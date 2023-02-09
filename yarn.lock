@@ -2529,7 +2529,7 @@ lit-js-sdk@1.2.24:
     tweetnacl-util "^0.15.1"
     utf-8-validate "^5.0.8"
 
-lit-js-sdk@^1.2.59:
+lit-js-sdk@serrano:
   version "1.2.59"
   resolved "https://registry.yarnpkg.com/lit-js-sdk/-/lit-js-sdk-1.2.59.tgz#2819f11e80523aa137555ec084b22b11cad67fb3"
   integrity sha512-UlrudihPqwa7QBVXN+JBq8oFsPoS1qcU2Az1ODiznorJulB1cAezuV41gl/oJ0yurp2CGNwVsMyLfJOfFWeFgw==
