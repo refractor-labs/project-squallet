@@ -9,6 +9,7 @@ import { verifyMessage } from "@ethersproject/wallet";
 import { LitContracts } from '@lit-protocol/contracts-sdk';
 import { ethers } from "ethers";
 import {useState} from 'react';
+import {litActions} from "@/components/lit-actions-code";
 
 // this code will be run on the node
 const litActionCode = `
@@ -78,7 +79,8 @@ function Sign() {
     }
   };
 
-  const executeLitAction = async (codeString) => {
+
+  const executeLitAction = async (message,codeString) => {
     const litContracts = new LitContracts();
     await litContracts.connect();
     const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
@@ -91,9 +93,8 @@ function Sign() {
 
     // this does both deployment action calling in the same code
     // need to break it down to upload to ipfs separately
-    const message = "Hello";
     const resp = await litNodeClient.executeJs({
-      code: litActionCode,
+      code: codeString,
       authSig,
       // all jsParams can be used anywhere in your litActionCode
       jsParams: {
@@ -103,6 +104,12 @@ function Sign() {
       },
     });
     console.log(resp)
+    return resp;
+  }
+  const executeLitActionAndVerify = async (codeString) => {
+    const message='Hello'
+    const resp = await executeLitAction(message,codeString)
+    console.log('resp',resp)
     const sig = resp.signatures.sig1;
     const dataSigned = sig.dataSigned;
     const encodedSig = joinSignature({
@@ -129,12 +136,13 @@ function Sign() {
     console.log("recoveredAddressViaMessage", recoveredAddressViaMessage);
   }
 
+
   const executeLitAction1 = async () => {
-    executeLitAction(litActionCode)
+   await executeLitActionAndVerify(litActionCode)
   }
 
   const executeLitAction2 = async () => {
-    litActionCode(litActionCode2)
+    await executeLitActionAndVerify(litActionCode2)
   }
 
   const checkPermissions = async () => {
@@ -146,7 +154,6 @@ function Sign() {
 
   }
 
-
   const addPermittedAddress = async () => {
 
     const litContracts = new LitContracts();
@@ -157,6 +164,53 @@ function Sign() {
   }
 
 
+  const addPermittedActionIpfsCid = async () => {
+
+    const litContracts = new LitContracts();
+    await litContracts.connect();
+    const permittedAction = await litContracts.pkpPermissionsContractUtil.write.addPermittedAction(pkpId, 'QmcJVc1jx1R2M6fedwASWQ53HKY6YddjEE4ZegNWrB9o8M')
+    console.log("permittedAction",permittedAction)
+
+  }
+
+  const addAuthMethod=async ()=>{
+    const litContracts = new LitContracts();
+    await litContracts.connect();
+    // const permittedAddresses = await litContracts.accessControlConditionsContract.write.
+  }
+  const executeLitActionIpfs = async (message,cid) => {
+    const litContracts = new LitContracts();
+    await litContracts.connect();
+    const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: "serrano" });
+    await litNodeClient.connect();
+
+    // get authentication signature to deploy call the action
+    var authSig = await LitJsSdk.checkAndSignAuthMessage({
+      chain: "mumbai",
+    });
+
+    // this does both deployment action calling in the same code
+    // need to break it down to upload to ipfs separately
+    const resp = await litNodeClient.executeJs({
+      ipfsId: cid,
+      authSig,
+      // all jsParams can be used anywhere in your litActionCode
+      jsParams: {
+        message,
+        publicKey,
+        sigName: "sig1",
+      },
+    });
+    console.log(resp)
+    return resp;
+  }
+
+  const executeGetPermissionsIpfs = async () => {
+    await executeLitActionIpfs('Hello', 'QmcJVc1jx1R2M6fedwASWQ53HKY6YddjEE4ZegNWrB9o8M')
+  }
+  const executeGetPermissionsAction=async()=>{
+    await executeLitAction("hello", litActions.readPermissions)
+  }
 
   return (
     <div className="App">
@@ -165,11 +219,27 @@ function Sign() {
       <div>Public key: {publicKey}</div>
       <div>PKP Address: {address}</div>
       <div>PKP ID: {pkpId}</div>
+
       <button onClick={executeLitAction1}>Execute Action1</button>
       <button onClick={checkPermissions}>Check Permissions</button>
       <button onClick={addPermittedAddress}>Add Permitted Address</button>
       <button onClick={executeLitAction2}>Execute Action2</button>
+      <button onClick={executeGetPermissionsAction}>Execute Read Permissions</button>
+      <button onClick={addPermittedActionIpfsCid}>Add permitted action</button>
+      <button onClick={executeGetPermissionsIpfs}>Execute IPFS Action</button>
       <hr />
+      <br />
+      Public key:  <input id={'pubkey-in'} type={'text'} />
+      PKP Address: <input id={'pkpaddress-in'} type={'text'} />
+      PKP ID: <input id={'pkpid-in'} type={'text'} />
+      <button onClick={()=>{
+        setPublicKey(document.getElementById('pubkey-in').value)
+        setAddress(document.getElementById('pkpaddress-in').value)
+        setPkpId(document.getElementById('pkpid-in').value)
+      }
+      }>Input Values</button>
+      <hr />
+      <br />
       <button onClick={() => window.location.reload()}>Reload</button>
     </div>
   );
