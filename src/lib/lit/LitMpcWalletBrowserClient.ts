@@ -1,11 +1,12 @@
-import { providers, Signer } from 'ethers'
-import { TransactionModel } from '@/lib/Transaction'
 import { LitMpcWallet, LitWalletData, WalletRequests, WalletResponse } from '@/lib/lit/LitMpcWallet'
-import { req } from 'pino-std-serializers'
 import { LitContracts } from '@lit-protocol/contracts-sdk'
 import LitJsSdk from 'lit-js-sdk'
 import { litActions } from '@/components/lit-actions-code'
 
+/**
+ * Lit MPC client. This talks to the lit action, and makes sure the inputs are correctly formatted.
+ * This also requests auth signatures from the user.
+ */
 export class LitMpcWalletBrowserClient implements LitMpcWallet {
   private readonly wallet: LitWalletData
 

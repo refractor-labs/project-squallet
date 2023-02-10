@@ -26,48 +26,12 @@ export interface IEIP155Lib {
   signTransaction(transaction: providers.TransactionRequest): any
 }
 
-/**
- * Library
- */
-// export default class EIP155Lib implements IEIP155Lib {
-//   orig: Wallet
-//   wallet: Signer
-//
-//   constructor(wallet: Wallet) {
-//     this.wallet = wallet
-//     this.orig = wallet
-//   }
-//
-//   static init({ mnemonic }: IInitArgs) {
-//     const wallet = mnemonic ? Wallet.fromMnemonic(mnemonic) : Wallet.createRandom()
-//
-//     return new EIP155Lib(wallet)
-//   }
-//
-//   async getAddress() {
-//     return this.wallet.getAddress()
-//   }
-//
-//   signMessage(message: string) {
-//     return this.wallet.signMessage(message)
-//   }
-//
-//   _signTypedData(domain: any, types: any, data: any) {
-//     // @ts-ignore
-//     return this.wallet._signTypedData(domain, types, data)
-//   }
-//
-//   connect(provider: providers.JsonRpcProvider) {
-//     return this.wallet.connect(provider)
-//   }
-//
-//   signTransaction(transaction: providers.TransactionRequest) {
-//     return this.wallet.signTransaction(transaction)
-//   }
-// }
-
 const staticTransactionServiceStore = new TransactionServiceStore()
 
+/**
+ * This connects the web2 transaction service with the lit action with wallet connect.
+ * This is where the wallet comes to life.
+ */
 export class EIP155PkpLib implements IEIP155Lib {
   wallet: Signer
   readonly transactionService: TransactionServiceI
@@ -100,10 +64,6 @@ export class EIP155PkpLib implements IEIP155Lib {
     return out
   }
 
-  getMnemonic() {
-    return null
-  }
-
   async getAddress() {
     return this.wallet.getAddress()
   }
@@ -114,11 +74,13 @@ export class EIP155PkpLib implements IEIP155Lib {
   }
 
   _signTypedData(domain: any, types: any, data: any) {
+    //todo
     // @ts-ignore
     return this.wallet._signTypedData(domain, types, data)
   }
 
   connect(provider: providers.JsonRpcProvider) {
+    //todo take this out
     return this.wallet.connect(provider)
   }
 
@@ -172,7 +134,6 @@ export class EIP155PkpLib implements IEIP155Lib {
     } else {
       throw new Error('Transaction not found')
     }
-    // return this.wallet.signTransaction(transaction)
   }
 }
 

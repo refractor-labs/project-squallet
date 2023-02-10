@@ -1,8 +1,5 @@
 import SettingsStore from '@/walletconnect/store/SettingsStore'
-import {
-  createOrRestoreEIP155Wallet,
-  restorePkpWallet
-} from '@/walletconnect/utils/EIP155WalletUtil'
+import { restorePkpWallet } from '@/walletconnect/utils/EIP155WalletUtil'
 import { createSignClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSnapshot } from 'valtio'

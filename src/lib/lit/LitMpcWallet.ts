@@ -5,12 +5,14 @@ export interface LitMpcWallet {
   sendRequest(request: WalletRequests): Promise<WalletResponse>
 }
 
+// The response common interface
 export interface WalletResponse {
   success: boolean
   error?: string
   data: any
 }
 
+// all the support actions that the lit wallet can do. not final
 type WalletRequestTypes =
   | 'signMessage'
   | 'signTransaction'
