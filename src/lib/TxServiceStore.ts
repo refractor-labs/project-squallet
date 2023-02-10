@@ -1,8 +1,5 @@
-import {
-  hashUnsignedTransaction,
-  TransactionModel,
-  UnsignedMpcTransaction
-} from '@/lib/Transaction'
+import { TransactionModel, UnsignedMpcTransaction } from '@/lib/Transaction'
+import { hashUnsignedTransaction } from '@/lib/action/lit-lib'
 
 export class TransactionServiceStore {
   private store = new Map<string, TransactionModel[]>()

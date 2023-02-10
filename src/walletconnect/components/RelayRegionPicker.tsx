@@ -1,4 +1,4 @@
-import { REGIONALIZED_RELAYER_ENDPOINTS } from '@/data/RelayerRegions'
+import { REGIONALIZED_RELAYER_ENDPOINTS } from '@/walletconnect/data/RelayerRegions'
 import SettingsStore from '@/walletconnect/store/SettingsStore'
 import { useSnapshot } from 'valtio'
 

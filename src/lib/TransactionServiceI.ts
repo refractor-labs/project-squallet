@@ -1,6 +1,7 @@
 import { ethers } from 'ethers'
 import { TransactionModel, UnsignedMpcTransaction } from '@/lib/Transaction'
 import { TransactionServiceStore } from '@/lib/TxServiceStore'
+import { hashUnsignedTransaction } from '@/lib/action/lit-lib'
 
 export interface UserSignedTransaction {}
 
@@ -30,8 +31,7 @@ export class TxService implements TransactionServiceI {
   //request the user sign the transaction
   async signTransaction(transaction: UnsignedMpcTransaction) {
     //todo this should be sign typed data
-    const serialized = ethers.utils.serializeTransaction(transaction)
-    const txHash = ethers.utils.hashMessage(serialized)
+    const txHash = hashUnsignedTransaction(transaction)
     const signature = await this.signer.signMessage(txHash)
     console.log('signTransaction', txHash, signature)
     this.store.storeSignature(

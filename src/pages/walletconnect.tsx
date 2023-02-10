@@ -5,7 +5,7 @@ import { Fragment, ReactElement, useState } from 'react'
 import { createLegacySignClient } from '@/walletconnect/utils/LegacyWalletConnectUtil'
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Input, Loading, Text } from '@nextui-org/react'
-import { WalletConnectLayout } from '@/components/WalletConnect/layouts/WalletConnectLayout'
+import { WalletConnectLayout } from '@/walletconnect/components/layouts/WalletConnectLayout'
 export default function WalletConnectPage() {
   const [uri, setUri] = useState('')
   const [loading, setLoading] = useState(false)

@@ -1,13 +1,12 @@
-import AccountCard from '@/components/WalletConnect/AccountCard'
-import AccountPicker from '@/components/WalletConnect/AccountPicker'
-import PageHeader from '@/components/WalletConnect/PageHeader'
-import { EIP155_MAINNET_CHAINS, EIP155_TEST_CHAINS } from '@/data/EIP155Data'
+import AccountCard from '@/walletconnect/components/AccountCard'
+import AccountPicker from '@/walletconnect/components/AccountPicker'
+import PageHeader from '@/walletconnect/components/PageHeader'
+import { EIP155_MAINNET_CHAINS, EIP155_TEST_CHAINS } from '@/walletconnect/data/EIP155Data'
 import SettingsStore from '@/walletconnect/store/SettingsStore'
 import { Text } from '@nextui-org/react'
 import { Fragment, ReactElement } from 'react'
 import { useSnapshot } from 'valtio'
-import { WalletConnectLayout } from '@/components/WalletConnect/layouts/WalletConnectLayout'
-import PairingsPage from '@/pages/pairings'
+import { WalletConnectLayout } from '@/walletconnect/components/layouts/WalletConnectLayout'
 
 export default function WalletPage() {
   const { testNets, eip155Address } = useSnapshot(SettingsStore.state)

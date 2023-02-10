@@ -1,12 +1,12 @@
-import PageHeader from '@/components/WalletConnect/PageHeader'
-import RelayRegionPicker from '@/components/WalletConnect/RelayRegionPicker'
+import PageHeader from '@/walletconnect/components/PageHeader'
+import RelayRegionPicker from '@/walletconnect/components/RelayRegionPicker'
 import SettingsStore from '@/walletconnect/store/SettingsStore'
 import { eip155Wallets } from '@/walletconnect/utils/EIP155WalletUtil'
 import { Card, Divider, Row, Switch, Text } from '@nextui-org/react'
 import { Fragment, ReactElement } from 'react'
 import { useSnapshot } from 'valtio'
 import packageJSON from '../../package.json'
-import { WalletConnectLayout } from '@/components/WalletConnect/layouts/WalletConnectLayout'
+import { WalletConnectLayout } from '@/walletconnect/components/layouts/WalletConnectLayout'
 import PairingsPage from '@/pages/pairings'
 
 export default function SettingsPage() {

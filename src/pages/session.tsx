@@ -1,12 +1,12 @@
-import PageHeader from '@/components/WalletConnect/PageHeader'
-import ProjectInfoCard from '@/components/WalletConnect/ProjectInfoCard'
-import SessionChainCard from '@/components/WalletConnect/SessionChainCard'
+import PageHeader from '@/walletconnect/components/PageHeader'
+import ProjectInfoCard from '@/walletconnect/components/ProjectInfoCard'
+import SessionChainCard from '@/walletconnect/components/SessionChainCard'
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Divider, Loading, Row, Text } from '@nextui-org/react'
 import { getSdkError } from '@walletconnect/utils'
 import { useRouter } from 'next/router'
 import { Fragment, ReactElement, useEffect, useState } from 'react'
-import { WalletConnectLayout } from '@/components/WalletConnect/layouts/WalletConnectLayout'
+import { WalletConnectLayout } from '@/walletconnect/components/layouts/WalletConnectLayout'
 import PairingsPage from '@/pages/pairings'
 
 /**

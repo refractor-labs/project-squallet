@@ -1,4 +1,8 @@
-import { EIP155_CHAINS, EIP155_SIGNING_METHODS, TEIP155Chain } from '@/data/EIP155Data'
+import {
+  EIP155_CHAINS,
+  EIP155_SIGNING_METHODS,
+  TEIP155Chain
+} from '@/walletconnect/data/EIP155Data'
 import { eip155Addresses, eip155Wallets } from '@/walletconnect/utils/EIP155WalletUtil'
 import {
   getSignParamsMessage,
@@ -16,7 +20,7 @@ export async function approveEIP155Request(
   const { params, id } = requestEvent
   const { chainId, request } = params
   const wallet = eip155Wallets[getWalletAddressFromParams(eip155Addresses, params)]
-
+  console.log('approveEIP155Request wallet', wallet)
   switch (request.method) {
     case EIP155_SIGNING_METHODS.PERSONAL_SIGN:
     case EIP155_SIGNING_METHODS.ETH_SIGN:

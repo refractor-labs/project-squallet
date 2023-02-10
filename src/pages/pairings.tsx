@@ -1,10 +1,10 @@
-import PageHeader from '@/components/WalletConnect/PageHeader'
-import PairingCard from '@/components/WalletConnect/PairingCard'
+import PageHeader from '@/walletconnect/components/PageHeader'
+import PairingCard from '@/walletconnect/components/PairingCard'
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Text } from '@nextui-org/react'
 import { getSdkError } from '@walletconnect/utils'
 import { Fragment, ReactElement, useState } from 'react'
-import { WalletConnectLayout } from '@/components/WalletConnect/layouts/WalletConnectLayout'
+import { WalletConnectLayout } from '@/walletconnect/components/layouts/WalletConnectLayout'
 
 export default function PairingsPage() {
   const [pairings, setPairings] = useState(signClient.pairing.values)

@@ -1,8 +1,8 @@
-import ProjectInfoCard from '@/components/WalletConnect/ProjectInfoCard'
-import RequestDataCard from '@/components/WalletConnect/RequestDataCard'
-import RequesDetailsCard from '@/components/WalletConnect/RequestDetalilsCard'
-import RequestMethodCard from '@/components/WalletConnect/RequestMethodCard'
-import RequestModalContainer from '@/components/WalletConnect/RequestModalContainer'
+import ProjectInfoCard from '@/walletconnect/components/ProjectInfoCard'
+import RequestDataCard from '@/walletconnect/components/RequestDataCard'
+import RequesDetailsCard from '@/walletconnect/components/RequestDetalilsCard'
+import RequestMethodCard from '@/walletconnect/components/RequestMethodCard'
+import RequestModalContainer from '@/walletconnect/components/RequestModalContainer'
 import ModalStore from '@/walletconnect/store/ModalStore'
 import {
   approveEIP155Request,

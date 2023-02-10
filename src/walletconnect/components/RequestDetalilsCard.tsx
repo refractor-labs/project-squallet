@@ -1,4 +1,4 @@
-import { EIP155_CHAINS, TEIP155Chain } from '@/data/EIP155Data'
+import { EIP155_CHAINS, TEIP155Chain } from '@/walletconnect/data/EIP155Data'
 import { Col, Divider, Row, Text } from '@nextui-org/react'
 import { Fragment } from 'react'
 

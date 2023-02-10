@@ -1,10 +1,10 @@
-import PageHeader from '@/components/WalletConnect/PageHeader'
-import SessionCard from '@/components/WalletConnect/SessionCard'
+import PageHeader from '@/walletconnect/components/PageHeader'
+import SessionCard from '@/walletconnect/components/SessionCard'
 import { legacySignClient } from '@/walletconnect/utils/LegacyWalletConnectUtil'
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Text } from '@nextui-org/react'
 import { Fragment, ReactElement, useState } from 'react'
-import { WalletConnectLayout } from '@/components/WalletConnect/layouts/WalletConnectLayout'
+import { WalletConnectLayout } from '@/walletconnect/components/layouts/WalletConnectLayout'
 import PairingsPage from '@/pages/pairings'
 
 export default function SessionsPage() {

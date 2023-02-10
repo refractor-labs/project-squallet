@@ -2,6 +2,8 @@ import { BigNumber, ethers, providers, Signer, Wallet } from 'ethers'
 import { TransactionServiceI, TxService } from '@/lib/TransactionServiceI'
 import { TransactionModel, UnsignedMpcTransaction } from '@/lib/Transaction'
 import { TransactionServiceStore } from '@/lib/TxServiceStore'
+import { LitWalletData } from '@/lib/lit/LitMpcWallet'
+import { LitMpcWalletBrowserClient } from '@/lib/lit/LitMpcWalletBrowserClient'
 
 /**
  * Types
@@ -27,65 +29,75 @@ export interface IEIP155Lib {
 /**
  * Library
  */
-export default class EIP155Lib implements IEIP155Lib {
-  orig: Wallet
-  wallet: Signer
-
-  constructor(wallet: Wallet) {
-    this.wallet = wallet
-    this.orig = wallet
-  }
-
-  static init({ mnemonic }: IInitArgs) {
-    const wallet = mnemonic ? Wallet.fromMnemonic(mnemonic) : Wallet.createRandom()
-
-    return new EIP155Lib(wallet)
-  }
-
-  async getAddress() {
-    return this.wallet.getAddress()
-  }
-
-  signMessage(message: string) {
-    return this.wallet.signMessage(message)
-  }
-
-  _signTypedData(domain: any, types: any, data: any) {
-    // @ts-ignore
-    return this.wallet._signTypedData(domain, types, data)
-  }
-
-  connect(provider: providers.JsonRpcProvider) {
-    return this.wallet.connect(provider)
-  }
-
-  signTransaction(transaction: providers.TransactionRequest) {
-    return this.wallet.signTransaction(transaction)
-  }
-}
+// export default class EIP155Lib implements IEIP155Lib {
+//   orig: Wallet
+//   wallet: Signer
+//
+//   constructor(wallet: Wallet) {
+//     this.wallet = wallet
+//     this.orig = wallet
+//   }
+//
+//   static init({ mnemonic }: IInitArgs) {
+//     const wallet = mnemonic ? Wallet.fromMnemonic(mnemonic) : Wallet.createRandom()
+//
+//     return new EIP155Lib(wallet)
+//   }
+//
+//   async getAddress() {
+//     return this.wallet.getAddress()
+//   }
+//
+//   signMessage(message: string) {
+//     return this.wallet.signMessage(message)
+//   }
+//
+//   _signTypedData(domain: any, types: any, data: any) {
+//     // @ts-ignore
+//     return this.wallet._signTypedData(domain, types, data)
+//   }
+//
+//   connect(provider: providers.JsonRpcProvider) {
+//     return this.wallet.connect(provider)
+//   }
+//
+//   signTransaction(transaction: providers.TransactionRequest) {
+//     return this.wallet.signTransaction(transaction)
+//   }
+// }
 
 const staticTransactionServiceStore = new TransactionServiceStore()
 
 export class EIP155PkpLib implements IEIP155Lib {
   wallet: Signer
   readonly transactionService: TransactionServiceI
+  readonly litClient: LitMpcWalletBrowserClient
   private abortFlag = false
 
-  constructor(wallet: Signer, transactionService: TransactionServiceI) {
+  constructor(
+    wallet: Signer,
+    transactionService: TransactionServiceI,
+    litClient: LitMpcWalletBrowserClient
+  ) {
     this.wallet = wallet
     this.transactionService = transactionService
+    this.litClient = litClient
   }
 
-  static async init({ address, eoaSigner }: { eoaSigner: Signer; address: string }) {
-    const wallet = new ethers.VoidSigner(
-      address,
-      ethers.getDefaultProvider(await eoaSigner.getChainId())
-    )
+  static async init({ wallet, eoaSigner }: { eoaSigner: Signer; wallet: LitWalletData }) {
+    console.log('fetcing chain id')
+    const chainId = await eoaSigner.getChainId()
+    const walletSigner = new ethers.VoidSigner(wallet.pkpAddress, eoaSigner.provider)
+    console.log('VoidSigner', wallet)
+    const litClient = new LitMpcWalletBrowserClient(wallet)
     //tx service should be scoped to the eoa signer
-    return new EIP155PkpLib(
-      wallet,
-      new TxService(address, eoaSigner, staticTransactionServiceStore)
+    const out = new EIP155PkpLib(
+      walletSigner,
+      new TxService(wallet.pkpAddress, eoaSigner, staticTransactionServiceStore),
+      litClient
     )
+    console.log('EIP155PkpLib', out)
+    return out
   }
 
   getMnemonic() {
@@ -115,6 +127,7 @@ export class EIP155PkpLib implements IEIP155Lib {
   }
 
   async signTransaction(transaction: providers.TransactionRequest) {
+    console.log('got request signTransaction', transaction)
     const tx: UnsignedMpcTransaction = {
       nonce: toNumber(transaction.nonce),
       type: 2,
@@ -135,16 +148,27 @@ export class EIP155PkpLib implements IEIP155Lib {
     let foundTransaction: TransactionModel | undefined = undefined
     while (true) {
       foundTransaction = await this.transactionService.getTransaction(hash)
-      if (foundTransaction && foundTransaction.signatures.length > 1) {
+      if (foundTransaction && foundTransaction.signatures.length > 0) {
         break
       }
       if (this.abortFlag) {
         this.abortFlag = false
         throw new Error('Transaction aborted')
       }
+      await new Promise(resolve => setTimeout(resolve, 500))
     }
     if (foundTransaction) {
-      //actually submit it to lit here
+      //todo get the final transaction with all the gas values stored on it.
+      //for now just use the Wallet conenct transaction
+      const res = await this.litClient.sendRequest({
+        method: 'signTransaction',
+        request: {
+          signedTransaction: foundTransaction,
+          transaction
+        }
+      })
+      console.log('lit result', res)
+      return res.data
     } else {
       throw new Error('Transaction not found')
     }

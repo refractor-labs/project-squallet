@@ -1,4 +1,4 @@
-import AccountSelectCard from '@/components/WalletConnect/AccountSelectCard'
+import AccountSelectCard from '@/walletconnect/components/AccountSelectCard'
 import { Col, Row, Text } from '@nextui-org/react'
 
 /**

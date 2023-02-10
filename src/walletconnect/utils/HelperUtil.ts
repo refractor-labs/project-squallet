@@ -1,4 +1,4 @@
-import { EIP155_CHAINS, TEIP155Chain } from '@/data/EIP155Data'
+import { EIP155_CHAINS, TEIP155Chain } from '@/walletconnect/data/EIP155Data'
 import { utils } from 'ethers'
 
 /**
@@ -96,8 +96,5 @@ export function isSolanaChain(chain: string) {
  * Formats chainId to its name
  */
 export function formatChainName(chainId: string) {
-  return (
-    EIP155_CHAINS[chainId as TEIP155Chain]?.name ??
-    chainId
-  )
+  return EIP155_CHAINS[chainId as TEIP155Chain]?.name ?? chainId
 }

@@ -1,5 +1,5 @@
-import ChainCard from '@/components/WalletConnect/ChainCard'
-import { EIP155_MAINNET_CHAINS, EIP155_TEST_CHAINS } from '@/data/EIP155Data'
+import ChainCard from '@/walletconnect/components/ChainCard'
+import { EIP155_MAINNET_CHAINS, EIP155_TEST_CHAINS } from '@/walletconnect/data/EIP155Data'
 import { formatChainName } from '@/walletconnect/utils/HelperUtil'
 import { Col, Row, Text } from '@nextui-org/react'
 import { SessionTypes } from '@walletconnect/types'

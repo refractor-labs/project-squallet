@@ -25,10 +25,6 @@ export interface UnsignedMpcTransaction {
   // EIP-2930; Type 1 & EIP-1559; Type 2
   accessList?: ethers.utils.AccessListish
 }
-export const hashUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
-  const serialized = ethers.utils.serializeTransaction(tx)
-  return ethers.utils.hashMessage(serialized)
-}
 
 export interface TransactionModel {
   transaction: UnsignedMpcTransaction

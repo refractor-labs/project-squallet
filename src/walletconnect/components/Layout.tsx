@@ -1,5 +1,5 @@
-import Navigation from '@/components/WalletConnect/Navigation'
-import RouteTransition from '@/components/WalletConnect/RouteTransition'
+import Navigation from '@/walletconnect/components/Navigation'
+import RouteTransition from '@/walletconnect/components/RouteTransition'
 import { Card, Container, Loading } from '@nextui-org/react'
 import { Fragment, ReactNode } from 'react'
 import { useAccount, useConnect, useDisconnect, useSigner } from 'wagmi'

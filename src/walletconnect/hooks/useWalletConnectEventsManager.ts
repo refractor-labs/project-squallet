@@ -1,4 +1,4 @@
-import { EIP155_SIGNING_METHODS } from '@/data/EIP155Data'
+import { EIP155_SIGNING_METHODS } from '@/walletconnect/data/EIP155Data'
 import ModalStore from '@/walletconnect/store/ModalStore'
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { SignClientTypes } from '@walletconnect/types'
