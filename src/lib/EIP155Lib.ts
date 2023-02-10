@@ -1,4 +1,7 @@
-import {ethers, providers, Signer, Wallet} from 'ethers'
+import { BigNumber, ethers, providers, Signer, Wallet } from 'ethers'
+import { TransactionServiceI, TxService } from '@/lib/TransactionServiceI'
+import { TransactionModel, UnsignedMpcTransaction } from '@/lib/Transaction'
+import { TransactionServiceStore } from '@/lib/TxServiceStore'
 
 /**
  * Types
@@ -8,19 +11,17 @@ interface IInitArgs {
 }
 
 export interface IEIP155Lib {
-  wallet: Signer;
+  wallet: Signer
 
-  getMnemonic(): any;
+  getAddress(): Promise<string>
 
-  getAddress(): Promise<string>;
+  signMessage(message: string): any
 
-  signMessage(message: string): any;
+  _signTypedData(domain: any, types: any, data: any): any
 
-  _signTypedData(domain: any, types: any, data: any): any;
+  connect(provider: providers.JsonRpcProvider): any
 
-  connect(provider: providers.JsonRpcProvider): any;
-
-  signTransaction(transaction: providers.TransactionRequest): any;
+  signTransaction(transaction: providers.TransactionRequest): any
 }
 
 /**
@@ -41,10 +42,6 @@ export default class EIP155Lib implements IEIP155Lib {
     return new EIP155Lib(wallet)
   }
 
-  getMnemonic() {
-    return this.orig.mnemonic.phrase
-  }
-
   async getAddress() {
     return this.wallet.getAddress()
   }
@@ -67,19 +64,28 @@ export default class EIP155Lib implements IEIP155Lib {
   }
 }
 
+const staticTransactionServiceStore = new TransactionServiceStore()
 
-export  class EIP155PkpLib implements IEIP155Lib{
+export class EIP155PkpLib implements IEIP155Lib {
   wallet: Signer
+  readonly transactionService: TransactionServiceI
+  private abortFlag = false
 
-  constructor(wallet: Signer) {
+  constructor(wallet: Signer, transactionService: TransactionServiceI) {
     this.wallet = wallet
-    this.wallet.getAddress()
-
+    this.transactionService = transactionService
   }
 
-  static init({ address }: { address: string }) {
-    const wallet = new ethers.VoidSigner(address, ethers.getDefaultProvider('goerli'))
-    return new EIP155PkpLib(wallet)
+  static async init({ address, eoaSigner }: { eoaSigner: Signer; address: string }) {
+    const wallet = new ethers.VoidSigner(
+      address,
+      ethers.getDefaultProvider(await eoaSigner.getChainId())
+    )
+    //tx service should be scoped to the eoa signer
+    return new EIP155PkpLib(
+      wallet,
+      new TxService(address, eoaSigner, staticTransactionServiceStore)
+    )
   }
 
   getMnemonic() {
@@ -91,6 +97,7 @@ export  class EIP155PkpLib implements IEIP155Lib{
   }
 
   signMessage(message: string) {
+    //todo
     return this.wallet.signMessage(message)
   }
 
@@ -103,7 +110,48 @@ export  class EIP155PkpLib implements IEIP155Lib{
     return this.wallet.connect(provider)
   }
 
-  signTransaction(transaction: providers.TransactionRequest) {
-    return this.wallet.signTransaction(transaction)
+  abortTransactions() {
+    this.abortFlag = true
   }
+
+  async signTransaction(transaction: providers.TransactionRequest) {
+    const tx: UnsignedMpcTransaction = {
+      nonce: toNumber(transaction.nonce),
+      type: 2,
+      maxFeePerGas: 0,
+      maxPriorityFeePerGas: 0,
+      from: await this.getAddress(),
+      to: transaction.to || ethers.constants.AddressZero,
+      value: transaction.value || '0x0',
+      data: transaction.data || '0x',
+      chainId: transaction.chainId || 0,
+      gasLimit: transaction.gasLimit || '0x0'
+    }
+    console.log('tx', tx)
+    const submitted = await this.transactionService.submitTransaction(tx)
+    console.log('submitted', submitted)
+    await this.transactionService.signTransaction(submitted.transaction)
+    const hash = submitted.hash
+    let foundTransaction: TransactionModel | undefined = undefined
+    while (true) {
+      foundTransaction = await this.transactionService.getTransaction(hash)
+      if (foundTransaction && foundTransaction.signatures.length > 1) {
+        break
+      }
+      if (this.abortFlag) {
+        this.abortFlag = false
+        throw new Error('Transaction aborted')
+      }
+    }
+    if (foundTransaction) {
+      //actually submit it to lit here
+    } else {
+      throw new Error('Transaction not found')
+    }
+    // return this.wallet.signTransaction(transaction)
+  }
+}
+
+const toNumber = (value: ethers.BigNumberish | undefined) => {
+  return value ? BigNumber.from(value).toNumber() : 0
 }

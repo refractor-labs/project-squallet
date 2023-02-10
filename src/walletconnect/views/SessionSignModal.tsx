@@ -1,16 +1,18 @@
-import ProjectInfoCard from '@/components/ProjectInfoCard'
-import RequestDataCard from '@/components/RequestDataCard'
-import RequesDetailsCard from '@/components/RequestDetalilsCard'
-import RequestMethodCard from '@/components/RequestMethodCard'
-import RequestModalContainer from '@/components/RequestModalContainer'
-import ModalStore from '@/store/ModalStore'
-import { approveEIP155Request, rejectEIP155Request } from '@/utils/EIP155RequestHandlerUtil'
-import { getSignTypedDataParamsData } from '@/utils/HelperUtil'
-import { signClient } from '@/utils/WalletConnectUtil'
-import { Button, Divider, Modal, Text } from '@nextui-org/react'
+import ProjectInfoCard from '@/components/WalletConnect/ProjectInfoCard'
+import RequesDetailsCard from '@/components/WalletConnect/RequestDetalilsCard'
+import RequestMethodCard from '@/components/WalletConnect/RequestMethodCard'
+import RequestModalContainer from '@/components/WalletConnect/RequestModalContainer'
+import ModalStore from '@/walletconnect/store/ModalStore'
+import {
+  approveEIP155Request,
+  rejectEIP155Request
+} from '@/walletconnect/utils/EIP155RequestHandlerUtil'
+import { getSignParamsMessage } from '@/walletconnect/utils/HelperUtil'
+import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
+import { Button, Col, Divider, Modal, Row, Text } from '@nextui-org/react'
 import { Fragment } from 'react'
 
-export default function SessionSignTypedDataModal() {
+export default function SessionSignModal() {
   // Get request and wallet data from store
   const requestEvent = ModalStore.state.data?.requestEvent
   const requestSession = ModalStore.state.data?.requestSession
@@ -24,8 +26,8 @@ export default function SessionSignTypedDataModal() {
   const { topic, params } = requestEvent
   const { request, chainId } = params
 
-  // Get data
-  const data = getSignTypedDataParamsData(request.params)
+  // Get message, convert it to UTF8 string if it is valid hex
+  const message = getSignParamsMessage(request.params)
 
   // Handle approve action (logic varies based on request method)
   async function onApprove() {
@@ -53,7 +55,7 @@ export default function SessionSignTypedDataModal() {
 
   return (
     <Fragment>
-      <RequestModalContainer title="Sign Typed Data">
+      <RequestModalContainer title="Sign Message">
         <ProjectInfoCard metadata={requestSession.peer.metadata} />
 
         <Divider y={2} />
@@ -62,7 +64,12 @@ export default function SessionSignTypedDataModal() {
 
         <Divider y={2} />
 
-        <RequestDataCard data={data} />
+        <Row>
+          <Col>
+            <Text h5>Message</Text>
+            <Text color="$gray400">{message}</Text>
+          </Col>
+        </Row>
 
         <Divider y={2} />
 

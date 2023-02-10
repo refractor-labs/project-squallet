@@ -1,5 +1,5 @@
 import { REGIONALIZED_RELAYER_ENDPOINTS } from '@/data/RelayerRegions'
-import SettingsStore from '@/store/SettingsStore'
+import SettingsStore from '@/walletconnect/store/SettingsStore'
 import { useSnapshot } from 'valtio'
 
 export default function AccountPicker() {

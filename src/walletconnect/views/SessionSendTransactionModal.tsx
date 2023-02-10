@@ -1,11 +1,14 @@
-import ProjectInfoCard from '@/components/ProjectInfoCard'
-import RequestDataCard from '@/components/RequestDataCard'
-import RequesDetailsCard from '@/components/RequestDetalilsCard'
-import RequestMethodCard from '@/components/RequestMethodCard'
-import RequestModalContainer from '@/components/RequestModalContainer'
-import ModalStore from '@/store/ModalStore'
-import { approveEIP155Request, rejectEIP155Request } from '@/utils/EIP155RequestHandlerUtil'
-import { signClient } from '@/utils/WalletConnectUtil'
+import ProjectInfoCard from '@/components/WalletConnect/ProjectInfoCard'
+import RequestDataCard from '@/components/WalletConnect/RequestDataCard'
+import RequesDetailsCard from '@/components/WalletConnect/RequestDetalilsCard'
+import RequestMethodCard from '@/components/WalletConnect/RequestMethodCard'
+import RequestModalContainer from '@/components/WalletConnect/RequestModalContainer'
+import ModalStore from '@/walletconnect/store/ModalStore'
+import {
+  approveEIP155Request,
+  rejectEIP155Request
+} from '@/walletconnect/utils/EIP155RequestHandlerUtil'
+import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Divider, Loading, Modal, Text } from '@nextui-org/react'
 import { Fragment, useState } from 'react'
 
@@ -52,6 +55,9 @@ export default function SessionSendTransactionModal() {
     }
   }
 
+  async function onAbort() {
+    onReject()
+  }
   return (
     <Fragment>
       <RequestModalContainer title="Send / Sign Transaction">
@@ -76,6 +82,9 @@ export default function SessionSendTransactionModal() {
         </Button>
         <Button auto flat color="success" onClick={onApprove} disabled={loading}>
           {loading ? <Loading size="sm" color="success" /> : 'Approve'}
+        </Button>
+        <Button auto flat color="error" onClick={onAbort} disabled={!loading}>
+          {'Abort'}
         </Button>
       </Modal.Footer>
     </Fragment>

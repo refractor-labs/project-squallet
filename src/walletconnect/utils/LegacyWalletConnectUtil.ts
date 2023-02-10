@@ -1,6 +1,6 @@
 import { IWalletConnectSession } from '@walletconnect/legacy-types'
 import LegacySignClient from '@walletconnect/client'
-import ModalStore from '@/store/ModalStore'
+import ModalStore from '@/walletconnect/store/ModalStore'
 import { EIP155_SIGNING_METHODS } from '@/data/EIP155Data'
 
 export let legacySignClient: LegacySignClient
@@ -43,7 +43,6 @@ export function createLegacySignClient({ uri }: { uri?: string } = {}) {
   legacySignClient.on('disconnect', async () => {
     deleteCachedLegacySession()
   })
-
 }
 
 const onCallRequest = async (payload: { id: number; method: string; params: any[] }) => {

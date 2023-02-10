@@ -1,4 +1,4 @@
-import { truncate } from '@/utils/HelperUtil'
+import { truncate } from '@/walletconnect/utils/HelperUtil'
 import { Card, Checkbox, Row, Text } from '@nextui-org/react'
 
 /**
@@ -26,7 +26,7 @@ export default function AccountSelectCard({ address, selected, index, onSelect }
       }}
     >
       <Row justify="space-between" align="center">
-        <Checkbox size="lg" color="success" checked={selected} />
+        <Checkbox aria-label={'checked'} size="lg" color="success" checked={selected} />
 
         <Text>{`${truncate(address, 14)} - Account ${index + 1}`} </Text>
       </Row>

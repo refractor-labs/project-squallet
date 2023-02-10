@@ -1,5 +1,5 @@
-import SettingsStore from '@/store/SettingsStore'
-import { eip155Addresses } from '@/utils/EIP155WalletUtil'
+import SettingsStore from '@/walletconnect/store/SettingsStore'
+import { eip155Addresses } from '@/walletconnect/utils/EIP155WalletUtil'
 import { useSnapshot } from 'valtio'
 
 export default function AccountPicker() {

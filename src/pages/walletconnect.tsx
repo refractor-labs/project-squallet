@@ -2,8 +2,8 @@
 import { parseUri } from '@walletconnect/utils'
 import * as React from 'react'
 import { Fragment, ReactElement, useState } from 'react'
-import { createLegacySignClient } from '@/utils/LegacyWalletConnectUtil'
-import { signClient } from '@/utils/WalletConnectUtil'
+import { createLegacySignClient } from '@/walletconnect/utils/LegacyWalletConnectUtil'
+import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Input, Loading, Text } from '@nextui-org/react'
 import { WalletConnectLayout } from '@/components/WalletConnect/layouts/WalletConnectLayout'
 export default function WalletConnectPage() {

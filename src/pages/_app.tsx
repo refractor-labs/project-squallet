@@ -1,14 +1,13 @@
-import Modal from '@/components/Modal'
-import { NextUIProvider, createTheme } from '@nextui-org/react'
 import type { AppProps } from 'next/app'
-import { createLegacySignClient } from '@/utils/LegacyWalletConnectUtil'
-import useWalletConnectEventsManager from '@/hooks/useWalletConnectEventsManager'
-import useInitialization from '@/hooks/useInitialization'
-import Layout from '@/components/Layout'
 import '../../public/main.css'
-
+import { createClient, WagmiConfig } from 'wagmi'
+import { getDefaultProvider } from 'ethers'
+const client = createClient({
+  autoConnect: true,
+  provider: getDefaultProvider()
+})
 export default function App({ Component, pageProps }: AppProps) {
   const getLayout = Component.getLayout || (page => page)
 
-  return getLayout(<Component {...pageProps} />)
+  return <WagmiConfig client={client}>{getLayout(<Component {...pageProps} />)}</WagmiConfig>
 }

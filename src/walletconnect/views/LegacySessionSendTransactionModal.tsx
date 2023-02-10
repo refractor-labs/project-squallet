@@ -1,15 +1,20 @@
-import ProjectInfoCard from '@/components/ProjectInfoCard'
-import RequesDetailsCard from '@/components/RequestDetalilsCard'
-import RequestMethodCard from '@/components/RequestMethodCard'
-import RequestModalContainer from '@/components/RequestModalContainer'
-import ModalStore from '@/store/ModalStore'
-import { approveEIP155Request, rejectEIP155Request } from '@/utils/EIP155RequestHandlerUtil'
-import { getSignParamsMessage } from '@/utils/HelperUtil'
-import { legacySignClient } from '@/utils/LegacyWalletConnectUtil'
-import { Button, Col, Divider, Modal, Row, Text } from '@nextui-org/react'
-import { Fragment } from 'react'
+import ProjectInfoCard from '@/components/WalletConnect/ProjectInfoCard'
+import RequestDataCard from '@/components/WalletConnect/RequestDataCard'
+import RequesDetailsCard from '@/components/WalletConnect/RequestDetalilsCard'
+import RequestMethodCard from '@/components/WalletConnect/RequestMethodCard'
+import RequestModalContainer from '@/components/WalletConnect/RequestModalContainer'
+import ModalStore from '@/walletconnect/store/ModalStore'
+import {
+  approveEIP155Request,
+  rejectEIP155Request
+} from '@/walletconnect/utils/EIP155RequestHandlerUtil'
+import { legacySignClient } from '@/walletconnect/utils/LegacyWalletConnectUtil'
+import { Button, Divider, Loading, Modal, Text } from '@nextui-org/react'
+import { Fragment, useState } from 'react'
 
-export default function LegacySessionSignModal() {
+export default function LegacySessionSendTransactionModal() {
+  const [loading, setLoading] = useState(false)
+
   // Get request and wallet data from store
   const requestEvent = ModalStore.state.data?.legacyCallRequestEvent
   const requestSession = ModalStore.state.data?.legacyRequestSession
@@ -19,13 +24,15 @@ export default function LegacySessionSignModal() {
     return <Text>Missing request data</Text>
   }
 
-  // Get required request data
+  // Get required proposal data
+
   const { id, method, params } = requestEvent
+  const transaction = params[0]
 
-  // Get message, convert it to UTF8 string if it is valid hex
-  const message = getSignParamsMessage(params)
+  // // Remove unneeded key coming from v1 sample dapp that throws Ethers.
+  if (transaction['gas']) delete transaction['gas']
 
-  // Handle approve action (logic varies based on request method)
+  // Handle approve action
   async function onApprove() {
     if (requestEvent) {
       const { result } = await approveEIP155Request({
@@ -60,8 +67,12 @@ export default function LegacySessionSignModal() {
 
   return (
     <Fragment>
-      <RequestModalContainer title="Sign Message">
+      <RequestModalContainer title="Send / Sign Transaction">
         <ProjectInfoCard metadata={requestSession.peerMeta!} />
+
+        <Divider y={2} />
+
+        <RequestDataCard data={transaction} />
 
         <Divider y={2} />
 
@@ -72,24 +83,15 @@ export default function LegacySessionSignModal() {
 
         <Divider y={2} />
 
-        <Row>
-          <Col>
-            <Text h5>Message</Text>
-            <Text color="$gray400">{message}</Text>
-          </Col>
-        </Row>
-
-        <Divider y={2} />
-
         <RequestMethodCard methods={[method]} />
       </RequestModalContainer>
 
       <Modal.Footer>
-        <Button auto flat color="error" onClick={onReject}>
+        <Button auto flat color="error" onClick={onReject} disabled={loading}>
           Reject
         </Button>
-        <Button auto flat color="success" onClick={onApprove}>
-          Approve
+        <Button auto flat color="success" onClick={onApprove} disabled={loading}>
+          {loading ? <Loading size="sm" color="success" /> : 'Approve'}
         </Button>
       </Modal.Footer>
     </Fragment>

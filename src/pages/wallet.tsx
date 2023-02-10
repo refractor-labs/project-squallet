@@ -1,8 +1,8 @@
-import AccountCard from '@/components/AccountCard'
-import AccountPicker from '@/components/AccountPicker'
-import PageHeader from '@/components/PageHeader'
+import AccountCard from '@/components/WalletConnect/AccountCard'
+import AccountPicker from '@/components/WalletConnect/AccountPicker'
+import PageHeader from '@/components/WalletConnect/PageHeader'
 import { EIP155_MAINNET_CHAINS, EIP155_TEST_CHAINS } from '@/data/EIP155Data'
-import SettingsStore from '@/store/SettingsStore'
+import SettingsStore from '@/walletconnect/store/SettingsStore'
 import { Text } from '@nextui-org/react'
 import { Fragment, ReactElement } from 'react'
 import { useSnapshot } from 'valtio'
@@ -10,16 +10,7 @@ import { WalletConnectLayout } from '@/components/WalletConnect/layouts/WalletCo
 import PairingsPage from '@/pages/pairings'
 
 export default function WalletPage() {
-  const {
-    testNets,
-    eip155Address,
-    cosmosAddress,
-    solanaAddress,
-    polkadotAddress,
-    nearAddress,
-    elrondAddress,
-    tronAddress
-  } = useSnapshot(SettingsStore.state)
+  const { testNets, eip155Address } = useSnapshot(SettingsStore.state)
 
   return (
     <Fragment>

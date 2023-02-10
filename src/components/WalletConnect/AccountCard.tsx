@@ -1,5 +1,5 @@
-import ChainCard from '@/components/ChainCard'
-import { truncate } from '@/utils/HelperUtil'
+import ChainCard from '@/components/WalletConnect/ChainCard'
+import { truncate } from '@/walletconnect/utils/HelperUtil'
 import { Avatar, Button, Text, Tooltip } from '@nextui-org/react'
 import Image from 'next/image'
 import { useState } from 'react'

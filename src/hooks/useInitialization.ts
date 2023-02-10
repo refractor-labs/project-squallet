@@ -1,50 +1,46 @@
-import SettingsStore from '@/store/SettingsStore'
-import {createOrRestoreEIP155Wallet, restorePkpWallet} from '@/utils/EIP155WalletUtil'
-import {createSignClient} from '@/utils/WalletConnectUtil'
-import {useCallback, useEffect, useRef, useState} from 'react'
-import {useSnapshot} from 'valtio'
+import SettingsStore from '@/walletconnect/store/SettingsStore'
+import {
+  createOrRestoreEIP155Wallet,
+  restorePkpWallet
+} from '@/walletconnect/utils/EIP155WalletUtil'
+import { createSignClient } from '@/walletconnect/utils/WalletConnectUtil'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useSnapshot } from 'valtio'
+import { Signer } from 'ethers'
 
-export default function useInitialization() {
-    const [initialized, setInitialized] = useState(false)
-    const prevRelayerURLValue = useRef<string>('')
+export default function useInitialization(signer: Signer | undefined) {
+  const [initialized, setInitialized] = useState(false)
+  const prevRelayerURLValue = useRef<string>('')
 
-    const {relayerRegionURL} = useSnapshot(SettingsStore.state)
+  const { relayerRegionURL } = useSnapshot(SettingsStore.state)
 
-    const onInitialize = useCallback(async () => {
-        try {
-            const {eip155Addresses} = await restorePkpWallet()
-            // const { cosmosAddresses } = await createOrRestoreCosmosWallet()
-            // const {solanaAddresses} = await createOrRestoreSolanaWallet()
-            // const { polkadotAddresses } = await createOrRestorePolkadotWallet()
-            // const { nearAddresses } = await createOrRestoreNearWallet()
-            // const { elrondAddresses } = await createOrRestoreElrondWallet()
-            // const { tronAddresses } = await createOrRestoreTronWallet()
+  const onInitialize = useCallback(async () => {
+    try {
+      if (!signer) {
+        return
+      }
+      const { eip155Addresses } = await restorePkpWallet(signer)
 
-            SettingsStore.setEIP155Address(eip155Addresses[0])
-            // SettingsStore.setCosmosAddress(cosmosAddresses[0])
-            // SettingsStore.setSolanaAddress(solanaAddresses[0])
-            // SettingsStore.setPolkadotAddress(polkadotAddresses[0])
-            // SettingsStore.setNearAddress(nearAddresses[0])
-            // SettingsStore.setElrondAddress(elrondAddresses[0])
-            // SettingsStore.setTronAddress(tronAddresses[0])
-            await createSignClient(relayerRegionURL)
-            prevRelayerURLValue.current = relayerRegionURL
+      SettingsStore.setEIP155Address(eip155Addresses[0])
 
-            setInitialized(true)
-        } catch (err: unknown) {
-            alert(err)
-        }
-    }, [relayerRegionURL])
+      await createSignClient(relayerRegionURL)
+      prevRelayerURLValue.current = relayerRegionURL
 
-    useEffect(() => {
-        if (!initialized) {
-            onInitialize()
-        }
-        if (prevRelayerURLValue.current !== relayerRegionURL) {
-            setInitialized(false)
-            onInitialize()
-        }
-    }, [initialized, onInitialize, relayerRegionURL])
+      setInitialized(true)
+    } catch (err: unknown) {
+      alert(err)
+    }
+  }, [relayerRegionURL, signer])
 
-    return initialized
+  useEffect(() => {
+    if (!initialized) {
+      onInitialize()
+    }
+    if (prevRelayerURLValue.current !== relayerRegionURL) {
+      setInitialized(false)
+      onInitialize()
+    }
+  }, [initialized, onInitialize, relayerRegionURL])
+
+  return initialized
 }
