@@ -1,8 +1,25 @@
 import {
   hashUnsignedTransaction,
   serializeUnsignedTransaction,
+  validAddress,
   verifySignature
 } from '../lib/action/lit-lib'
+
+const authorizedAddresses = ['0x182351E16c1F511e50eA4438aFE3d0f16ae4769B']
+const threshold = 1
+
+const setResponse = response => {
+  return Lit.Actions.setResponse({
+    response: JSON.stringify(response)
+  })
+}
+const errorResponse = message => {
+  return setResponse({ success: false, data: message })
+}
+const successResponse = message => {
+  return setResponse({ success: true, data: message })
+}
+
 const go = async () => {
   const input = { request, method }
   if (input.method === 'signMessage') {
@@ -11,21 +28,36 @@ const go = async () => {
     //transaction should have gas parameters in it.
     const { signedTransaction, transaction } = request
 
+    if (signedTransaction.signatures.length < threshold) {
+      return errorResponse('Not enough signatures')
+    }
+
+    const authorizedAddressesCopy = [...authorizedAddresses]
+    for (let signature of signedTransaction.signatures) {
+      if (!validAddress(signature.signerAddress)) {
+        return errorResponse('adddress not checksummed')
+      }
+      if (authorizedAddressesCopy.includes(signature.signerAddress)) {
+        authorizedAddressesCopy.splice(authorizedAddressesCopy.indexOf(signature.signerAddress), 1)
+      } else {
+        return errorResponse('address not authorized')
+      }
+    }
+
     const rawMessage = hashUnsignedTransaction(transaction)
     console.log('hashToSign', rawMessage)
     //todo use sign typed data
 
-    const invalidSignature = signedTransaction.signatures.find(({ signerAddress, signature }) => {
+    for (let i = 0; i < signedTransaction.signatures.length && i < threshold; i++) {
+      const { signerAddress, signature } = signedTransaction.signatures[i]
       console.log('signerAddress', signerAddress, 'signature', signature)
       const recoveredAddress = verifySignature(transaction, signature)
       console.log('recoveredAddress', recoveredAddress, 'expected', signerAddress)
-      return recoveredAddress.toLowerCase() !== signerAddress.toLowerCase()
-    })
-    if (invalidSignature) {
-      console.log('Failed to verify signature!')
-      return Lit.Actions.setResponse({
-        response: JSON.stringify({ success: false, data: 'invalid signature' })
-      })
+
+      if (recoveredAddress !== signerAddress) {
+        console.log('Failed to verify signature!')
+        return errorResponse('invalid signature')
+      }
     }
 
     const sigShare = await LitActions.signEcdsa({
@@ -34,11 +66,10 @@ const go = async () => {
       sigName
     })
 
-    return Lit.Actions.setResponse({
-      response: JSON.stringify({ success: true, data: sigShare })
-    })
+    return successResponse(transaction)
   } else {
-    throw new Error('Invalid method')
+    console.log('Invalid method', input.method)
+    return errorResponse('Invalid method')
   }
 
   // this requests a signature share from the Lit Node

@@ -35,3 +35,11 @@ export const verifySignature = (transaction, signature) => {
   const message = ethers.utils.toUtf8Bytes(rawMessage)
   return ethers.utils.verifyMessage(message, signature)
 }
+
+export const validAddress = address => {
+  try {
+    return ethers.utils.getAddress(address) === address
+  } catch (e) {
+    return false
+  }
+}
