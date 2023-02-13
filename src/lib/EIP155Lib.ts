@@ -1,7 +1,7 @@
 import { BigNumber, ethers, providers, Signer, Wallet } from 'ethers'
 import { TransactionServiceI, TxService } from '@/lib/TransactionServiceI'
 import { TransactionModel, UnsignedMpcTransaction } from '@/lib/Transaction'
-import { TransactionServiceStore } from '@/lib/TxServiceStore'
+import { TransactionServiceStore, TransactionServiceStoreDb } from '@/lib/TxServiceStore'
 import { LitWalletData } from '@/lib/lit/LitMpcWallet'
 import { LitMpcWalletBrowserClient } from '@/lib/lit/LitMpcWalletBrowserClient'
 
@@ -26,7 +26,8 @@ export interface IEIP155Lib {
   signTransaction(transaction: providers.TransactionRequest): any
 }
 
-const staticTransactionServiceStore = new TransactionServiceStore()
+// const staticTransactionServiceStore = new TransactionServiceStore()
+const staticTransactionServiceStore = new TransactionServiceStoreDb()
 
 /**
  * This connects the web2 transaction service with the lit action with wallet connect.

@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { TransactionModel, UnsignedMpcTransaction } from '@/lib/Transaction'
-import { TransactionServiceStore } from '@/lib/TxServiceStore'
+import { TransactionServiceStore, TransactionServiceStoreI } from '@/lib/TxServiceStore'
 import { hashUnsignedTransaction } from '@/lib/action/lit-lib'
 
 export interface UserSignedTransaction {}
@@ -9,13 +9,13 @@ export interface TransactionServiceI {
   submitTransaction(transaction: UnsignedMpcTransaction): Promise<TransactionModel>
 
   signTransaction(transaction: UnsignedMpcTransaction): Promise<void>
-  getTransaction(hash: string): Promise<TransactionModel | undefined>
+  getTransaction(hash: string): Promise<TransactionModel | null>
 }
 export class TxService implements TransactionServiceI {
   readonly mpcWalletAddress: string
   readonly signer: ethers.Signer
-  readonly store: TransactionServiceStore
-  constructor(mpcWalletAddress: string, signer: ethers.Signer, store: TransactionServiceStore) {
+  readonly store: TransactionServiceStoreI
+  constructor(mpcWalletAddress: string, signer: ethers.Signer, store: TransactionServiceStoreI) {
     this.mpcWalletAddress = mpcWalletAddress
     this.signer = signer
     this.store = store
@@ -36,12 +36,13 @@ export class TxService implements TransactionServiceI {
     console.log('signTransaction', txHash, signature)
     this.store.storeSignature(
       this.mpcWalletAddress,
+      transaction,
       await this.signer.getAddress(),
       txHash,
       signature
     )
   }
-  async getTransaction(hash: string): Promise<TransactionModel | undefined> {
+  async getTransaction(hash: string): Promise<TransactionModel | null> {
     return this.store.getTransaction(this.mpcWalletAddress, hash)
   }
 }

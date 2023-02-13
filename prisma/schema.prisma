@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  address   String
+
+  // hash of the transaction
+  signerHash  String @unique
+  transaction Json
+
+  // once it's executed
+  txHash     String?
+  signatures Signature[]
+
+  @@unique([address, signerHash])
+}
+
+model Signature {
+  id            String      @id @default(cuid())
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onUpdate: NoAction)
+  transactionId String
+
+  signerHash    String
+  signerAddress String
+  signature     String
+
+  @@unique([signerAddress, signerHash])
+}

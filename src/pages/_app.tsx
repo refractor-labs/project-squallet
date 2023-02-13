@@ -6,6 +6,7 @@ import { mainnet, polygon, polygonMumbai, goerli } from '@wagmi/core/chains'
 import { configureChains } from '@wagmi/core'
 import { publicProvider } from '@wagmi/core/providers/public'
 import { InjectedConnector } from '@wagmi/connectors/injected'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const { chains, provider } = configureChains(
   [mainnet, goerli, polygon, polygonMumbai],
@@ -16,8 +17,14 @@ const client = createClient({
   connectors: [new InjectedConnector({ chains })],
   provider
 })
+const queryClient = new QueryClient()
+
 export default function App({ Component, pageProps }: AppProps) {
   const getLayout = Component.getLayout || (page => page)
 
-  return <WagmiConfig client={client}>{getLayout(<Component {...pageProps} />)}</WagmiConfig>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <WagmiConfig client={client}>{getLayout(<Component {...pageProps} />)}</WagmiConfig>
+    </QueryClientProvider>
+  )
 }
