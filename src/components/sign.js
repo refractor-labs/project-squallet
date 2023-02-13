@@ -8,6 +8,8 @@ import { ethers } from 'ethers'
 import { useState } from 'react'
 import { litActions } from '@/components/lit-actions-code'
 import { hashUnsignedTransaction } from '@/lib/action/lit-lib'
+import Ipfs from './ipfs'
+import erc20 from '@/abis/erc20'
 
 // this code will be run on the node
 const litActionCode = `
@@ -33,10 +35,26 @@ const go = async () => {
 go();
 `
 
+const litActionCode3 = `
+const go = async () => {  
+  // this requests a signature share from the Lit Node
+  // the signature share will be automatically returned in the HTTP response from the node
+  // all the params (tx, publicKey, sigName) are passed in from the LitJsSdk.executeJs() function
+  const sigShare = await Lit.Actions.signEcdsa({ 
+    toSign: tx, 
+    publicKey, 
+    sigName 
+  });
+};
+
+go();
+`
+
 function Sign() {
   const [publicKey, setPublicKey] = useState('')
   const [pkpId, setPkpId] = useState('')
   const [address, setAddress] = useState('')
+  const [cid, setCid] = useState('');
 
   const mintPkp = async () => {
     try {
@@ -245,6 +263,105 @@ function Sign() {
     console.log('equivalent', recoveredAddress.toLowerCase() === signerAddress.toLowerCase())
   }
 
+  const transferErc20 = async () => {
+    try {
+      
+      const from  = address;
+      const chainId = 80001;
+      const provider = new ethers.providers.JsonRpcProvider('https://polygon-mumbai.infura.io/v3/e612f847d6854db2807f1f403d9e2464', chainId);
+
+      const wallet = new ethers.Wallet('47213c56ad7e8164b8dec77b4d6703fc5938c028057b3f3418b026c50359f64b', provider);
+
+      const contractWithWallet = new ethers.Contract('0x2d7882beDcbfDDce29Ba99965dd3cdF7fcB10A1e', erc20, wallet);
+      const contract = new ethers.Contract('0x2d7882beDcbfDDce29Ba99965dd3cdF7fcB10A1e', erc20, provider);
+
+      console.log("Sending tokens to PKP")
+      const tokensTx = await contractWithWallet.transfer(address, '1');
+      console.log(await tokensTx.wait())
+      console.log(`Tokens sent to ${address}`);
+
+      console.log("Sending gas to PKP")
+      const gasTx = await wallet.sendTransaction({
+        to: address,
+        value: '1000000000000000',
+      });
+      console.log(await gasTx.wait())
+      console.log(`Gas sent to ${address}`);
+
+      const nonce = await provider.getTransactionCount(from);
+      console.log(nonce)
+    
+      const params = [
+        wallet.address,
+        '1',
+        {
+          from,
+        }
+      ]
+      const estimation = await contract.estimateGas.transfer(...params);
+      console.log(estimation)
+    
+      const feeData = await provider.getFeeData();
+      console.log(feeData)
+    
+      const tx = await contract.populateTransaction.transfer(...params);
+      tx.type = 2;
+      tx.nonce = nonce;
+      tx.chainId = chainId;
+      tx.maxFeePerGas = feeData.maxFeePerGas.toHexString();
+      tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString();
+      tx.gasLimit = estimation.toHexString();
+      console.log(tx);
+  
+      const litContracts = new LitContracts()
+      await litContracts.connect()
+      const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' })
+      await litNodeClient.connect()
+  
+      // get authentication signature to deploy call the action
+      var authSig = await LitJsSdk.checkAndSignAuthMessage({
+        chain: 'mumbai'
+      })
+
+      const serialized = ethers.utils.serializeTransaction(tx);
+      console.log(serialized);
+
+      const hash = ethers.utils.keccak256(serialized);
+      console.log("hash", hash);
+
+      // this does both deployment action calling in the same code
+      // need to break it down to upload to ipfs separately
+      const resp = await litNodeClient.executeJs({
+        code: litActionCode3,
+        authSig,
+        // all jsParams can be used anywhere in your litActionCode
+        jsParams: {
+          tx: ethers.utils.arrayify(hash),
+          publicKey,
+          sigName: 'sig1'
+        }
+      })
+      const sig = resp.signatures.sig1
+      const dataSigned = sig.dataSigned
+  
+      // validations
+  
+      const recoveredAddress = recoverAddress(dataSigned, sig.signature)
+      console.log('recoveredAddress', recoveredAddress, hash, sig.dataSigned)
+    
+      console.log(resp.signatures.sig1)
+      const serialized2 = ethers.utils.serializeTransaction(tx, resp.signatures.sig1.signature);
+      console.log(serialized2);
+      // console.log(ethers.utils.parse(serialized2));
+      const sent = await provider.sendTransaction(serialized2);
+      console.log(sent);
+      console.log(await sent.wait())  
+    } catch (err) {
+      console.log(err)
+    }
+  }
+  // test();
+  
   return (
     <div className="App">
       <button onClick={mintPkp}>Mint PKP</button>
@@ -259,6 +376,7 @@ function Sign() {
       <button onClick={addPermittedActionIpfsCid}>Add permitted action</button>
       <button onClick={executeGetPermissionsIpfs}>Execute IPFS Action</button>
       <button onClick={testSignature}>Test Signature</button>
+      <button onClick={transferErc20}>Transfer ERc20</button>
       <hr />
       <br />
       Public key: <input id={'pubkey-in'} type={'text'} />
@@ -273,6 +391,13 @@ function Sign() {
       >
         Input Values
       </button>
+      <br />
+      <br />
+      <hr />
+      <br />
+      <Ipfs onUpload={cid => setCid(cid)} />
+      <br />
+      <br />
       <hr />
       <br />
       <button onClick={() => window.location.reload()}>Reload</button>
