@@ -10,6 +10,7 @@ import { litActions } from '@/components/lit-actions-code'
 import { hashUnsignedTransaction } from '@/lib/action/lit-lib'
 import Ipfs from './ipfs'
 import erc20 from '@/abis/erc20'
+import { ipfs } from '@/utils/ipfs'
 
 // this code will be run on the node
 const litActionCode = `
@@ -51,6 +52,7 @@ go();
 `
 
 function Sign() {
+  const [tokenId, setTokenId] = useState('')
   const [publicKey, setPublicKey] = useState('')
   const [pkpId, setPkpId] = useState('')
   const [address, setAddress] = useState('')
@@ -275,22 +277,44 @@ function Sign() {
       const contractWithWallet = new ethers.Contract('0x2d7882beDcbfDDce29Ba99965dd3cdF7fcB10A1e', erc20, wallet);
       const contract = new ethers.Contract('0x2d7882beDcbfDDce29Ba99965dd3cdF7fcB10A1e', erc20, provider);
 
-      console.log("Sending tokens to PKP")
-      const tokensTx = await contractWithWallet.transfer(address, '1');
-      console.log(await tokensTx.wait())
-      console.log(`Tokens sent to ${address}`);
+      const litContracts = new LitContracts()
+      await litContracts.connect()
+      const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' })
+      await litNodeClient.connect()
+  
+      // console.log("Sending tokens to PKP")
+      // const tokensTx = await contractWithWallet.transfer(address, '1');
+      // console.log(await tokensTx.wait())
+      // console.log(`Tokens sent to ${address}`);
 
-      console.log("Sending gas to PKP")
-      const gasTx = await wallet.sendTransaction({
-        to: address,
-        value: '1000000000000000',
-      });
-      console.log(await gasTx.wait())
-      console.log(`Gas sent to ${address}`);
+      // console.log("Sending gas to PKP")
+      // const gasTx = await wallet.sendTransaction({
+      //   to: address,
+      //   value: '1000000000000000',
+      // });
+      // console.log(await gasTx.wait())
+      // console.log(`Gas sent to ${address}`);
 
-      const nonce = await provider.getTransactionCount(from);
-      console.log(nonce)
-    
+      const addTx = await litContracts.pkpPermissionsContractUtil.write.addPermittedAction(
+        pkpId,
+        cid,
+      )
+      console.log(addTx);
+      console.log(await addTx.wait());
+
+      console.log("adding permitted address")
+      await (await litContracts.pkpPermissionsContractUtil.write.addPermittedAddress(
+        pkpId,
+        '0xb81798b54005170F23f08351F4C26C4e736e26C0',
+      ));
+      console.log("added permitted address")
+
+      await (await litContracts.pkpNftContract.write.transferFrom(
+        '0xb81798b54005170F23f08351F4C26C4e736e26C0',
+        address,
+        pkpId,
+      ));
+
       const params = [
         wallet.address,
         '1',
@@ -303,7 +327,10 @@ function Sign() {
     
       const feeData = await provider.getFeeData();
       console.log(feeData)
-    
+
+      const nonce = await provider.getTransactionCount(from);
+      console.log(nonce)
+
       const tx = await contract.populateTransaction.transfer(...params);
       tx.type = 2;
       tx.nonce = nonce;
@@ -312,11 +339,6 @@ function Sign() {
       tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString();
       tx.gasLimit = estimation.toHexString();
       console.log(tx);
-  
-      const litContracts = new LitContracts()
-      await litContracts.connect()
-      const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' })
-      await litNodeClient.connect()
   
       // get authentication signature to deploy call the action
       var authSig = await LitJsSdk.checkAndSignAuthMessage({
@@ -332,7 +354,7 @@ function Sign() {
       // this does both deployment action calling in the same code
       // need to break it down to upload to ipfs separately
       const resp = await litNodeClient.executeJs({
-        code: litActionCode3,
+        ipfsId: cid,
         authSig,
         // all jsParams can be used anywhere in your litActionCode
         jsParams: {
@@ -360,14 +382,22 @@ function Sign() {
       console.log(err)
     }
   }
+
+  const uploadAction = async () => {
+    setCid('');
+    const {cid } = await ipfs.add(litActionCode3)
+    setCid(cid.toString());
+  }
   // test();
   
   return (
     <div className="App">
       <button onClick={mintPkp}>Mint PKP</button>
+      <button onClick={uploadAction}>Upload Action</button>
       <div>Public key: {publicKey}</div>
       <div>PKP Address: {address}</div>
       <div>PKP ID: {pkpId}</div>
+      <div>CID: {cid}</div>
       <button onClick={executeLitAction1}>Execute Action1</button>
       <button onClick={checkPermissions}>Check Permissions</button>
       <button onClick={addPermittedAddress}>Add Permitted Address</button>
@@ -382,24 +412,17 @@ function Sign() {
       Public key: <input id={'pubkey-in'} type={'text'} />
       PKP Address: <input id={'pkpaddress-in'} type={'text'} />
       PKP ID: <input id={'pkpid-in'} type={'text'} />
+      CID: <input type={'text'} id={'cid-in'} />
       <button
         onClick={() => {
           setPublicKey(document.getElementById('pubkey-in').value)
           setAddress(document.getElementById('pkpaddress-in').value)
           setPkpId(document.getElementById('pkpid-in').value)
+          setCid(document.getElementById('cid-in').value)
         }}
       >
         Input Values
       </button>
-      <br />
-      <br />
-      <hr />
-      <br />
-      <Ipfs onUpload={cid => setCid(cid)} />
-      <br />
-      <br />
-      <hr />
-      <br />
       <button onClick={() => window.location.reload()}>Reload</button>
     </div>
   )

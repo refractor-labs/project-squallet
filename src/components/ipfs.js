@@ -1,16 +1,5 @@
-import { create } from "ipfs-http-client";
+import { ipfs } from "@/utils/ipfs";
 import { useState } from "react";
-
-const projectId = "2LeRQnoqwGBEevYmOWyugMmDQRT";
-const projectSecret = "6e5587db2185d495bed44d32fa2d35c5";
-const authorization = "Basic " + btoa(projectId + ":" + projectSecret);
-
-const client = create({
-  url: "https://ipfs.infura.io:5001",
-  headers:{
-    authorization
-  }
-})
 
 const defaultCode = `
 const go = async () => {  
@@ -26,7 +15,7 @@ export default function Ipfs({onUpload}) {
   const [cid, setCid] = useState('');
   const [code, setCode] = useState(defaultCode);
   const onClickCreate = async () => {
-    const { cid } = await client.add(code)
+    const { cid } = await ipfs.add(code)
     console.log(cid)
     setCid(cid.toString());
     onUpload(cid.toString());
