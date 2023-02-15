@@ -1,6 +1,8 @@
 import Head from 'next/head'
-import styles from '@/styles/Home.module.css'
 import Sign from '@/components/sign'
+import { ReactElement } from 'react'
+import DashboardLayout from '@/components/layouts/Dashboard'
+import PKP from '@/components/pkp'
 
 export default function Home() {
   return (
@@ -11,9 +13,15 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
+      <main>
+        <PKP />
         <Sign />
       </main>
     </>
   )
+}
+
+
+Home.getLayout = function getLayout(page: ReactElement) {
+  return <DashboardLayout title='Home'>{page}</DashboardLayout>
 }
