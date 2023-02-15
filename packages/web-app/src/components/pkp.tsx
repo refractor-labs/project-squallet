@@ -8,6 +8,7 @@ function PKP() {
   const [pkpId, setPkpId] = useLocalStorage('pkpId', '')
   const [address, setAddress] = useLocalStorage('address', '')
   const [loading, setLoading] = useState(false)
+  const [_, setCid] = useLocalStorage('cid', '')
 
   const mintPkp = async () => {
     try {
@@ -34,6 +35,7 @@ function PKP() {
       console.log('publicKey', publicKey)
       console.log('address', ethers.utils.computeAddress(publicKey))
       setAddress(ethers.utils.computeAddress(publicKey))
+      setCid('')
     } catch (err) {
       console.log(err)
     }
@@ -41,19 +43,17 @@ function PKP() {
   }
 
   return (
-    <div className="card bg-base-100 w-full max-w-full shadow-xl border break-all">
-      <div className="card-body">
-        <h2 className="card-title">Public key</h2>
-        <code>{publicKey}</code>
-        <h2 className="card-title">PKP Address</h2>
-        <code>{address}</code>
-        <h2 className="card-title">PKP ID</h2>
-        <code>{pkpId}</code>
-        <div className="card-actions justify-end">
-          <button className={`btn btn-sm ${loading ? 'loading' : ''}`} onClick={mintPkp}>
-            Mint PKP
-          </button>
-        </div>
+    <div className="break-all text-xs space-y-6">
+      <h2 className="font-bold">Public key</h2>
+      <code>{publicKey}</code>
+      <h2 className="font-bold">PKP Address</h2>
+      <code>{address}</code>
+      <h2 className="font-bold">PKP ID</h2>
+      <code>{pkpId}</code>
+      <div className="card-actions justify-end">
+        <button className={`btn btn-sm ${loading ? 'loading' : ''}`} onClick={mintPkp}>
+          Mint PKP
+        </button>
       </div>
     </div>
   )

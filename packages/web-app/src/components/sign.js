@@ -364,11 +364,6 @@ function Sign() {
     }
   }
 
-  const uploadAction = async () => {
-    setCid('')
-    const { cid } = await ipfs.add(litActionCode3)
-    setCid(cid.toString())
-  }
   // test();
 
   if (!publicKey) {
@@ -377,8 +372,6 @@ function Sign() {
 
   return (
     <div className="App">
-      <button onClick={uploadAction}>Upload Action</button>
-      <div>CID: {cid}</div>
       <button className="btn btn-xs" onClick={executeLitAction1}>
         Execute Action1
       </button>
