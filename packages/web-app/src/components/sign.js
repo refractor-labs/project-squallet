@@ -5,12 +5,11 @@ import { recoverPublicKey, computePublicKey } from '@ethersproject/signing-key'
 import { verifyMessage } from '@ethersproject/wallet'
 import { LitContracts } from '@lit-protocol/contracts-sdk'
 import { ethers } from 'ethers'
-import { useState } from 'react'
 import { litActions } from '@/components/lit-actions-code'
 import { hashUnsignedTransaction } from '@/lib/action/lit-lib'
-import Ipfs from './ipfs'
 import erc20 from '@/abis/erc20'
 import { ipfs } from '@/utils/ipfs'
+import { useLocalStorage } from 'usehooks-ts'
 
 // this code will be run on the node
 const litActionCode = `
@@ -52,45 +51,10 @@ go();
 `
 
 function Sign() {
-  const [tokenId, setTokenId] = useState('')
-  const [publicKey, setPublicKey] = useState('')
-  const [pkpId, setPkpId] = useState('')
-  const [address, setAddress] = useState('')
-  const [cid, setCid] = useState('')
-
-  const mintPkp = async () => {
-    try {
-      // logout so we can do the full flow everytime (not required in production)
-      await LitJsSdk.disconnectWeb3()
-
-      // initialization
-      const litContracts = new LitContracts()
-      await litContracts.connect()
-      const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' })
-      await litNodeClient.connect()
-
-      // mint token
-      const mintCost = await litContracts.pkpNftContract.read.mintCost()
-      const tx = await litContracts.pkpNftContract.write.mintNext(2, { value: mintCost })
-      const txResp = await tx.wait()
-
-      // this token id belongs to the metamask that minted it
-      const tokenId = txResp.events[1].topics[3]
-      const pkpId = tokenId
-      console.log('tokenId', tokenId)
-      console.log('pkpId', pkpId)
-      setPkpId(pkpId)
-
-      // extract public key and address
-      const publicKey = await litContracts.pkpNftContract.read.getPubkey(tokenId)
-      setPublicKey(publicKey)
-      console.log('publicKey', publicKey)
-      console.log('address', ethers.utils.computeAddress(publicKey))
-      setAddress(ethers.utils.computeAddress(publicKey))
-    } catch (err) {
-      console.log(err)
-    }
-  }
+  const [publicKey] = useLocalStorage('publicKey', '')
+  const [pkpId] = useLocalStorage('pkpId', '')
+  const [address] = useLocalStorage('address', '')
+  const [cid, setCid] = useLocalStorage('cid', '')
 
   const executeLitAction = async (message, codeString) => {
     const litContracts = new LitContracts()
@@ -316,17 +280,21 @@ function Sign() {
       console.log(await addTx.wait())
 
       console.log('adding permitted address')
-      await await litContracts.pkpPermissionsContractUtil.write.addPermittedAddress(
-        pkpId,
-        '0xb81798b54005170F23f08351F4C26C4e736e26C0'
-      )
+      await (
+        await litContracts.pkpPermissionsContractUtil.write.addPermittedAddress(
+          pkpId,
+          '0xb81798b54005170F23f08351F4C26C4e736e26C0'
+        )
+      ).wait()
       console.log('added permitted address')
 
-      await await litContracts.pkpNftContract.write.transferFrom(
-        '0xb81798b54005170F23f08351F4C26C4e736e26C0',
-        address,
-        pkpId
-      )
+      await (
+        await litContracts.pkpNftContract.write.transferFrom(
+          '0xb81798b54005170F23f08351F4C26C4e736e26C0',
+          address,
+          pkpId
+        )
+      ).wait()
 
       const params = [
         wallet.address,
@@ -403,40 +371,43 @@ function Sign() {
   }
   // test();
 
+  if (!publicKey) {
+    return null
+  }
+
   return (
     <div className="App">
-      <button onClick={mintPkp}>Mint PKP</button>
       <button onClick={uploadAction}>Upload Action</button>
-      <div>Public key: {publicKey}</div>
-      <div>PKP Address: {address}</div>
-      <div>PKP ID: {pkpId}</div>
       <div>CID: {cid}</div>
-      <button onClick={executeLitAction1}>Execute Action1</button>
-      <button onClick={checkPermissions}>Check Permissions</button>
-      <button onClick={addPermittedAddress}>Add Permitted Address</button>
-      <button onClick={executeLitAction2}>Execute Action2</button>
-      <button onClick={executeGetPermissionsAction}>Execute Read Permissions</button>
-      <button onClick={addPermittedActionIpfsCid}>Add permitted action</button>
-      <button onClick={executeGetPermissionsIpfs}>Execute IPFS Action</button>
-      <button onClick={testSignature}>Test Signature</button>
-      <button onClick={transferErc20}>Transfer ERc20</button>
+      <button className="btn btn-xs" onClick={executeLitAction1}>
+        Execute Action1
+      </button>
+      <button className="btn btn-xs" onClick={checkPermissions}>
+        Check Permissions
+      </button>
+      <button className="btn btn-xs" onClick={addPermittedAddress}>
+        Add Permitted Address
+      </button>
+      <button className="btn btn-xs" onClick={executeLitAction2}>
+        Execute Action2
+      </button>
+      <button className="btn btn-xs" onClick={executeGetPermissionsAction}>
+        Execute Read Permissions
+      </button>
+      <button className="btn btn-xs" onClick={addPermittedActionIpfsCid}>
+        Add permitted action
+      </button>
+      <button className="btn btn-xs" onClick={executeGetPermissionsIpfs}>
+        Execute IPFS Action
+      </button>
+      <button className="btn btn-xs" onClick={testSignature}>
+        Test Signature
+      </button>
+      <button className="btn btn-xs" onClick={transferErc20}>
+        Transfer ERc20
+      </button>
       <hr />
       <br />
-      Public key: <input id={'pubkey-in'} type={'text'} />
-      PKP Address: <input id={'pkpaddress-in'} type={'text'} />
-      PKP ID: <input id={'pkpid-in'} type={'text'} />
-      CID: <input type={'text'} id={'cid-in'} />
-      <button
-        onClick={() => {
-          setPublicKey(document.getElementById('pubkey-in').value)
-          setAddress(document.getElementById('pkpaddress-in').value)
-          setPkpId(document.getElementById('pkpid-in').value)
-          setCid(document.getElementById('cid-in').value)
-        }}
-      >
-        Input Values
-      </button>
-      <button onClick={() => window.location.reload()}>Reload</button>
     </div>
   )
 }

@@ -20,7 +20,7 @@ const client = createClient({
 const queryClient = new QueryClient()
 
 export default function App({ Component, pageProps }: AppProps) {
-  const getLayout = Component.getLayout || (page => page)
+  const getLayout = (Component as any).getLayout || ((page: any) => page)
 
   return (
     <QueryClientProvider client={queryClient}>
