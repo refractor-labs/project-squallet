@@ -21,7 +21,6 @@ export default function Home() {
   )
 }
 
-
 Home.getLayout = function getLayout(page: ReactElement) {
-  return <DashboardLayout title='Home'>{page}</DashboardLayout>
+  return <DashboardLayout title="Home">{page}</DashboardLayout>
 }

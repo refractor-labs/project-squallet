@@ -6,22 +6,22 @@ const user = {
   name: 'Tom Cook',
   email: 'tom@example.com',
   imageUrl:
-    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
 }
 const navigation = [
   { name: 'Home', href: '#', current: true },
-  { name: 'Transactions', href: '#', current: false },
+  { name: 'Transactions', href: '#', current: false }
 ]
 const userNavigation = [
   { name: 'Your Profile', href: '#' },
   { name: 'Settings', href: '#' },
-  { name: 'Sign out', href: '#' },
+  { name: 'Sign out', href: '#' }
 ]
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
-type Props = { children: React.ReactNode, title: string }
+type Props = { children: React.ReactNode; title: string }
 export default function DashboardLayout({ children, title }: Props) {
   return (
     <>
@@ -49,7 +49,7 @@ export default function DashboardLayout({ children, title }: Props) {
                     </div>
                     <div className="hidden md:block">
                       <div className="ml-10 flex items-baseline space-x-4">
-                        {navigation.map((item) => (
+                        {navigation.map(item => (
                           <a
                             key={item.name}
                             href={item.href}
@@ -95,7 +95,7 @@ export default function DashboardLayout({ children, title }: Props) {
                           leaveTo="transform opacity-0 scale-95"
                         >
                           <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            {userNavigation.map((item) => (
+                            {userNavigation.map(item => (
                               <Menu.Item key={item.name}>
                                 {({ active }) => (
                                   <a
@@ -131,13 +131,15 @@ export default function DashboardLayout({ children, title }: Props) {
 
               <Disclosure.Panel className="md:hidden">
                 <div className="space-y-1 px-2 pt-2 pb-3 sm:px-3">
-                  {navigation.map((item) => (
+                  {navigation.map(item => (
                     <Disclosure.Button
                       key={item.name}
                       as="a"
                       href={item.href}
                       className={classNames(
-                        item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                        item.current
+                          ? 'bg-gray-900 text-white'
+                          : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                         'block px-3 py-2 rounded-md text-base font-medium'
                       )}
                       aria-current={item.current ? 'page' : undefined}
@@ -152,8 +154,12 @@ export default function DashboardLayout({ children, title }: Props) {
                       <img className="h-10 w-10 rounded-full" src={user.imageUrl} alt="" />
                     </div>
                     <div className="ml-3">
-                      <div className="text-base font-medium leading-none text-white">{user.name}</div>
-                      <div className="text-sm font-medium leading-none text-gray-400">{user.email}</div>
+                      <div className="text-base font-medium leading-none text-white">
+                        {user.name}
+                      </div>
+                      <div className="text-sm font-medium leading-none text-gray-400">
+                        {user.email}
+                      </div>
                     </div>
                     <button
                       type="button"
@@ -164,7 +170,7 @@ export default function DashboardLayout({ children, title }: Props) {
                     </button>
                   </div>
                   <div className="mt-3 space-y-1 px-2">
-                    {userNavigation.map((item) => (
+                    {userNavigation.map(item => (
                       <Disclosure.Button
                         key={item.name}
                         as="a"
@@ -187,9 +193,7 @@ export default function DashboardLayout({ children, title }: Props) {
           </div>
         </header>
         <main>
-          <div className="mx-auto max-w-7xl py-6">
-            {children}
-          </div>
+          <div className="mx-auto max-w-7xl py-6">{children}</div>
         </main>
       </div>
     </>

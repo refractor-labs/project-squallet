@@ -3,16 +3,15 @@ import { ethers } from 'ethers'
 import { useState } from 'react'
 import { useLocalStorage } from 'usehooks-ts'
 
-
 function PKP() {
   const [publicKey, setPublicKey] = useLocalStorage('publicKey', '')
   const [pkpId, setPkpId] = useLocalStorage('pkpId', '')
   const [address, setAddress] = useLocalStorage('address', '')
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   const mintPkp = async () => {
     try {
-      setLoading(true);
+      setLoading(true)
       // initialization
       const litContracts = new LitContracts()
       await litContracts.connect()
@@ -38,7 +37,7 @@ function PKP() {
     } catch (err) {
       console.log(err)
     }
-    setLoading(false);
+    setLoading(false)
   }
 
   return (
@@ -51,7 +50,9 @@ function PKP() {
         <h2 className="card-title">PKP ID</h2>
         <code>{pkpId}</code>
         <div className="card-actions justify-end">
-          <button className={`btn btn-sm ${loading ? 'loading' : ''}`} onClick={mintPkp}>Mint PKP</button>
+          <button className={`btn btn-sm ${loading ? 'loading' : ''}`} onClick={mintPkp}>
+            Mint PKP
+          </button>
         </div>
       </div>
     </div>

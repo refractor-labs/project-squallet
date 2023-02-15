@@ -231,21 +231,34 @@ function Sign() {
 
   const transferErc20 = async () => {
     try {
-      
-      const from  = address;
-      const chainId = 80001;
-      const provider = new ethers.providers.JsonRpcProvider('https://polygon-mumbai.infura.io/v3/e612f847d6854db2807f1f403d9e2464', chainId);
+      const from = address
+      const chainId = 80001
+      const provider = new ethers.providers.JsonRpcProvider(
+        'https://polygon-mumbai.infura.io/v3/e612f847d6854db2807f1f403d9e2464',
+        chainId
+      )
 
-      const wallet = new ethers.Wallet('47213c56ad7e8164b8dec77b4d6703fc5938c028057b3f3418b026c50359f64b', provider);
+      const wallet = new ethers.Wallet(
+        '47213c56ad7e8164b8dec77b4d6703fc5938c028057b3f3418b026c50359f64b',
+        provider
+      )
 
-      const contractWithWallet = new ethers.Contract('0x2d7882beDcbfDDce29Ba99965dd3cdF7fcB10A1e', erc20, wallet);
-      const contract = new ethers.Contract('0x2d7882beDcbfDDce29Ba99965dd3cdF7fcB10A1e', erc20, provider);
+      const contractWithWallet = new ethers.Contract(
+        '0x2d7882beDcbfDDce29Ba99965dd3cdF7fcB10A1e',
+        erc20,
+        wallet
+      )
+      const contract = new ethers.Contract(
+        '0x2d7882beDcbfDDce29Ba99965dd3cdF7fcB10A1e',
+        erc20,
+        provider
+      )
 
       const litContracts = new LitContracts()
       await litContracts.connect()
       const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' })
       await litNodeClient.connect()
-  
+
       // console.log("Sending tokens to PKP")
       // const tokensTx = await contractWithWallet.transfer(address, '1');
       // console.log(await tokensTx.wait())
@@ -261,59 +274,63 @@ function Sign() {
 
       const addTx = await litContracts.pkpPermissionsContractUtil.write.addPermittedAction(
         pkpId,
-        cid,
+        cid
       )
-      console.log(addTx);
-      console.log(await addTx.wait());
+      console.log(addTx)
+      console.log(await addTx.wait())
 
-      console.log("adding permitted address")
-      await (await litContracts.pkpPermissionsContractUtil.write.addPermittedAddress(
-        pkpId,
-        '0xb81798b54005170F23f08351F4C26C4e736e26C0',
-      )).wait();
-      console.log("added permitted address")
+      console.log('adding permitted address')
+      await (
+        await litContracts.pkpPermissionsContractUtil.write.addPermittedAddress(
+          pkpId,
+          '0xb81798b54005170F23f08351F4C26C4e736e26C0'
+        )
+      ).wait()
+      console.log('added permitted address')
 
-      await (await litContracts.pkpNftContract.write.transferFrom(
-        '0xb81798b54005170F23f08351F4C26C4e736e26C0',
-        address,
-        pkpId,
-      )).wait();
+      await (
+        await litContracts.pkpNftContract.write.transferFrom(
+          '0xb81798b54005170F23f08351F4C26C4e736e26C0',
+          address,
+          pkpId
+        )
+      ).wait()
 
       const params = [
         wallet.address,
         '1',
         {
-          from,
+          from
         }
       ]
-      const estimation = await contract.estimateGas.transfer(...params);
+      const estimation = await contract.estimateGas.transfer(...params)
       console.log(estimation)
-    
-      const feeData = await provider.getFeeData();
+
+      const feeData = await provider.getFeeData()
       console.log(feeData)
 
-      const nonce = await provider.getTransactionCount(from);
+      const nonce = await provider.getTransactionCount(from)
       console.log(nonce)
 
-      const tx = await contract.populateTransaction.transfer(...params);
-      tx.type = 2;
-      tx.nonce = nonce;
-      tx.chainId = chainId;
-      tx.maxFeePerGas = feeData.maxFeePerGas.toHexString();
-      tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString();
-      tx.gasLimit = estimation.toHexString();
-      console.log(tx);
-  
+      const tx = await contract.populateTransaction.transfer(...params)
+      tx.type = 2
+      tx.nonce = nonce
+      tx.chainId = chainId
+      tx.maxFeePerGas = feeData.maxFeePerGas.toHexString()
+      tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString()
+      tx.gasLimit = estimation.toHexString()
+      console.log(tx)
+
       // get authentication signature to deploy call the action
       var authSig = await LitJsSdk.checkAndSignAuthMessage({
         chain: 'mumbai'
       })
 
-      const serialized = ethers.utils.serializeTransaction(tx);
-      console.log(serialized);
+      const serialized = ethers.utils.serializeTransaction(tx)
+      console.log(serialized)
 
-      const hash = ethers.utils.keccak256(serialized);
-      console.log("hash", hash);
+      const hash = ethers.utils.keccak256(serialized)
+      console.log('hash', hash)
 
       // this does both deployment action calling in the same code
       // need to break it down to upload to ipfs separately
@@ -329,31 +346,31 @@ function Sign() {
       })
       const sig = resp.signatures.sig1
       const dataSigned = sig.dataSigned
-  
+
       // validations
-  
+
       const recoveredAddress = recoverAddress(dataSigned, sig.signature)
       console.log('recoveredAddress', recoveredAddress, hash, sig.dataSigned)
-    
+
       console.log(resp.signatures.sig1)
-      const serialized2 = ethers.utils.serializeTransaction(tx, resp.signatures.sig1.signature);
-      console.log(serialized2);
+      const serialized2 = ethers.utils.serializeTransaction(tx, resp.signatures.sig1.signature)
+      console.log(serialized2)
       // console.log(ethers.utils.parse(serialized2));
-      const sent = await provider.sendTransaction(serialized2);
-      console.log(sent);
-      console.log(await sent.wait())  
+      const sent = await provider.sendTransaction(serialized2)
+      console.log(sent)
+      console.log(await sent.wait())
     } catch (err) {
       console.log(err)
     }
   }
 
   const uploadAction = async () => {
-    setCid('');
-    const {cid } = await ipfs.add(litActionCode3)
-    setCid(cid.toString());
+    setCid('')
+    const { cid } = await ipfs.add(litActionCode3)
+    setCid(cid.toString())
   }
   // test();
-  
+
   if (!publicKey) {
     return null
   }
@@ -362,15 +379,33 @@ function Sign() {
     <div className="App">
       <button onClick={uploadAction}>Upload Action</button>
       <div>CID: {cid}</div>
-      <button className='btn btn-xs' onClick={executeLitAction1}>Execute Action1</button>
-      <button className='btn btn-xs' onClick={checkPermissions}>Check Permissions</button>
-      <button className='btn btn-xs' onClick={addPermittedAddress}>Add Permitted Address</button>
-      <button className='btn btn-xs' onClick={executeLitAction2}>Execute Action2</button>
-      <button className='btn btn-xs' onClick={executeGetPermissionsAction}>Execute Read Permissions</button>
-      <button className='btn btn-xs' onClick={addPermittedActionIpfsCid}>Add permitted action</button>
-      <button className='btn btn-xs' onClick={executeGetPermissionsIpfs}>Execute IPFS Action</button>
-      <button className='btn btn-xs' onClick={testSignature}>Test Signature</button>
-      <button className='btn btn-xs' onClick={transferErc20}>Transfer ERc20</button>
+      <button className="btn btn-xs" onClick={executeLitAction1}>
+        Execute Action1
+      </button>
+      <button className="btn btn-xs" onClick={checkPermissions}>
+        Check Permissions
+      </button>
+      <button className="btn btn-xs" onClick={addPermittedAddress}>
+        Add Permitted Address
+      </button>
+      <button className="btn btn-xs" onClick={executeLitAction2}>
+        Execute Action2
+      </button>
+      <button className="btn btn-xs" onClick={executeGetPermissionsAction}>
+        Execute Read Permissions
+      </button>
+      <button className="btn btn-xs" onClick={addPermittedActionIpfsCid}>
+        Add permitted action
+      </button>
+      <button className="btn btn-xs" onClick={executeGetPermissionsIpfs}>
+        Execute IPFS Action
+      </button>
+      <button className="btn btn-xs" onClick={testSignature}>
+        Test Signature
+      </button>
+      <button className="btn btn-xs" onClick={transferErc20}>
+        Transfer ERc20
+      </button>
       <hr />
       <br />
     </div>
