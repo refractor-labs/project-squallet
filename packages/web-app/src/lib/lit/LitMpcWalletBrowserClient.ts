@@ -15,14 +15,24 @@ export class LitMpcWalletBrowserClient implements LitMpcWallet {
   }
 
   async sendRequest(request: WalletRequests): Promise<WalletResponse> {
+    const cid = window.localStorage.getItem('multisig-cid')
+    if (!cid) {
+      throw new Error('multisig-cid not found in local storage, upload it first')
+    }
+    console.log('multisig-cid', cid)
+
     const litContracts = new LitContracts()
     await litContracts.connect()
+    console.log('connected lit contract client')
     const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' })
+    console.log('initialized lit client')
     await litNodeClient.connect()
+    console.log('connected lit client')
     // get authentication signature to deploy call the action
     var authSig = await LitJsSdk.checkAndSignAuthMessage({
       chain: 'mumbai'
     })
+    console.log('created auth sig', authSig)
 
     const sigName = 'sig1'
     const jsParams = {
@@ -31,10 +41,12 @@ export class LitMpcWalletBrowserClient implements LitMpcWallet {
       sigName: sigName
     }
     console.log('jsParams', jsParams)
+
     // this does both deployment action calling in the same code
     // need to break it down to upload to ipfs separately
     const resp = await litNodeClient.executeJs({
-      code: litActions.multisig,
+      // code: litActions.multisig,
+      ipfsId: cid,
       authSig,
       // all jsParams can be used anywhere in your litActionCode
       jsParams

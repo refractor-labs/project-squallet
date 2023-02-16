@@ -140,13 +140,15 @@ function Sign() {
     console.log('permittedAddresses', permittedAddresses)
   }
 
-  const addPermittedActionIpfsCid = async () => {
+  const addPermittedActionIpfsCidMultisig = async () => {
     const litContracts = new LitContracts()
     await litContracts.connect()
+    const { cid } = await ipfs.add(litActions.multisig)
+    console.log('uploaded multisig action to ipfs', cid.toString())
+    window.localStorage.setItem('multisig-cid', cid.toString())
     const permittedAction = await litContracts.pkpPermissionsContractUtil.write.addPermittedAction(
       pkpId,
-      // 'QmcJVc1jx1R2M6fedwASWQ53HKY6YddjEE4ZegNWrB9o8M'
-      'Qmcv4U9ZmSRddTpY9iz381W5kDWFM5RGB93DTt4aVWceab'
+      cid.toString()
     )
     console.log('permittedAction', permittedAction)
   }
@@ -387,8 +389,8 @@ function Sign() {
       <button className="btn btn-xs" onClick={executeGetPermissionsAction}>
         Execute Read Permissions
       </button>
-      <button className="btn btn-xs" onClick={addPermittedActionIpfsCid}>
-        Add permitted action
+      <button className="btn btn-xs" onClick={addPermittedActionIpfsCidMultisig}>
+        Add Multisig action
       </button>
       <button className="btn btn-xs" onClick={executeGetPermissionsIpfs}>
         Execute IPFS Action

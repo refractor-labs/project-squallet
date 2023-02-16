@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, useEffect } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
@@ -23,6 +23,21 @@ function classNames(...classes: string[]) {
 }
 type Props = { children: React.ReactNode; title: string }
 export default function DashboardLayout({ children, title }: Props) {
+  useEffect(() => {
+    const c = () => {
+      const elem = document.getElementById('lit-connect-modal')
+      if (elem) {
+        if (elem.classList.contains('is-open')) {
+          elem.classList.add('modal-open')
+        } else if (elem.classList.contains('modal-open')) {
+          elem.classList.remove('modal-open')
+        }
+      }
+    }
+    const interval = setInterval(c, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <>
       {/*

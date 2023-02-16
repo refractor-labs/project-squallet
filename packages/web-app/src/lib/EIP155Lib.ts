@@ -61,7 +61,7 @@ export class EIP155PkpLib implements IEIP155Lib {
       new TxService(wallet.pkpAddress, eoaSigner, staticTransactionServiceStore),
       litClient
     )
-    console.log('EIP155PkpLib', out)
+    console.log('EIP155PkpLib is', out)
     return out
   }
 
@@ -70,7 +70,7 @@ export class EIP155PkpLib implements IEIP155Lib {
   }
 
   signMessage(message: string) {
-    //todo
+    // todo
     return this.wallet.signMessage(message)
   }
 
