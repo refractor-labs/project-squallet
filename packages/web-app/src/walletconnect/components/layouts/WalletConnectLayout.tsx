@@ -25,7 +25,7 @@ export const WalletConnectLayout = ({ children }: { children: React.ReactNode })
   // Backwards compatibility only - create a legacy v1 SignClient instance.
   createLegacySignClient()
   return (
-    <NextUIProvider theme={createTheme({ type: 'dark' })}>
+    <>
       <>
         <button onClick={() => connect()}>Connect</button>
         <button onClick={() => disconnect()}>Disconnect</button>
@@ -35,6 +35,6 @@ export const WalletConnectLayout = ({ children }: { children: React.ReactNode })
       </Layout>
 
       <Modal />
-    </NextUIProvider>
+    </>
   )
 }

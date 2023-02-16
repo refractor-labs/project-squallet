@@ -6,6 +6,8 @@ import PKP from '@/components/pkp'
 import LitAction from '@/components/lit-action'
 import { useLocalStorage } from 'usehooks-ts'
 import Fund from '@/components/fund'
+import { WalletConnectLayout } from '@/walletconnect/components/layouts/WalletConnectLayout'
+import WalletConnectPage from './walletconnect'
 
 export default function Home() {
   const [publicKey] = useLocalStorage('publicKey', '')
@@ -37,7 +39,9 @@ export default function Home() {
           {publicKey && (
             <div className="lg:col-span-3 card bg-base-100 w-full max-w-full shadow-xl border break-all">
               <div className="card-body">
-                <Sign />
+                <WalletConnectLayout>
+                  <WalletConnectPage />
+                </WalletConnectLayout>
               </div>
             </div>
           )}
