@@ -1,10 +1,12 @@
+import { usePkpAddress, usePkpId, usePublicKey } from '@/utils/localstorage'
 import { LitContracts } from '@lit-protocol/contracts-sdk'
 import { ethers } from 'ethers'
 import { useCallback, useEffect, useState } from 'react'
-import { useLocalStorage } from 'usehooks-ts'
 
 export default function Fund() {
-  const [address] = useLocalStorage('address', '')
+  const [publicKey] = usePublicKey()
+  const [address] = usePkpAddress()
+  const [pkpId] = usePkpId()
   const [loading, setLoading] = useState(false)
   const [balance, setBalance] = useState('0')
 
@@ -51,6 +53,12 @@ export default function Fund() {
 
   return (
     <div className="break-all text-xs space-y-6">
+      <h2 className="font-bold">Public key</h2>
+      <code>{publicKey}</code>
+      <h2 className="font-bold">PKP Address</h2>
+      <code>{address}</code>
+      <h2 className="font-bold">PKP ID</h2>
+      <code>{pkpId}</code>
       <h2 className="font-bold">Balance</h2>
       <code>{balance} MATIC</code>
       <div className="card-actions justify-end">

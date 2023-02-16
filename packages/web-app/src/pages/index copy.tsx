@@ -20,10 +20,31 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <div className="card bg-base-100 w-full max-w-full shadow-xl border break-all divide-y gap-6">
-          <div className="card-body">
-            <PKP />
+        <div className="grid lg:grid-cols-5 gap-4">
+          <div className="lg:col-span-2 card bg-base-100 w-full max-w-full shadow-xl border break-all divide-y gap-6">
+            <div className="card-body">
+              <PKP />
+            </div>
+            {publicKey && (
+              <div className="card-body">
+                <Fund />
+              </div>
+            )}
+            {publicKey && (
+              <div className="card-body">
+                <LitAction onUpload={() => {}} />
+              </div>
+            )}
           </div>
+          {publicKey && (
+            <div className="lg:col-span-3 card bg-base-100 w-full max-w-full shadow-xl border break-all">
+              <div className="card-body">
+                <WalletConnectLayout>
+                  <WalletConnectPage />
+                </WalletConnectLayout>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </>

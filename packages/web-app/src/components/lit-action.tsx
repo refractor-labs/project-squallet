@@ -24,7 +24,7 @@ const go = async () => {
 go();`
 
 const fromHexString = (hexString: string) =>
-  Uint8Array.from((hexString.match(/.{1,2}/g) as any).map((byte: string) => parseInt(byte, 16)));
+  Uint8Array.from((hexString.match(/.{1,2}/g) as any).map((byte: string) => parseInt(byte, 16)))
 
 const hexToString = (hex: string): string => {
   const hashStr = base58.encode(fromHexString(hex.slice(2)))
@@ -40,22 +40,22 @@ export default function LitAction({ onUpload }: Props) {
   const [pkpId] = usePkpId()
   const [address] = usePkpAddress()
   const [owner, setOwner] = useState('')
-  const [actions, setActions] = useState<string[]>([]);
+  const [actions, setActions] = useState<string[]>([])
 
   useEffect(() => {
     const c = () => {
-      const elem = document.getElementById('lit-connect-modal');
+      const elem = document.getElementById('lit-connect-modal')
       if (elem) {
         if (elem.classList.contains('is-open')) {
-          elem.classList.add('modal-open');
-        } else if (elem.classList.contains('modal-open')) { 
-          elem.classList.remove('modal-open');
+          elem.classList.add('modal-open')
+        } else if (elem.classList.contains('modal-open')) {
+          elem.classList.remove('modal-open')
         }
       }
     }
-    const interval = setInterval(c, 1000);
-    return () => clearInterval(interval);
-  }, []);
+    const interval = setInterval(c, 1000)
+    return () => clearInterval(interval)
+  }, [])
 
   const readPkpData = useCallback(async () => {
     const litContracts = new LitContracts()
@@ -64,15 +64,17 @@ export default function LitAction({ onUpload }: Props) {
     const owner = await litContracts.pkpNftContract.read.ownerOf(pkpId)
     setOwner(owner)
 
-    const actions = await litContracts.pkpPermissionsContractUtil.read.getPermittedActions(pkpId);
-    setActions(actions);
-  }, [pkpId]);
+    const actions = await litContracts.pkpPermissionsContractUtil.read.getPermittedActions(pkpId)
+    setActions(actions)
+  }, [pkpId])
 
-  useEffect(() => { readPkpData() }, [readPkpData])
+  useEffect(() => {
+    readPkpData()
+  }, [readPkpData])
 
-  const onClickDelete =async (bytes: Uint8Array) => {
+  const onClickDelete = async (bytes: Uint8Array) => {
     if (!actions?.length || actions.length === 1) {
-      alert("Please do not delete the only action left");
+      alert('Please do not delete the only action left')
       return
     }
     if (!confirm('Are you sure you want to delete this action?')) {
@@ -84,25 +86,25 @@ export default function LitAction({ onUpload }: Props) {
     await litNodeClient.connect()
     const { chainId } = await litContracts.provider.getNetwork()
 
-    const params = [
-      pkpId,
-      bytes,
-      [],
-    ];
+    const params = [pkpId, bytes, []]
 
-    const estimation = await litContracts.pkpPermissionsContract.write.connect(address).estimateGas.removePermittedAction(...params)
+    const estimation = await litContracts.pkpPermissionsContract.write
+      .connect(address)
+      .estimateGas.removePermittedAction(...params)
     const feeData = await litContracts.provider.getFeeData()
     const nonce = await litContracts.provider.getTransactionCount(address)
-    const tx = await litContracts.pkpPermissionsContract.write.connect(address).populateTransaction.removePermittedAction(...params);
+    const tx = await litContracts.pkpPermissionsContract.write
+      .connect(address)
+      .populateTransaction.removePermittedAction(...params)
     tx.type = 2
-    tx.nonce = nonce;
+    tx.nonce = nonce
     tx.chainId = chainId
     tx.maxFeePerGas = feeData.maxFeePerGas.toHexString()
     tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString()
     tx.gasLimit = estimation.toHexString()
 
     // get authentication signature to deploy call the action
-    var authSig = await (LitJsSdk as any).checkAndSignAuthMessage({chain: 'mumbai'})
+    var authSig = await (LitJsSdk as any).checkAndSignAuthMessage({ chain: 'mumbai' })
 
     // this does both deployment action calling in the same code
     // need to break it down to upload to ipfs separately
@@ -116,13 +118,13 @@ export default function LitAction({ onUpload }: Props) {
         sigName: 'sig1'
       }
     })
-    console.log(resp);
+    console.log(resp)
     const serialized2 = ethers.utils.serializeTransaction(tx, resp.signatures.sig1.signature)
     console.log(serialized2)
     const sent = await litContracts.provider.sendTransaction(serialized2)
     console.log(sent)
     console.log(await sent.wait())
-    await readPkpData();
+    await readPkpData()
   }
   const onClickCreate = async () => {
     if (!signers) {
@@ -137,30 +139,30 @@ export default function LitAction({ onUpload }: Props) {
       await litNodeClient.connect()
 
       const ipfsResp = await ipfs.add(getCode(signers.split('\n')))
-      const newCid = ipfsResp.cid;
+      const newCid = ipfsResp.cid
       const signer = await litContracts.signer.getAddress()
       const { chainId } = await litContracts.provider.getNetwork()
       if (owner === address) {
-        const params = [
-          pkpId,
-          newCid.bytes,
-          [],
-        ];
+        const params = [pkpId, newCid.bytes, []]
         console.log(newCid)
 
-        const estimation = await litContracts.pkpPermissionsContract.write.connect(address).estimateGas.addPermittedAction(...params)
+        const estimation = await litContracts.pkpPermissionsContract.write
+          .connect(address)
+          .estimateGas.addPermittedAction(...params)
         const feeData = await litContracts.provider.getFeeData()
         const nonce = await litContracts.provider.getTransactionCount(address)
-        const tx = await litContracts.pkpPermissionsContract.write.connect(address).populateTransaction.addPermittedAction(...params);
+        const tx = await litContracts.pkpPermissionsContract.write
+          .connect(address)
+          .populateTransaction.addPermittedAction(...params)
         tx.type = 2
-        tx.nonce = nonce;
+        tx.nonce = nonce
         tx.chainId = chainId
         tx.maxFeePerGas = feeData.maxFeePerGas.toHexString()
         tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString()
         tx.gasLimit = estimation.toHexString()
 
         // get authentication signature to deploy call the action
-        var authSig = await (LitJsSdk as any).checkAndSignAuthMessage({chain: 'mumbai'})
+        var authSig = await (LitJsSdk as any).checkAndSignAuthMessage({ chain: 'mumbai' })
 
         // this does both deployment action calling in the same code
         // need to break it down to upload to ipfs separately
@@ -174,7 +176,7 @@ export default function LitAction({ onUpload }: Props) {
             sigName: 'sig1'
           }
         })
-        console.log(resp);
+        console.log(resp)
         const serialized2 = ethers.utils.serializeTransaction(tx, resp.signatures.sig1.signature)
         console.log(serialized2)
         const sent = await litContracts.provider.sendTransaction(serialized2)
@@ -190,11 +192,11 @@ export default function LitAction({ onUpload }: Props) {
           address,
           pkpId
         )
-        await transferTx.wait();
+        await transferTx.wait()
         const owner = await litContracts.pkpNftContract.read.ownerOf(pkpId)
         setOwner(owner)
       }
-      await readPkpData();
+      await readPkpData()
     } catch (err) {
       console.log(err)
     }
@@ -210,24 +212,30 @@ export default function LitAction({ onUpload }: Props) {
       <span>{owner}</span>
       <span className="badge badge-sm font-xs ml-3">{owner === address ? 'PKP' : 'Non-PKP'} </span>
       <h3 className="font-bold">Approved Actions:</h3>
-      <span className='space-y-3'>
-        {
-          actions?.map(a => {
-            const id = hexToString(a)
-            return (
-              <p key={a} className="space-x-2">
-                <a href={`https://ipfs.stibits.com/${id}`} className="underline" target="_blank">
-                  {id}
-                </a>
-                <button onClick={() => onClickDelete(fromHexString(a))} className='btn btn-xs btn-ghost text-xs'>x</button>
-              </p>
-            )
-          })
-        } 
+      <span className="space-y-3">
+        {actions?.map(a => {
+          const id = hexToString(a)
+          return (
+            <p key={a} className="space-x-2">
+              <a href={`https://ipfs.stibits.com/${id}`} className="underline" target="_blank">
+                {id}
+              </a>
+              <button
+                onClick={() => onClickDelete(fromHexString(a))}
+                className="btn btn-xs btn-ghost text-xs"
+              >
+                x
+              </button>
+            </p>
+          )
+        })}
       </span>
       <h3 className="font-bold">Approved Signers (one per line):</h3>
       <span>
-        <textarea className="w-full textarea textarea-bordered mt-2" onChange={e => setSigners(e.target.value)}>
+        <textarea
+          className="w-full textarea textarea-bordered mt-2"
+          onChange={e => setSigners(e.target.value)}
+        >
           {signers}
         </textarea>
       </span>
