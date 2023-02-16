@@ -4,6 +4,8 @@ import { createSignClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSnapshot } from 'valtio'
 import { Signer } from 'ethers'
+import { useLocalStorage } from 'usehooks-ts'
+import { usePkpAddress, usePkpId, usePublicKey } from '@/utils/localstorage'
 
 export default function useInitialization(signer: Signer | undefined) {
   const [initialized, setInitialized] = useState(false)
@@ -11,12 +13,21 @@ export default function useInitialization(signer: Signer | undefined) {
 
   const { relayerRegionURL } = useSnapshot(SettingsStore.state)
 
+  const [publicKey, setPublicKey] = usePublicKey()
+  const [pkpId, setPkpId] = usePkpId()
+  const [pkpAddress, setAddress] = usePkpAddress()
+
   const onInitialize = useCallback(async () => {
     try {
-      if (!signer) {
+      if (!signer || !publicKey || !pkpId || !pkpAddress) {
+        console.log('missing signer or pkp env vars')
         return
       }
-      const { eip155Addresses } = await restorePkpWallet(signer)
+      const { eip155Addresses } = await restorePkpWallet(signer, {
+        publicKey,
+        pkpId,
+        pkpAddress
+      })
 
       SettingsStore.setEIP155Address(eip155Addresses[0])
 

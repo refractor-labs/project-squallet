@@ -21,7 +21,7 @@ export class TxService implements TransactionServiceI {
     this.store = store
   }
   async submitTransaction(transaction: UnsignedMpcTransaction) {
-    const out = this.store.save({
+    const out = await this.store.save({
       walletAddress: this.mpcWalletAddress,
       transaction
     })
@@ -34,7 +34,7 @@ export class TxService implements TransactionServiceI {
     const txHash = hashUnsignedTransaction(transaction)
     const signature = await this.signer.signMessage(txHash)
     console.log('signTransaction', txHash, signature)
-    this.store.storeSignature(
+    await this.store.storeSignature(
       this.mpcWalletAddress,
       transaction,
       await this.signer.getAddress(),

@@ -82,7 +82,7 @@ export class TransactionServiceStoreDb implements TransactionServiceStoreI {
     transaction: UnsignedMpcTransaction
     signatures?: { signerAddress: string; signature: string }[]
   }) {
-    const res = await fetch(this.baseUrl(), {
+    const res = await fetch(this.baseUrl() + '/transactions', {
       method: 'POST',
       body: JSON.stringify({
         address: tx.walletAddress,
@@ -107,7 +107,7 @@ export class TransactionServiceStoreDb implements TransactionServiceStoreI {
     hash: string,
     signature: string
   ): Promise<TransactionModel> {
-    const res = await fetch(this.baseUrl(), {
+    const res = await fetch(this.baseUrl() + '/transactions/' + hash + '/sign', {
       method: 'PUT',
       body: JSON.stringify({
         address: walletAddress,
@@ -127,12 +127,12 @@ export class TransactionServiceStoreDb implements TransactionServiceStoreI {
   }
 
   private baseUrl() {
-    const origin =
-      typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
-    return origin + '/api/transactions'
+    const origin = process.env.NEXT_PUBLIC_TRANSACTION_API_URL
+    console.log('origin', origin)
+    return origin
   }
   async getTransaction(walletAddress: string, hash: string): Promise<TransactionModel | null> {
-    const res = await fetch(this.baseUrl() + '?signerHash=' + hash)
+    const res = await fetch(this.baseUrl() + '/transactions/' + hash)
     const json = (await res.json()) as { data: (Transaction & { signatures: Signature[] }) | null }
     if (!json.data) {
       return null
@@ -154,10 +154,7 @@ export class TransactionServiceStoreDb implements TransactionServiceStoreI {
   }
 
   async getTransactions(walletAddress: string): Promise<TransactionModel[]> {
-    const origin =
-      typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
-
-    const res = await fetch(this.baseUrl() + '?address=' + walletAddress)
+    const res = await fetch(this.baseUrl() + '/transactions?address=' + walletAddress)
     console.log('res', res)
     console.log(res.headers.get('Content-Type'))
     // const body = await res.text()
