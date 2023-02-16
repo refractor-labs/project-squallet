@@ -1,6 +1,7 @@
 import { EIP155PkpLib, IEIP155Lib } from '@/lib/EIP155Lib'
 import { Signer } from 'ethers'
 import { LitWalletData } from '@/lib/lit/LitMpcWallet'
+import { useLocalStorage } from 'usehooks-ts'
 
 export let wallet1: IEIP155Lib
 export let wallet2: IEIP155Lib
@@ -13,10 +14,13 @@ let address1: string
  * Utilities
  */
 
-export async function restorePkpWallet(eoaSigner: Signer) {
-  const pkpAddress = process.env.NEXT_PUBLIC_PKP_ADDRESS
-  const publicKey = process.env.NEXT_PUBLIC_PKP_PUBLICKEY
-  const pkpId = process.env.NEXT_PUBLIC_PKP_TOKENID
+export async function restorePkpWallet(
+  eoaSigner: Signer,
+  { publicKey, pkpId, pkpAddress }: { publicKey: string; pkpId: string; pkpAddress: string }
+) {
+  // const pkpAddress = window.localStorage.getItem('address')
+  // const publicKey = window.localStorage.getItem('publicKey')
+  // const pkpId = window.localStorage.getItem('pkpId')
   if (!pkpAddress || !publicKey || !pkpId) throw new Error('Missing PKP env vars')
   const wallet: LitWalletData = {
     pkpAddress,

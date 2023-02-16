@@ -2,13 +2,15 @@ import { LitContracts } from '@lit-protocol/contracts-sdk'
 import { ethers } from 'ethers'
 import { useState } from 'react'
 import { useLocalStorage } from 'usehooks-ts'
+import { usePkpAddress, usePkpId, usePublicKey } from '@/utils/localstorage'
 
 function PKP() {
-  const [publicKey, setPublicKey] = useLocalStorage('publicKey', '')
-  const [pkpId, setPkpId] = useLocalStorage('pkpId', '')
-  const [address, setAddress] = useLocalStorage('address', '')
   const [loading, setLoading] = useState(false)
   const [_, setCid] = useLocalStorage('cid', '')
+
+  const [publicKey, setPublicKey] = usePublicKey()
+  const [pkpId, setPkpId] = usePkpId()
+  const [address, setAddress] = usePkpAddress()
 
   const mintPkp = async () => {
     try {

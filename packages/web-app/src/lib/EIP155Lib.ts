@@ -107,8 +107,9 @@ export class EIP155PkpLib implements IEIP155Lib {
     const submitted = await this.transactionService.submitTransaction(tx)
     console.log('submitted', submitted)
     await this.transactionService.signTransaction(submitted.transaction)
+    console.log('signed transaction!')
     const hash = submitted.hash
-    let foundTransaction: TransactionModel | undefined = undefined
+    let foundTransaction: TransactionModel | null = null
     while (true) {
       foundTransaction = await this.transactionService.getTransaction(hash)
       if (foundTransaction && foundTransaction.signatures.length > 0) {
@@ -118,9 +119,11 @@ export class EIP155PkpLib implements IEIP155Lib {
         this.abortFlag = false
         throw new Error('Transaction aborted')
       }
+      console.log('waiting for transaction', hash)
       await new Promise(resolve => setTimeout(resolve, 500))
     }
     if (foundTransaction) {
+      console.log('found transaction', foundTransaction, 'sending lit request')
       //todo get the final transaction with all the gas values stored on it.
       //for now just use the Wallet conenct transaction
       const res = await this.litClient.sendRequest({

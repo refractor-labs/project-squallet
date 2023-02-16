@@ -2,6 +2,7 @@ import { ipfs } from '@/utils/ipfs'
 import { LitContracts } from '@lit-protocol/contracts-sdk'
 import { useEffect, useState } from 'react'
 import { useLocalStorage } from 'usehooks-ts'
+import { usePkpAddress, usePkpId, usePublicKey } from '@/utils/localstorage'
 
 const defaultCode = `
 const go = async () => {  
@@ -21,8 +22,8 @@ export default function LitAction({ onUpload }: Props) {
   const [code, setCode] = useState(defaultCode)
   const [loading, setLoading] = useState(false)
   const [signers, setSigners] = useState<string>()
-  const [pkpId] = useLocalStorage('pkpId', '')
-  const [address] = useLocalStorage('address', '')
+  const [pkpId] = usePkpId()
+  const [address] = usePkpAddress()
   const [owner, setOwner] = useState('')
 
   useEffect(() => {
@@ -80,7 +81,7 @@ export default function LitAction({ onUpload }: Props) {
       <h3 className="font-bold">Approved Action:</h3>
       <span>
         {cid ? (
-          <a href={`https://explore.ipld.io/#/explore/${cid}`} target="_blank">
+          <a href={`https://explore.ipld.io/#/explore/${cid}`} target="_blank" rel="noreferrer">
             {cid}
           </a>
         ) : (
