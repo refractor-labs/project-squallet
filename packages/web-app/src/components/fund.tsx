@@ -33,7 +33,7 @@ export default function Fund() {
       console.log('Sending gas to PKP')
       const gasTx = await litContracts.signer.sendTransaction({
         to: address,
-        value: '1000000000000000'
+        value: '10000000000000000'
       })
       console.log(await gasTx.wait())
       console.log(`Gas sent to ${address}`)
@@ -55,7 +55,7 @@ export default function Fund() {
       <code>{balance} MATIC</code>
       <div className="card-actions justify-end">
         <button className={`btn btn-sm ${loading ? 'loading' : ''}`} onClick={fund}>
-          Fund PKP (0.001 MATIC)
+          Fund PKP (0.01 MATIC)
         </button>
       </div>
     </div>
