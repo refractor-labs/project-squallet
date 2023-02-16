@@ -10,6 +10,7 @@ export default function Document() {
           type="text/css"
         />
         <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.js"></script>
       </Head>
       <body>
         <Main />
