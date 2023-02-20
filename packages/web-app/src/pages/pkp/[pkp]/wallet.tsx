@@ -6,7 +6,6 @@ import SettingsStore from '@/walletconnect/store/SettingsStore'
 import { Text } from '@nextui-org/react'
 import { Fragment, ReactElement } from 'react'
 import { useSnapshot } from 'valtio'
-import { WalletConnectLayout } from '@/walletconnect/components/layouts/WalletConnectLayout'
 
 export default function WalletPage() {
   const { testNets, eip155Address } = useSnapshot(SettingsStore.state)
@@ -35,8 +34,4 @@ export default function WalletPage() {
       ) : null}
     </Fragment>
   )
-}
-
-WalletPage.getLayout = function getLayout(page: ReactElement) {
-  return <WalletConnectLayout>{page}</WalletConnectLayout>
 }

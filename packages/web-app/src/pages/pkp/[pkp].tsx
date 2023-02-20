@@ -1,14 +1,16 @@
 // @flow
 import { parseUri } from '@walletconnect/utils'
 import * as React from 'react'
-import { Fragment, ReactElement, useState } from 'react'
+import { Fragment, useState } from 'react'
 import { createLegacySignClient } from '@/walletconnect/utils/LegacyWalletConnectUtil'
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Input, Loading, Text } from '@nextui-org/react'
-import { WalletConnectLayout } from '@/walletconnect/components/layouts/WalletConnectLayout'
+import Fund from '@/components/fund'
+import LitAction from '@/components/lit-action'
+
 export default function WalletConnectPage() {
   const [uri, setUri] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false)  
   async function onConnect(uri: string) {
     try {
       setLoading(true)
@@ -19,6 +21,8 @@ export default function WalletConnectPage() {
         createLegacySignClient({ uri })
       } else {
         await signClient.pair({ uri })
+        await signClient.session.init();
+        console.log(signClient)
       }
     } catch (err: unknown) {
       alert(err)
@@ -29,7 +33,9 @@ export default function WalletConnectPage() {
   }
 
   return (
-    <Fragment>
+    <div className='divide-y space-y-10'>
+      <Fund />
+      <LitAction />
       <Text size={13} css={{ textAlign: 'center', marginTop: '$10', marginBottom: '$10' }}>
         use walletconnect uri
       </Text>
@@ -53,9 +59,6 @@ export default function WalletConnectPage() {
           </Button>
         }
       />
-    </Fragment>
+    </div>
   )
-}
-WalletConnectPage.getLayout = function getLayout(page: ReactElement) {
-  return <WalletConnectLayout>{page}</WalletConnectLayout>
 }

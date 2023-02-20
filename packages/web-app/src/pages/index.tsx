@@ -1,14 +1,7 @@
 import Head from 'next/head'
-import Sign from '@/components/sign'
-import { ReactElement } from 'react'
-import DashboardLayout from '@/components/layouts/Dashboard'
 import PKP from '@/components/pkp'
-import LitAction from '@/components/lit-action'
-import { useLocalStorage } from 'usehooks-ts'
-import Fund from '@/components/fund'
 
 export default function Home() {
-  const [publicKey] = useLocalStorage('publicKey', '')
   return (
     <>
       <Head>
@@ -18,35 +11,12 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <div className="grid lg:grid-cols-5 gap-4">
-          <div className="lg:col-span-2 card bg-base-100 w-full max-w-full shadow-xl border break-all divide-y gap-6">
-            <div className="card-body">
-              <PKP />
-            </div>
-            {publicKey && (
-              <div className="card-body">
-                <Fund />
-              </div>
-            )}
-            {publicKey && (
-              <div className="card-body">
-                <LitAction onUpload={() => {}} />
-              </div>
-            )}
+        <div className="card bg-base-100 w-full max-w-full shadow-xl border break-all divide-y gap-6">
+          <div className="card-body">
+            <PKP />
           </div>
-          {publicKey && (
-            <div className="lg:col-span-3 card bg-base-100 w-full max-w-full shadow-xl border break-all">
-              <div className="card-body">
-                <Sign />
-              </div>
-            </div>
-          )}
         </div>
       </main>
     </>
   )
-}
-
-Home.getLayout = function getLayout(page: ReactElement) {
-  return <DashboardLayout title="Home">{page}</DashboardLayout>
 }

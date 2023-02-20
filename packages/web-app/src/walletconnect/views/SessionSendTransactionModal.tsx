@@ -1,3 +1,4 @@
+import { WalletContext } from '@/contexts/wallet'
 import ProjectInfoCard from '@/walletconnect/components/ProjectInfoCard'
 import RequestDataCard from '@/walletconnect/components/RequestDataCard'
 import RequesDetailsCard from '@/walletconnect/components/RequestDetalilsCard'
@@ -10,10 +11,13 @@ import {
 } from '@/walletconnect/utils/EIP155RequestHandlerUtil'
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Divider, Loading, Modal, Text } from '@nextui-org/react'
-import { Fragment, useState } from 'react'
+import { Fragment, useContext, useState } from 'react'
 
 export default function SessionSendTransactionModal() {
   const [loading, setLoading] = useState(false)
+  const {
+    actions
+  } = useContext(WalletContext);
 
   // Get request and wallet data from store
   const requestEvent = ModalStore.state.data?.requestEvent

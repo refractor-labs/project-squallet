@@ -5,9 +5,7 @@ import { eip155Wallets } from '@/walletconnect/utils/EIP155WalletUtil'
 import { Card, Divider, Row, Switch, Text } from '@nextui-org/react'
 import { Fragment, ReactElement } from 'react'
 import { useSnapshot } from 'valtio'
-import packageJSON from '../../package.json'
-import { WalletConnectLayout } from '@/walletconnect/components/layouts/WalletConnectLayout'
-import PairingsPage from '@/pages/pairings'
+import packageJSON from '../../../../package.json'
 
 export default function SettingsPage() {
   const { testNets, eip155Address, cosmosAddress, solanaAddress, elrondAddress, tronAddress } =
@@ -71,7 +69,4 @@ export default function SettingsPage() {
       {/*</Card>*/}
     </Fragment>
   )
-}
-SettingsPage.getLayout = function getLayout(page: ReactElement) {
-  return <WalletConnectLayout>{page}</WalletConnectLayout>
 }

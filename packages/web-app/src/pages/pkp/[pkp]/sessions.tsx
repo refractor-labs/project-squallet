@@ -5,9 +5,7 @@ import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Divider, Loading, Row, Text } from '@nextui-org/react'
 import { getSdkError } from '@walletconnect/utils'
 import { useRouter } from 'next/router'
-import { Fragment, ReactElement, useEffect, useState } from 'react'
-import { WalletConnectLayout } from '@/walletconnect/components/layouts/WalletConnectLayout'
-import PairingsPage from '@/pages/pairings'
+import { Fragment, useEffect, useState } from 'react'
 
 /**
  * Component
@@ -169,7 +167,4 @@ export default function SessionPage() {
       </Row>
     </Fragment>
   )
-}
-SessionPage.getLayout = function getLayout(page: ReactElement) {
-  return <WalletConnectLayout>{page}</WalletConnectLayout>
 }
