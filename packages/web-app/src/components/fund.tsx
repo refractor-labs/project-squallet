@@ -1,17 +1,21 @@
-import { usePkpAddress, usePkpId, usePublicKey } from '@/utils/localstorage'
-import { LitContracts } from '@lit-protocol/contracts-sdk'
+import { WalletContext } from '@/contexts/wallet';
 import { ethers } from 'ethers'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 
 export default function Fund() {
-  const [publicKey] = usePublicKey()
-  const [address] = usePkpAddress()
-  const [pkpId] = usePkpId()
+  const {
+    publicKey,
+    address,
+    pkp,
+    litContracts,
+  } = useContext(WalletContext);
   const [loading, setLoading] = useState(false)
   const [balance, setBalance] = useState('0')
 
   const updateBalance = useCallback(async () => {
-    const litContracts = new LitContracts()
+    if (!address) {
+      return
+    }
     await litContracts.connect()
     try {
       const balance = await litContracts.provider.getBalance(address)
@@ -29,7 +33,6 @@ export default function Fund() {
     try {
       setLoading(true)
       // initialization
-      const litContracts = new LitContracts()
       await litContracts.connect()
 
       console.log('Sending gas to PKP')
@@ -58,7 +61,7 @@ export default function Fund() {
       <h2 className="font-bold">PKP Address</h2>
       <code>{address}</code>
       <h2 className="font-bold">PKP ID</h2>
-      <code>{pkpId}</code>
+      <code>{pkp}</code>
       <h2 className="font-bold">Balance</h2>
       <code>{balance} MATIC</code>
       <div className="card-actions justify-end">

@@ -1,16 +1,7 @@
 import Head from 'next/head'
-import Sign from '@/components/sign'
-import { ReactElement } from 'react'
-import DashboardLayout from '@/components/layouts/Dashboard'
 import PKP from '@/components/pkp'
-import LitAction from '@/components/lit-action'
-import { useLocalStorage } from 'usehooks-ts'
-import Fund from '@/components/fund'
-import { WalletConnectLayout } from '@/walletconnect/components/layouts/WalletConnectLayout'
-import WalletConnectPage from './walletconnect'
 
 export default function Home() {
-  const [publicKey] = useLocalStorage('publicKey', '')
   return (
     <>
       <Head>
@@ -28,8 +19,4 @@ export default function Home() {
       </main>
     </>
   )
-}
-
-Home.getLayout = function getLayout(page: ReactElement) {
-  return <DashboardLayout title="Home">{page}</DashboardLayout>
 }

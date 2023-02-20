@@ -1,10 +1,9 @@
 import { ipfs } from '@/utils/ipfs'
-import { LitContracts } from '@lit-protocol/contracts-sdk'
-import { useCallback, useEffect, useState } from 'react'
-import { usePkpAddress, usePkpId, usePublicKey } from '@/utils/localstorage'
+import { useContext, useState } from 'react'
 import { ethers } from 'ethers'
 import LitJsSdk from 'lit-js-sdk'
 import base58 from 'bs58'
+import { WalletContext } from '@/contexts/wallet'
 
 const getCode = (signers: string[]) => `
 const go = async () => {  
@@ -30,49 +29,21 @@ const hexToString = (hex: string): string => {
   const hashStr = base58.encode(fromHexString(hex.slice(2)))
   return hashStr
 }
-type Props = {
-  onUpload: (cid: string) => void
-}
-export default function LitAction({ onUpload }: Props) {
-  const [publicKey] = usePublicKey()
+export default function LitAction() {
+  const {
+    publicKey,
+    address,
+    pkp,
+    owner,
+    actions,
+    chainId,
+    litContracts,
+    litNodeClient,
+  } = useContext(WalletContext);
   const [loading, setLoading] = useState(false)
   const [signers, setSigners] = useState<string>()
-  const [pkpId] = usePkpId()
-  const [address] = usePkpAddress()
-  const [owner, setOwner] = useState('')
-  const [actions, setActions] = useState<string[]>([])
 
-  useEffect(() => {
-    const c = () => {
-      const elem = document.getElementById('lit-connect-modal')
-      if (elem) {
-        if (elem.classList.contains('is-open')) {
-          elem.classList.add('modal-open')
-        } else if (elem.classList.contains('modal-open')) {
-          elem.classList.remove('modal-open')
-        }
-      }
-    }
-    const interval = setInterval(c, 1000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const readPkpData = useCallback(async () => {
-    const litContracts = new LitContracts()
-    await litContracts.connect()
-
-    const owner = await litContracts.pkpNftContract.read.ownerOf(pkpId)
-    setOwner(owner)
-
-    const actions = await litContracts.pkpPermissionsContractUtil.read.getPermittedActions(pkpId)
-    setActions(actions)
-  }, [pkpId])
-
-  useEffect(() => {
-    readPkpData()
-  }, [readPkpData])
-
-  const onClickDelete = async (bytes: Uint8Array) => {
+  const onClickDelete = async (id: string) => {
     if (!actions?.length || actions.length === 1) {
       alert('Please do not delete the only action left')
       return
@@ -80,13 +51,10 @@ export default function LitAction({ onUpload }: Props) {
     if (!confirm('Are you sure you want to delete this action?')) {
       return
     }
-    const litContracts = new LitContracts()
     await litContracts.connect()
-    const litNodeClient = new (LitJsSdk as any).LitNodeClient({ litNetwork: 'serrano' })
     await litNodeClient.connect()
-    const { chainId } = await litContracts.provider.getNetwork()
 
-    const params = [pkpId, bytes, []]
+    const params = [pkp, id, []]
 
     const estimation = await litContracts.pkpPermissionsContract.write
       .connect(address)
@@ -109,7 +77,7 @@ export default function LitAction({ onUpload }: Props) {
     // this does both deployment action calling in the same code
     // need to break it down to upload to ipfs separately
     const resp = await litNodeClient.executeJs({
-      ipfsId: hexToString(actions[actions.length - 1]),
+      ipfsId: actions[actions.length - 1].cid,
       authSig,
       // all jsParams can be used anywhere in your litActionCode
       jsParams: {
@@ -124,7 +92,7 @@ export default function LitAction({ onUpload }: Props) {
     const sent = await litContracts.provider.sendTransaction(serialized2)
     console.log(sent)
     console.log(await sent.wait())
-    await readPkpData()
+    document.dispatchEvent(new Event('reload'));
   }
   const onClickCreate = async () => {
     if (!signers) {
@@ -133,9 +101,7 @@ export default function LitAction({ onUpload }: Props) {
     }
     setLoading(true)
     try {
-      const litContracts = new LitContracts()
       await litContracts.connect()
-      const litNodeClient = new (LitJsSdk as any).LitNodeClient({ litNetwork: 'serrano' })
       await litNodeClient.connect()
 
       const ipfsResp = await ipfs.add(getCode(signers.split('\n')))
@@ -143,7 +109,7 @@ export default function LitAction({ onUpload }: Props) {
       const signer = await litContracts.signer.getAddress()
       const { chainId } = await litContracts.provider.getNetwork()
       if (owner === address) {
-        const params = [pkpId, newCid.bytes, []]
+        const params = [pkp, newCid.bytes, []]
         console.log(newCid)
 
         const estimation = await litContracts.pkpPermissionsContract.write
@@ -167,7 +133,7 @@ export default function LitAction({ onUpload }: Props) {
         // this does both deployment action calling in the same code
         // need to break it down to upload to ipfs separately
         const resp = await litNodeClient.executeJs({
-          ipfsId: hexToString(actions[actions.length - 1]),
+          ipfsId: actions[actions.length - 1].cid,
           authSig,
           // all jsParams can be used anywhere in your litActionCode
           jsParams: {
@@ -184,19 +150,17 @@ export default function LitAction({ onUpload }: Props) {
         console.log(await sent.wait())
       } else {
         await litContracts.pkpPermissionsContractUtil.write.addPermittedAction(
-          pkpId,
+          pkp,
           newCid.toString()
         )
         const transferTx = await litContracts.pkpNftContract.write.transferFrom(
           signer,
           address,
-          pkpId
+          pkp
         )
         await transferTx.wait()
-        const owner = await litContracts.pkpNftContract.read.ownerOf(pkpId)
-        setOwner(owner)
       }
-      await readPkpData()
+      document.dispatchEvent(new Event('reload'));
     } catch (err) {
       console.log(err)
     }
@@ -214,14 +178,13 @@ export default function LitAction({ onUpload }: Props) {
       <h3 className="font-bold">Approved Actions:</h3>
       <span className="space-y-3">
         {actions?.map(a => {
-          const id = hexToString(a)
           return (
-            <p key={a} className="space-x-2">
-              <a href={`https://ipfs.stibits.com/${id}`} className="underline" target="_blank">
-                {id}
+            <p key={a.id} className="space-x-2">
+              <a href={`https://ipfs.stibits.com/${a.cid}`} className="underline" target="_blank">
+                {a.cid}
               </a>
               <button
-                onClick={() => onClickDelete(fromHexString(a))}
+                onClick={() => onClickDelete(a.id)}
                 className="btn btn-xs btn-ghost text-xs"
               >
                 x

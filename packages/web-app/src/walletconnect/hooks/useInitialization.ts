@@ -1,36 +1,37 @@
 import SettingsStore from '@/walletconnect/store/SettingsStore'
 import { restorePkpWallet } from '@/walletconnect/utils/EIP155WalletUtil'
 import { createSignClient } from '@/walletconnect/utils/WalletConnectUtil'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useSnapshot } from 'valtio'
-import { Signer } from 'ethers'
-import { useLocalStorage } from 'usehooks-ts'
-import { usePkpAddress, usePkpId, usePublicKey } from '@/utils/localstorage'
+import { Wallet, WalletContext } from '@/contexts/wallet'
 
-export default function useInitialization(signer: Signer | undefined) {
+export default function useInitialization(context: Wallet) {
   const [initialized, setInitialized] = useState(false)
   const prevRelayerURLValue = useRef<string>('')
 
   const { relayerRegionURL } = useSnapshot(SettingsStore.state)
-
-  const [publicKey, setPublicKey] = usePublicKey()
-  const [pkpId, setPkpId] = usePkpId()
-  const [pkpAddress, setAddress] = usePkpAddress()
+  const {
+    publicKey,
+    address,
+    pkp,
+    signer,
+  } = context;
 
   const onInitialize = useCallback(async () => {
     try {
-      if (!signer || !publicKey || !pkpId || !pkpAddress) {
+      if (!signer || !publicKey || !pkp || !address) {
         console.log('missing signer or pkp env vars')
         return
       }
       const { eip155Addresses } = await restorePkpWallet(signer, {
         publicKey,
-        pkpId,
-        pkpAddress
+        pkpId: pkp,
+        pkpAddress: address,
       })
 
       SettingsStore.setEIP155Address(eip155Addresses[0])
 
+      console.log("createSignClient")
       await createSignClient(relayerRegionURL)
       prevRelayerURLValue.current = relayerRegionURL
 
@@ -38,7 +39,7 @@ export default function useInitialization(signer: Signer | undefined) {
     } catch (err: unknown) {
       alert(err)
     }
-  }, [relayerRegionURL, signer])
+  }, [relayerRegionURL, signer, publicKey, pkp, address])
 
   useEffect(() => {
     if (!initialized) {

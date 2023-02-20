@@ -1,17 +1,12 @@
 import { useRouter } from 'next/router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { TransactionServiceStoreDb } from '@/lib/TxServiceStore'
-import { useAccount, useConnect, useDisconnect, useSigner } from 'wagmi'
-import { InjectedConnector } from '@wagmi/connectors/injected'
 import { TxService } from '@/lib/TransactionServiceI'
+import { useContext } from 'react'
+import { WalletContext } from '@/contexts/wallet'
 
 export default function WalletTransaction() {
-  const { address, isConnected } = useAccount()
-  const { connect } = useConnect({
-    connector: new InjectedConnector()
-  })
-  const { disconnect } = useDisconnect()
-  const { data: signer } = useSigner()
+  const { signer } = useContext(WalletContext)
 
   const router = useRouter()
   const { walletAddress } = router.query
@@ -26,7 +21,7 @@ export default function WalletTransaction() {
   const signTransactionMutation = useMutation(async (id: number) => {
     //
     // lalalal/
-    const tx = transactionsQuery.data[id]
+    const tx = transactionsQuery?.data?[id];
     if (typeof walletAddress !== 'string' || !signer || !tx) {
       throw new Error('Invalid wallet address or signer')
     }
@@ -35,11 +30,6 @@ export default function WalletTransaction() {
 
   return (
     <div>
-      <>
-        <button onClick={() => connect()}>Connect</button>
-        <button onClick={() => disconnect()}>Disconnect</button>
-        {isConnected && <div>Connected as {address}</div>}
-      </>
       <h1>Transactions for {walletAddress}</h1>
       {transactionsQuery.isLoading && <p>Loading...</p>}
       {transactionsQuery.isError && (
