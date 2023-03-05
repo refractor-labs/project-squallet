@@ -2,33 +2,11 @@ import { ipfs } from '@/utils/ipfs'
 import { useContext, useState } from 'react'
 import { ethers } from 'ethers'
 import LitJsSdk from 'lit-js-sdk'
-import base58 from 'bs58'
 import { WalletContext } from '@/contexts/wallet'
+import { useRouter } from 'next/router'
+import { getCode } from '@/utils/code'
+import { gnosis } from '@/abis/gnosis'
 
-const getCode = (signers: string[]) => `
-const go = async () => {  
-  const signers = ${JSON.stringify(signers)}
-  const serialized = ethers.utils.serializeTransaction(tx)
-  const hash = ethers.utils.keccak256(serialized)
-  // this requests a signature share from the Lit Node
-  // the signature share will be automatically returned in the HTTP response from the node
-  // all the params (tx, publicKey, sigName) are passed in from the LitJsSdk.executeJs() function
-  const sigShare = await Lit.Actions.signEcdsa({ 
-    toSign: ethers.utils.arrayify(hash), 
-    publicKey, 
-    sigName 
-  });
-};
-
-go();`
-
-const fromHexString = (hexString: string) =>
-  Uint8Array.from((hexString.match(/.{1,2}/g) as any).map((byte: string) => parseInt(byte, 16)))
-
-const hexToString = (hex: string): string => {
-  const hashStr = base58.encode(fromHexString(hex.slice(2)))
-  return hashStr
-}
 export default function LitAction() {
   const {
     publicKey,
@@ -41,7 +19,8 @@ export default function LitAction() {
     litNodeClient,
   } = useContext(WalletContext);
   const [loading, setLoading] = useState(false)
-  const [signers, setSigners] = useState<string>()
+  const router = useRouter();
+  const safe = (router.query.safe || '0x7169C30D4cfb727C7A463dA8c33A18B8f11C2230') as string;
 
   const onClickDelete = async (id: string) => {
     if (!actions?.length || actions.length === 1) {
@@ -95,16 +74,12 @@ export default function LitAction() {
     document.dispatchEvent(new Event('reload'));
   }
   const onClickCreate = async () => {
-    if (!signers) {
-      alert('Please add signers')
-      return
-    }
     setLoading(true)
     try {
       await litContracts.connect()
       await litNodeClient.connect()
 
-      const ipfsResp = await ipfs.add(getCode(signers.split('\n')))
+      const ipfsResp = await ipfs.add(getCode(safe))
       const newCid = ipfsResp.cid
       const signer = await litContracts.signer.getAddress()
       const { chainId } = await litContracts.provider.getNetwork()
@@ -126,10 +101,21 @@ export default function LitAction() {
         tx.maxFeePerGas = feeData.maxFeePerGas.toHexString()
         tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString()
         tx.gasLimit = estimation.toHexString()
-
         // get authentication signature to deploy call the action
         var authSig = await (LitJsSdk as any).checkAndSignAuthMessage({ chain: 'mumbai' })
 
+        console.log({
+          ipfsId: actions[actions.length - 1].cid,
+          authSig,
+          // all jsParams can be used anywhere in your litActionCode
+          jsParams: {
+            tx,
+            rpc: 'https://eth-mainnet.g.alchemy.com/v2/_G2nJ6rJsA4hR3q0BotWHVLoK40HF4FA',
+            network: 'homestead',
+            publicKey,
+            sigName: 'sig1'
+          }
+        })
         // this does both deployment action calling in the same code
         // need to break it down to upload to ipfs separately
         const resp = await litNodeClient.executeJs({
@@ -138,6 +124,7 @@ export default function LitAction() {
           // all jsParams can be used anywhere in your litActionCode
           jsParams: {
             tx,
+            rpc: 'https://eth-mainnet.g.alchemy.com/v2/_G2nJ6rJsA4hR3q0BotWHVLoK40HF4FA',
             publicKey,
             sigName: 'sig1'
           }
@@ -193,20 +180,15 @@ export default function LitAction() {
           )
         })}
       </span>
-      <h3 className="font-bold">Approved Signers (one per line):</h3>
-      <span>
-        <textarea
-          className="w-full textarea textarea-bordered mt-2"
-          onChange={e => setSigners(e.target.value)}
-        >
-          {signers}
-        </textarea>
-      </span>
-      <div className="card-actions justify-end">
-        <button className={`btn btn-sm ${loading ? 'loading' : ''}`} onClick={onClickCreate}>
-          {owner === address ? 'Update Signers' : 'Transfer Onwership to PKP'}
-        </button>
-      </div>
+      {
+        owner !== address && (
+          <div className="card-actions justify-end">
+            <button className={`btn btn-sm ${loading ? 'loading' : ''}`} onClick={onClickCreate}>
+              {owner === address ? 'Update Signers' : 'Transfer Onwership to PKP'}
+            </button>
+          </div>  
+        )
+      }
     </div>
   )
 }

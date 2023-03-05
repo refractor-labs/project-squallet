@@ -27,7 +27,7 @@ export default function PageHeader({ title, children }: Props) {
             {title}
           </Text>
         </Col>
-        {children ? <Col css={{ flex: 1 }}>{children}</Col> : null}
+        {children ? <Col css={{ width: 100 }}>{children}</Col> : null}
       </Row>
 
       <Divider css={{ marginBottom: '$10' }} />

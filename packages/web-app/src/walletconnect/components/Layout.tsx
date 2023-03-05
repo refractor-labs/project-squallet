@@ -2,6 +2,7 @@ import { WalletContext } from '@/contexts/wallet'
 import Navigation from '@/walletconnect/components/Navigation'
 import RouteTransition from '@/walletconnect/components/RouteTransition'
 import { Card, Container, Loading } from '@nextui-org/react'
+import Link from 'next/link'
 import { Fragment, ReactNode, useContext, useEffect } from 'react'
 import { signClient } from '../utils/WalletConnectUtil'
 import Modal from './Modal'
@@ -20,7 +21,8 @@ interface Props {
  */
 export default function Layout({ children, initialized }: Props) {
   const {
-    signerAddress
+    signerAddress,
+    address
   } = useContext(WalletContext);
   useEffect(() => {
     if (!initialized) {
@@ -42,7 +44,16 @@ export default function Layout({ children, initialized }: Props) {
                 display: 'block',
               }}
             >
-              <PageHeader title={`Connected wallet: ${signerAddress}`} />
+              <PageHeader title={`PKP: ${address}`}>
+                <p className='btn btn-xs' >
+                  <Link target="_blank" href={`https://mumbai.polygonscan.com/address/${address}`}>Explorer</Link>
+                </p>              
+              </PageHeader>
+              <PageHeader title={`Connected wallet: ${signerAddress}`}>
+                <p className='btn btn-xs' >
+                  <Link target="_blank" href={`https://mumbai.polygonscan.com/address/${signerAddress}`}>Explorer</Link>
+                </p>
+              </PageHeader>
               {children}
             </Card.Body>
           </RouteTransition>

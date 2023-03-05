@@ -34,8 +34,6 @@ export default function WalletConnectPage() {
 
   return (
     <div className='divide-y space-y-10'>
-      <Fund />
-      <LitAction />
       <Text size={13} css={{ textAlign: 'center', marginTop: '$10', marginBottom: '$10' }}>
         use walletconnect uri
       </Text>

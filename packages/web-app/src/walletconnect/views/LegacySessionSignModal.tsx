@@ -35,7 +35,7 @@ export default function LegacySessionSignModal() {
         id,
         topic: '',
         params: { request: { method, params }, chainId: '1' }
-      })
+      }, '')
 
       legacySignClient.approveRequest({
         id,

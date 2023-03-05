@@ -1,0 +1,27 @@
+{
+  "name": "@refactor-labs-lit-protocol/api-client",
+  "version": "0.1.0",
+  "main": "dist/src/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn openapi && tsc -p tsconfig.json",
+    "prepare": "yarn build",
+    "openapi": "openapi-generator-cli generate -i ../api/public/swagger.json -g typescript-axios -o src",
+    "lint": "eslint --max-warnings 10 --ext .ts src/",
+    "lint-fix": "eslint --ext .ts src/ --fix",
+    "clean": "rimraf src dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "dependencies": {
+    "@refactor-labs-lit-protocol/api": "*",
+    "axios": "1.1.x"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.5.2"
+  }
+}

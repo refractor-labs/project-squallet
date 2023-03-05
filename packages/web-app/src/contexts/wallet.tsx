@@ -4,6 +4,7 @@ import { ethers, Signer } from "ethers";
 import { useRouter } from "next/router";
 import { createContext, ReactNode, useCallback, useEffect, useState } from "react";
 import base58 from "bs58";
+import { gnosis } from "@/abis/gnosis";
 
 const litContracts = new LitContracts();
 const litNodeClient = new (LitJsSdk as any).LitNodeClient({ litNetwork: 'serrano' })
@@ -23,6 +24,9 @@ export type Wallet = {
   chainId: string;
   litContracts: LitContracts;
   litNodeClient: any;
+  safe: string;
+  signers: string[];
+  threshhold: number;
 }
 export const WalletContext = createContext<Wallet>({
   pkp: '',
@@ -35,6 +39,9 @@ export const WalletContext = createContext<Wallet>({
   chainId: '',
   litContracts,
   litNodeClient,
+  safe: '',
+  signers: [],
+  threshhold: 0,
 });
 
 type Props = {
@@ -49,7 +56,12 @@ const hexToString = (hex: string): string => {
   return hashStr
 }
 
+const rpc = "https://eth-mainnet.g.alchemy.com/v2/_G2nJ6rJsA4hR3q0BotWHVLoK40HF4FA";
+const network = "homestead";
+const provider = new ethers.providers.JsonRpcProvider(rpc, network);
+
 export default function({children}: Props) {
+  const router = useRouter();
   const [address, setAddress] = useState('');
   const [publicKey, setPublicKey] = useState('');
   const [pkp, setPkp] = useState('');
@@ -58,20 +70,32 @@ export default function({children}: Props) {
   const [owner, setOwner] = useState('');
   const [actions, setActions] = useState<string[]>([])
   const [chainId, setChainId] = useState('');
+  const [safe, setSafe] = useState('');
+  const [threshhold, setThreshold] = useState(0);
+  const [signers, setSigners] = useState<string[]>([]);
 
-  const router = useRouter();
 
   const reload = useCallback(() => {
     if (!router.query) {
       return
     }
-    console.log(router.query)
     const clear = () => {
       setAddress('');
       setPublicKey('');
       setPkp('')
+      setSafe('');
     }
     (async () => {
+      const safe = router.query.safe as string;
+      if (!safe) {
+        clear();
+        return;
+      }
+      setSafe(safe);
+      const contract = new ethers.Contract(safe , gnosis.abi , provider);
+      setSigners(await contract.getOwners());
+      setThreshold((await contract.getThreshold()).toNumber())
+
       const pkp = router.query.pkp as string
       if (!pkp) {
         clear();
@@ -110,6 +134,7 @@ export default function({children}: Props) {
         signer,
         signerAddress,
         owner,
+        safe,
         actions: actions.map(a => ({
           id: a,
           cid: hexToString(a),
@@ -117,6 +142,8 @@ export default function({children}: Props) {
         chainId,
         litContracts,
         litNodeClient,
+        signers,
+        threshhold,
       }}>
       {children}
     </WalletContext.Provider>

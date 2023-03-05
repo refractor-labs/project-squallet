@@ -1,0 +1,6 @@
+{
+  "watch": ["./src/**/*"],
+  "ext": "ts",
+  "exec": "npx tsoa spec-and-routes && ts-node --project tsconfig.json --files ./src/server.ts",
+  "ignore": ["./src/**/*.test.ts"]
+}
