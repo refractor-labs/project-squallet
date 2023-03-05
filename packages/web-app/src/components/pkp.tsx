@@ -21,7 +21,7 @@ function PKP() {
 
       // this token id belongs to the metamask that minted it
       const tokenId = txResp.events[1].topics[3]
-      router.push(`/pkp/${tokenId}`)
+      router.push(`/${router.query.safe}/pkp/${tokenId}`)
     } catch (err) {
       console.log(err)
     }

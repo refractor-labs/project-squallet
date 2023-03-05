@@ -5,22 +5,28 @@ import Link from 'next/link'
 import { useContext } from 'react'
 
 export default function Navigation() {
-  const { pkp } = useContext(WalletContext);
+  const { pkp, safe } = useContext(WalletContext);
   return (
     <Row justify="space-between" align="center">
-      <Link href={`/pkp/${pkp}/wallet`} passHref>
+      <Link href={`/${safe}/pkp/${pkp}/wallet`} passHref>
         <a className="navLink">
           <Image alt="accounts icon" src="/icons/accounts-icon.svg" width={27} height={27} />
         </a>
       </Link>
 
-      <Link href={`/pkp/${pkp}/sessions`} passHref>
+      <Link href={`/${safe}/pkp/${pkp}/key`} passHref>
         <a className="navLink">
-          <Image alt="sessions icon" src="/icons/sessions-icon.svg" width={27} height={27} />
+          <Image alt="sessions icon" src="/icons/accounts-icon.svg" width={27} height={27} />
         </a>
       </Link>
 
-      <Link href={`/pkp/${pkp}`} passHref>
+      <Link href={`/${safe}/pkp/${pkp}/transactions`} passHref>
+        <a className="navLink">
+          <Image alt="sessions icon" src="/icons/checkmark-icon.svg" width={27} height={27} />
+        </a>
+      </Link>
+
+      <Link href={`/${safe}/pkp/${pkp}`} passHref>
         <a className="navLink">
           <Avatar
             size="lg"
@@ -38,13 +44,19 @@ export default function Navigation() {
         </a>
       </Link>
 
-      <Link href={`/pkp/${pkp}/pairings`} passHref>
+      <Link href={`/${safe}/pkp/${pkp}/sessions`} passHref>
+        <a className="navLink">
+          <Image alt="sessions icon" src="/icons/sessions-icon.svg" width={27} height={27} />
+        </a>
+      </Link>
+
+      <Link href={`/${safe}/pkp/${pkp}/pairings`} passHref>
         <a className="navLink">
           <Image alt="pairings icon" src="/icons/pairings-icon.svg" width={25} height={25} />
         </a>
       </Link>
 
-      <Link href={`/pkp/${pkp}/settings`} passHref>
+      <Link href={`/${safe}/pkp/${pkp}/settings`} passHref>
         <a className="navLink">
           <Image alt="settings icon" src="/icons/settings-icon.svg" width={27} height={27} />
         </a>

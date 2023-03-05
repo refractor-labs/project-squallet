@@ -6,18 +6,25 @@ import RequestMethodCard from '@/walletconnect/components/RequestMethodCard'
 import RequestModalContainer from '@/walletconnect/components/RequestModalContainer'
 import ModalStore from '@/walletconnect/store/ModalStore'
 import {
-  approveEIP155Request,
   rejectEIP155Request
 } from '@/walletconnect/utils/EIP155RequestHandlerUtil'
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Divider, Loading, Modal, Text } from '@nextui-org/react'
-import { Fragment, useContext, useState } from 'react'
+import { Fragment, useContext, useEffect, useState } from 'react'
+import { ethers } from 'ethers'
+import { formatJsonRpcResult } from '@json-rpc-tools/utils'
+import useApi from '@/hooks/useApi'
 
 export default function SessionSendTransactionModal() {
   const [loading, setLoading] = useState(false)
   const {
-    actions
+    litContracts,
+    address,
+    safe,
   } = useContext(WalletContext);
+  const [tx, setTx] = useState<any>(null);
+  const [hash, setHash] = useState<string>('');
+  const { safeApi } = useApi();
 
   // Get request and wallet data from store
   const requestEvent = ModalStore.state.data?.requestEvent
@@ -30,21 +37,42 @@ export default function SessionSendTransactionModal() {
 
   // Get required proposal data
 
-  const { topic, params } = requestEvent
+  const { topic, params, id } = requestEvent
   const { request, chainId } = params
   const transaction = request.params[0]
 
-  // Handle approve action
-  async function onApprove() {
-    if (requestEvent) {
-      setLoading(true)
-      const response = await approveEIP155Request(requestEvent)
-      await signClient.respond({
-        topic,
-        response
-      })
-      ModalStore.close()
+  useEffect(() => {
+    if (!transaction) {
+      return
     }
+    (async () => {
+      const tx = JSON.parse(JSON.stringify(transaction));
+      const feeData = await litContracts.provider.getFeeData()
+      const nonce = await litContracts.provider.getTransactionCount(address)
+      tx.type = 2
+      tx.nonce = nonce
+      tx.chainId = chainId.indexOf(':') !== -1 ? chainId.split(':')[1] : chainId,
+      tx.maxFeePerGas = feeData.maxFeePerGas.toHexString()
+      delete tx.gasPrice
+      tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString()
+      setTx(tx);
+      const serialized = ethers.utils.serializeTransaction(tx)
+      setHash(ethers.utils.keccak256(serialized))
+    })();
+  }, [transaction])
+
+  async function onSave() {
+    setLoading(true);
+    await safeApi.createTransaction(
+      safe,
+      tx,
+    )
+    await signClient.respond({
+      topic,
+      response: formatJsonRpcResult(id, hash),
+    })
+    ModalStore.close()
+    setLoading(false);
   }
 
   // Handle reject action
@@ -78,16 +106,15 @@ export default function SessionSendTransactionModal() {
         <Divider y={2} />
 
         <RequestMethodCard methods={[request.method]} />
-      </RequestModalContainer>
-
+      </RequestModalContainer>      
       <Modal.Footer>
         <Button auto flat color="error" onClick={onReject} disabled={loading}>
           Reject
         </Button>
-        <Button auto flat color="success" onClick={onApprove} disabled={loading}>
-          {loading ? <Loading size="sm" color="success" /> : 'Approve'}
+        <Button auto flat color="success" onClick={onSave} disabled={loading}>
+          {loading ? <Loading size="sm" color="success" /> : 'Save'}
         </Button>
-        <Button auto flat color="error" onClick={onAbort} disabled={!loading}>
+        <Button auto flat color="error" onClick={onAbort}>
           {'Abort'}
         </Button>
       </Modal.Footer>

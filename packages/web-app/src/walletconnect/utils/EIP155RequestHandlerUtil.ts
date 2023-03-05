@@ -15,7 +15,8 @@ import { getSdkError } from '@walletconnect/utils'
 import { providers } from 'ethers'
 
 export async function approveEIP155Request(
-  requestEvent: SignClientTypes.EventArguments['session_request']
+  requestEvent: SignClientTypes.EventArguments['session_request'],
+  cid: string,
 ) {
   const { params, id } = requestEvent
   const { chainId, request } = params

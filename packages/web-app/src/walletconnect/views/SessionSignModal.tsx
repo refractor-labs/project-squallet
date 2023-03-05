@@ -32,7 +32,7 @@ export default function SessionSignModal() {
   // Handle approve action (logic varies based on request method)
   async function onApprove() {
     if (requestEvent) {
-      const response = await approveEIP155Request(requestEvent)
+      const response = await approveEIP155Request(requestEvent, '')
       await signClient.respond({
         topic,
         response
