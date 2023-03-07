@@ -36,7 +36,6 @@ export default function SessionSendTransactionModal() {
   }
 
   // Get required proposal data
-
   const { topic, params, id } = requestEvent
   const { request, chainId } = params
   const transaction = request.params[0]
@@ -65,12 +64,14 @@ export default function SessionSendTransactionModal() {
     setLoading(true);
     await safeApi.createTransaction(
       safe,
+      topic,
+      id,
       tx,
     )
-    await signClient.respond({
-      topic,
-      response: formatJsonRpcResult(id, hash),
-    })
+    // await signClient.respond({
+    //   topic,
+    //   response: formatJsonRpcResult(id, hash),
+    // })
     ModalStore.close()
     setLoading(false);
   }
@@ -90,6 +91,7 @@ export default function SessionSendTransactionModal() {
   async function onAbort() {
     onReject()
   }
+
   return (
     <Fragment>
       <RequestModalContainer title="Send / Sign Transaction">
@@ -106,7 +108,7 @@ export default function SessionSendTransactionModal() {
         <Divider y={2} />
 
         <RequestMethodCard methods={[request.method]} />
-      </RequestModalContainer>      
+      </RequestModalContainer>
       <Modal.Footer>
         <Button auto flat color="error" onClick={onReject} disabled={loading}>
           Reject

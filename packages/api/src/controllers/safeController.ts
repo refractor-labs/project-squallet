@@ -29,13 +29,16 @@ export class SafeController extends Controller {
   public async createTransaction(
     @Path() address: string,
     @Body() transaction: any,
+    @Query() topic: string,
+    @Query() requestId: string,
   ): Promise<TransactionDetailed> {
-
     return prisma.transaction.create({
       data: {
         address: address.toLocaleLowerCase(),
         transaction,
         hash: '',
+        topic,
+        requestId,
       },
       include: {
         signatures: true,

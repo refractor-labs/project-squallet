@@ -5,6 +5,11 @@ import { ethers } from "ethers";
 import { useContext, useState } from "react";
 import LitJsSdk from 'lit-js-sdk';
 
+import {signClient} from "@/walletconnect/utils/WalletConnectUtil";
+import { formatJsonRpcResult } from '@json-rpc-tools/utils'
+import ModalStore from "@/walletconnect/store/ModalStore";
+import {Text} from "@nextui-org/react";
+
 type Props = {
   transaction: TransactionDetailed
   onUpdate: () => void,
@@ -15,6 +20,14 @@ function Transaction ({transaction, onUpdate}: Props) {
   const { actions, signer, signers, threshhold, signerAddress, safe, litNodeClient, publicKey, litContracts } = useContext(WalletContext);
 
   const { safeApi } = useApi();
+
+  // const requestEvent = ModalStore.state.data?.requestEvent
+  //
+  // if (!requestEvent) {
+  //   return <Text>Missing request data</Text>
+  // }
+  //
+  // const { id } = requestEvent
 
   if (!transaction || !transaction.transaction || !signers) {
     return null
@@ -56,17 +69,22 @@ function Transaction ({transaction, onUpdate}: Props) {
           signatures: transaction.signatures.map(s => s.signature),
         }
       })      
-      console.log(resp)
+      // console.log(resp)
       if (!resp?.signatures?.sig1) {
         alert("Invalid signature");
         setLoading(false);
         return
       }
       const serialized2 = ethers.utils.serializeTransaction(transaction.transaction, resp.signatures.sig1.signature)
-      console.log(serialized2)
+      // console.log(serialized2)
       const sent = await litContracts.provider.sendTransaction(serialized2)
       await safeApi.patchTransaction(safe, transaction.id, sent.hash);
       await onUpdate();
+      await signClient.respond({
+        topic: transaction.topic,
+        response: formatJsonRpcResult(parseInt(transaction.requestId, 10), sent.hash),
+      })
+
     } catch(err) {
       console.log(err);
       alert('See console for error');
@@ -97,19 +115,19 @@ ${JSON.stringify(transaction.transaction, null, 2)}
       </div>
       <div className="space-y-4 py-4 text-xs">
         {
-          signers.map(signer => {
+          signers.map((signer, index) => {
             const isSigner = signerAddress.toLocaleLowerCase() === signer.toLocaleLowerCase();
             const signature = transaction.signatures?.find(signature => signature.signer.toLocaleLowerCase() === signer.toLocaleLowerCase());
             if (signature) {
               return (
-                <div className="border p-4 rounded-xl">
+                <div key={"signer" + index} className="border p-4 rounded-xl">
                   Signer: {signer}<br />
                   Signature: {signature.signature}
                 </div>
               )
             }
             return (
-              <div className="border p-4 rounded-xl">
+              <div key={"signer" + index} className="border p-4 rounded-xl">
                 Signer: {signer}<br />
                 Signature: <button className="btn btn-xs" onClick={sign} disabled={!isSigner}>Sign</button>
               </div>

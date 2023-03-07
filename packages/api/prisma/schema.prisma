@@ -30,4 +30,6 @@ model Transaction {
   hash        String?
   address     String
   signatures  Signature[]
+  topic       String
+  requestId   String
 }
