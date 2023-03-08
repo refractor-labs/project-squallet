@@ -41,9 +41,9 @@ function Transactions() {
     safeApi.getTransactions(safe).then(r => setTransactions(r.data))
   }, [safeApi, safe, updateNonce])
 
-  useEffect(() => loadData(), [loadData])
+  useEffect(() => {loadData()}, [loadData])
 
-  if (!transactions || !nonce) {
+  if (!transactions || nonce === null) {
     return null
   }
 

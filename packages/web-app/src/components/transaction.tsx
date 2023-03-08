@@ -37,10 +37,12 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
   if (!transaction || !transaction.transaction || !signers) {
     return null
   }
-  const hash = ethers.utils.keccak256(ethers.utils.serializeTransaction({
+
+  const tx = {
     ...transaction.transaction,
     nonce
-  }))
+  }
+  const hash = ethers.utils.keccak256(ethers.utils.serializeTransaction(tx));
 
   const sign = async () => {
     if (!signer || !safeApi) {
@@ -68,10 +70,7 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
         authSig,
         // all jsParams can be used anywhere in your litActionCode
         jsParams: {
-          tx: {
-            ...transaction.transaction,
-            nonce
-          },
+          tx,
           threshhold,
           rpc: 'https://ethereum.publicnode.com',
           network: 'homestead',
@@ -87,10 +86,7 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
         return
       }
       const serialized2 = ethers.utils.serializeTransaction(
-          {
-            ...transaction.transaction,
-            nonce
-          },
+        tx,
         resp.signatures.sig1.signature
       )
       // console.log(serialized2)
@@ -98,10 +94,16 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
       await sent.wait();
       await safeApi.patchTransaction(safe, transaction.id, sent.hash)
       await onUpdate()
-      await signClient.respond({
-        topic: transaction.topic,
-        response: formatJsonRpcResult(parseInt(transaction.requestId, 10), sent.hash)
-      })
+      if (transaction.topic) {
+        try {
+          await signClient.respond({
+            topic: transaction.topic,
+            response: formatJsonRpcResult(parseInt(transaction.requestId, 10), sent.hash)
+          })    
+        } catch (err: any) {
+          console.log(err)
+        }
+      }
     } catch (err) {
       console.log(err)
       alert('See console for error')
@@ -123,7 +125,7 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
         <pre className="px-4">
           <code>
             {`
-${JSON.stringify(transaction.transaction, null, 2)}              
+${JSON.stringify(tx, null, 2)}              
               `}
           </code>
         </pre>
