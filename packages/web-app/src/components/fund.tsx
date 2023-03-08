@@ -1,16 +1,12 @@
-import { WalletContext } from '@/contexts/wallet';
+import { WalletContext } from '@/contexts/wallet'
 import { ethers } from 'ethers'
 import { useCallback, useContext, useEffect, useState } from 'react'
 
 export default function Fund() {
-  const {
-    publicKey,
-    address,
-    pkp,
-    litContracts,
-  } = useContext(WalletContext);
+  const { publicKey, address, pkp, litContracts } = useContext(WalletContext)
   const [loading, setLoading] = useState(false)
   const [balance, setBalance] = useState('0')
+  const [nonce, setNonce] = useState(0)
 
   const updateBalance = useCallback(async () => {
     if (!address) {
@@ -25,9 +21,26 @@ export default function Fund() {
     }
   }, [address])
 
+  const updateNonce = useCallback(async () => {
+    if (!address) {
+      return
+    }
+    await litContracts.connect()
+    try {
+      const nonce = await litContracts.provider.getTransactionCount(address)
+      setNonce(nonce)
+    } catch (err) {
+      console.error(err)
+    }
+  }, [address])
+
   useEffect(() => {
     updateBalance()
   }, [updateBalance])
+
+  useEffect(() => {
+    updateNonce()
+  }, [updateNonce])
 
   const fund = async () => {
     try {
@@ -64,6 +77,8 @@ export default function Fund() {
       <code>{pkp}</code>
       <h2 className="font-bold">Balance</h2>
       <code>{balance} MATIC</code>
+      <h2 className="font-bold">Nonce</h2>
+      <code>{nonce}</code>
       <div className="card-actions justify-end">
         <button className={`btn btn-sm ${loading ? 'loading' : ''}`} onClick={fund}>
           Fund PKP (0.01 MATIC)

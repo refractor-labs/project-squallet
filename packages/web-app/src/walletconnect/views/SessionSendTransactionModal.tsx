@@ -5,9 +5,7 @@ import RequesDetailsCard from '@/walletconnect/components/RequestDetalilsCard'
 import RequestMethodCard from '@/walletconnect/components/RequestMethodCard'
 import RequestModalContainer from '@/walletconnect/components/RequestModalContainer'
 import ModalStore from '@/walletconnect/store/ModalStore'
-import {
-  rejectEIP155Request
-} from '@/walletconnect/utils/EIP155RequestHandlerUtil'
+import { rejectEIP155Request } from '@/walletconnect/utils/EIP155RequestHandlerUtil'
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Divider, Loading, Modal, Text } from '@nextui-org/react'
 import { Fragment, useContext, useEffect, useState } from 'react'
@@ -17,14 +15,9 @@ import useApi from '@/hooks/useApi'
 
 export default function SessionSendTransactionModal() {
   const [loading, setLoading] = useState(false)
-  const {
-    litContracts,
-    address,
-    safe,
-  } = useContext(WalletContext);
-  const [tx, setTx] = useState<any>(null);
-  const [hash, setHash] = useState<string>('');
-  const { safeApi } = useApi();
+  const { litContracts, address, safe } = useContext(WalletContext)
+  const [tx, setTx] = useState<any>(null)
+  const { safeApi } = useApi()
 
   // Get request and wallet data from store
   const requestEvent = ModalStore.state.data?.requestEvent
@@ -45,29 +38,21 @@ export default function SessionSendTransactionModal() {
       return
     }
     (async () => {
+      transaction.nonce = await litContracts.provider.getTransactionCount(address)
       const tx = JSON.parse(JSON.stringify(transaction));
       const feeData = await litContracts.provider.getFeeData()
-      const nonce = await litContracts.provider.getTransactionCount(address)
       tx.type = 2
-      tx.nonce = nonce
       tx.chainId = chainId.indexOf(':') !== -1 ? chainId.split(':')[1] : chainId,
       tx.maxFeePerGas = feeData.maxFeePerGas.toHexString()
       delete tx.gasPrice
       tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString()
-      setTx(tx);
-      const serialized = ethers.utils.serializeTransaction(tx)
-      setHash(ethers.utils.keccak256(serialized))
+      setTx(tx)
     })();
   }, [transaction])
 
   async function onSave() {
-    setLoading(true);
-    await safeApi.createTransaction(
-      safe,
-      topic,
-      id,
-      tx,
-    )
+    setLoading(true)
+    await safeApi.createTransaction(safe, topic, id.toString(10), tx)
     // await signClient.respond({
     //   topic,
     //   response: formatJsonRpcResult(id, hash),

@@ -1,38 +1,46 @@
-import { WalletContext } from "@/contexts/wallet";
-import useApi from "@/hooks/useApi";
-import { TransactionDetailed } from "@refactor-labs-lit-protocol/api-client";
-import { ethers } from "ethers";
-import { useContext, useState } from "react";
-import LitJsSdk from 'lit-js-sdk';
+import { WalletContext } from '@/contexts/wallet'
+import useApi from '@/hooks/useApi'
+import { TransactionDetailed } from '@refactor-labs-lit-protocol/api-client'
+import { ethers } from 'ethers'
+import { useCallback, useContext, useEffect, useState } from 'react'
+import LitJsSdk from 'lit-js-sdk'
 
-import {signClient} from "@/walletconnect/utils/WalletConnectUtil";
+import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { formatJsonRpcResult } from '@json-rpc-tools/utils'
-import ModalStore from "@/walletconnect/store/ModalStore";
-import {Text} from "@nextui-org/react";
+import ModalStore from '@/walletconnect/store/ModalStore'
+import { Text } from '@nextui-org/react'
 
 type Props = {
   transaction: TransactionDetailed
-  onUpdate: () => void,
+  onUpdate: () => void
+  baseNonce: number
+  nonce: number
 }
 
-function Transaction ({transaction, onUpdate}: Props) {
-  const [loading, setLoading] = useState(false);
-  const { actions, signer, signers, threshhold, signerAddress, safe, litNodeClient, publicKey, litContracts } = useContext(WalletContext);
+function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
+  const [loading, setLoading] = useState(false)
+  const {
+    actions,
+    address,
+    signer,
+    signers,
+    threshhold,
+    signerAddress,
+    safe,
+    litNodeClient,
+    publicKey,
+    litContracts
+  } = useContext(WalletContext)
 
-  const { safeApi } = useApi();
-
-  // const requestEvent = ModalStore.state.data?.requestEvent
-  //
-  // if (!requestEvent) {
-  //   return <Text>Missing request data</Text>
-  // }
-  //
-  // const { id } = requestEvent
+  const { safeApi } = useApi()
 
   if (!transaction || !transaction.transaction || !signers) {
     return null
   }
-  const hash = ethers.utils.keccak256(ethers.utils.serializeTransaction(transaction.transaction));
+  const hash = ethers.utils.keccak256(ethers.utils.serializeTransaction({
+    ...transaction.transaction,
+    nonce
+  }))
 
   const sign = async () => {
     if (!signer || !safeApi) {
@@ -40,9 +48,9 @@ function Transaction ({transaction, onUpdate}: Props) {
     }
     try {
       const signature = await signer.signMessage(hash)
-      await safeApi.createSignature(safe, transaction.id, signature, signerAddress)
+      await safeApi.createSignature(safe, transaction.id, signature, signerAddress, nonce)
       await onUpdate();
-    } catch{}
+    } catch {}
   }
 
   const broadcast = async () => {
@@ -60,44 +68,53 @@ function Transaction ({transaction, onUpdate}: Props) {
         authSig,
         // all jsParams can be used anywhere in your litActionCode
         jsParams: {
-          tx: transaction.transaction,
+          tx: {
+            ...transaction.transaction,
+            nonce
+          },
           threshhold,
           rpc: 'https://ethereum.publicnode.com',
           network: 'homestead',
           publicKey,
           sigName: 'sig1',
-          signatures: transaction.signatures.map(s => s.signature),
+          signatures: transaction.signatures.map(s => s.signature)
         }
-      })      
+      })
       // console.log(resp)
       if (!resp?.signatures?.sig1) {
-        alert("Invalid signature");
-        setLoading(false);
+        alert('Invalid signature')
+        setLoading(false)
         return
       }
-      const serialized2 = ethers.utils.serializeTransaction(transaction.transaction, resp.signatures.sig1.signature)
+      const serialized2 = ethers.utils.serializeTransaction(
+          {
+            ...transaction.transaction,
+            nonce
+          },
+        resp.signatures.sig1.signature
+      )
       // console.log(serialized2)
       const sent = await litContracts.provider.sendTransaction(serialized2)
-      await safeApi.patchTransaction(safe, transaction.id, sent.hash);
-      await onUpdate();
+      await sent.wait();
+      await safeApi.patchTransaction(safe, transaction.id, sent.hash)
+      await onUpdate()
       await signClient.respond({
         topic: transaction.topic,
-        response: formatJsonRpcResult(parseInt(transaction.requestId, 10), sent.hash),
+        response: formatJsonRpcResult(parseInt(transaction.requestId, 10), sent.hash)
       })
-
-    } catch(err) {
-      console.log(err);
-      alert('See console for error');
+    } catch (err) {
+      console.log(err)
+      alert('See console for error')
     }
-    setLoading(false);
+    setLoading(false)
   }
 
   const deleteTransaction = async () => {
     if (!transaction?.id) {
       return
     }
-    await safeApi.deleteTransaction(safe, transaction.id);
-    await onUpdate();
+    await safeApi.deleteTransaction(safe, transaction.id)
+    await onUpdate()
   }
 
   return (
@@ -105,42 +122,69 @@ function Transaction ({transaction, onUpdate}: Props) {
       <div className="mockup-code">
         <pre className="px-4">
           <code>
-            {
-              `
+            {`
 ${JSON.stringify(transaction.transaction, null, 2)}              
-              `
-            }
+              `}
           </code>
         </pre>
       </div>
       <div className="space-y-4 py-4 text-xs">
-        {
-          signers.map((signer, index) => {
-            const isSigner = signerAddress.toLocaleLowerCase() === signer.toLocaleLowerCase();
-            const signature = transaction.signatures?.find(signature => signature.signer.toLocaleLowerCase() === signer.toLocaleLowerCase());
-            if (signature) {
-              return (
-                <div key={"signer" + index} className="border p-4 rounded-xl">
-                  Signer: {signer}<br />
-                  Signature: {signature.signature}
-                </div>
-              )
-            }
+        {nonce}
+        {signers.map((signer, index) => {
+          const isSigner = signerAddress.toLocaleLowerCase() === signer.toLocaleLowerCase()
+          const signature = transaction.signatures?.find(
+            signature => signature.signer.toLocaleLowerCase() === signer.toLocaleLowerCase()
+          )
+          if (signature && signature.nonce === nonce) {
             return (
-              <div key={"signer" + index} className="border p-4 rounded-xl">
-                Signer: {signer}<br />
-                Signature: <button className="btn btn-xs" onClick={sign} disabled={!isSigner}>Sign</button>
+              <div key={'signer' + index} className="border p-4 rounded-xl">
+                {nonce}
+                <br />
+                Signer: {signer}
+                <br />
+                Signature: {signature.signature}
               </div>
             )
-          })
-        }
+          }
+          return (
+            <div key={'signer' + index} className="border p-4 rounded-xl">
+              {signature ? signature.nonce : null}
+              <br />
+              Signer: {signer}
+              <br />
+              Signature:{' '}
+              <button className="btn btn-xs" onClick={sign} disabled={!isSigner}>
+                Sign
+              </button>
+            </div>
+          )
+        })}
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <button onClick={broadcast} className={`btn w-full btn-success ${loading ? ' loading ': ''}`} disabled={transaction.signatures.length < threshhold || loading}>Broadcast</button>
-        <button onClick={deleteTransaction} className={`btn btn-error w-full ${loading ? ' loading ': ''}`} disabled={loading}>Delete</button>
+        <button
+          onClick={broadcast}
+          className={`btn w-full btn-success ${loading ? ' loading ' : ''}`}
+          disabled={
+            transaction.signatures.length < threshhold ||
+            loading ||
+            baseNonce !== nonce ||
+            transaction.signatures.some((signature) => {
+              return signature.nonce !== nonce
+            })
+          }
+        >
+          Broadcast
+        </button>
+        <button
+          onClick={deleteTransaction}
+          className={`btn btn-error w-full ${loading ? ' loading ' : ''}`}
+          disabled={loading}
+        >
+          Delete
+        </button>
       </div>
     </div>
   )
 }
 
-export default Transaction;
+export default Transaction

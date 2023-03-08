@@ -15,57 +15,55 @@ import {
 import { Signature, Transaction } from "@prisma/client";
 import { prisma } from "../config";
 
-
 type TransactionDetailed = Transaction & {
-  signatures: Signature[]
-}
+  signatures: Signature[];
+};
 
 @Route("safe")
 @Tags("safe")
 @Response<ErrorResponse>("default")
 export class SafeController extends Controller {
-
   @Post("{address}/transactions")
   public async createTransaction(
     @Path() address: string,
     @Body() transaction: any,
     @Query() topic: string,
-    @Query() requestId: string,
+    @Query() requestId: string
   ): Promise<TransactionDetailed> {
     return prisma.transaction.create({
       data: {
         address: address.toLocaleLowerCase(),
         transaction,
-        hash: '',
+        hash: "",
         topic,
         requestId,
       },
       include: {
         signatures: true,
-      }
+      },
     });
   }
 
   @Get("{address}/transactions")
   public async getTransactions(
-    @Path() address: string,
+    @Path() address: string
   ): Promise<TransactionDetailed[]> {
     return prisma.transaction.findMany({
       where: {
         address: address.toLocaleLowerCase(),
-        hash: '',
+        hash: "",
       },
       include: {
         signatures: true,
-      }
-    })
+      },
+    });
   }
 
   @Patch("{address}/transactions/{transactionId}")
   public async patchTransaction(
     @Path() address: string,
     @Path() transactionId: string,
-    @Query() hash: string,
+    @Query() hash: string
   ): Promise<TransactionDetailed> {
     return prisma.transaction.update({
       where: {
@@ -76,20 +74,20 @@ export class SafeController extends Controller {
       },
       include: {
         signatures: true,
-      }
-    })
+      },
+    });
   }
 
   @Delete("{address}/transactions/{transactionId}")
   public async deleteTransaction(
     @Path() address: string,
-    @Path() transactionId: string,
+    @Path() transactionId: string
   ): Promise<void> {
     await prisma.transaction.delete({
       where: {
         id: transactionId,
       },
-    })
+    });
   }
 
   @Post("{address}/transactions/{transactionId}/signatures")
@@ -98,19 +96,20 @@ export class SafeController extends Controller {
     @Path() transactionId: string,
     @Query() signature: string,
     @Query() signer: string,
+    @Query() nonce: number
   ): Promise<Signature> {
-
     await prisma.signature.deleteMany({
       where: {
         transactionId,
         signer: signer.toLocaleLowerCase(),
-      }
-    })
+      },
+    });
     return prisma.signature.create({
       data: {
         transactionId,
         signature,
         signer: signer.toLocaleLowerCase(),
+        nonce,
       },
     });
   }
