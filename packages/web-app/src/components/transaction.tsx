@@ -94,12 +94,12 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
       await sent.wait();
       await safeApi.patchTransaction(safe, transaction.id, sent.hash)
       await onUpdate()
-      if (transaction.topic) {
+      if (transaction.topic && transaction.requestId) {
         try {
           await signClient.respond({
             topic: transaction.topic,
             response: formatJsonRpcResult(parseInt(transaction.requestId, 10), sent.hash)
-          })    
+          })
         } catch (err: any) {
           console.log(err)
         }
@@ -131,7 +131,6 @@ ${JSON.stringify(tx, null, 2)}
         </pre>
       </div>
       <div className="space-y-4 py-4 text-xs">
-        {nonce}
         {signers.map((signer, index) => {
           const isSigner = signerAddress.toLocaleLowerCase() === signer.toLocaleLowerCase()
           const signature = transaction.signatures?.find(
@@ -140,8 +139,6 @@ ${JSON.stringify(tx, null, 2)}
           if (signature && signature.nonce === nonce) {
             return (
               <div key={'signer' + index} className="border p-4 rounded-xl">
-                {nonce}
-                <br />
                 Signer: {signer}
                 <br />
                 Signature: {signature.signature}
@@ -150,8 +147,6 @@ ${JSON.stringify(tx, null, 2)}
           }
           return (
             <div key={'signer' + index} className="border p-4 rounded-xl">
-              {signature ? signature.nonce : null}
-              <br />
               Signer: {signer}
               <br />
               Signature:{' '}

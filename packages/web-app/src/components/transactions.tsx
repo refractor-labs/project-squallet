@@ -18,14 +18,12 @@ function Transactions() {
   const safe = router.query.safe as string
 
   const updateNonce = useCallback(async () => {
-    console.log("updateNonce");
     if (!address) {
       return
     }
     await litContracts.connect()
     try {
       const nonce = await litContracts.provider.getTransactionCount(address)
-      console.log("nonce", nonce);
       setNonce(nonce)
     } catch (err) {
       console.error(err)
@@ -33,7 +31,6 @@ function Transactions() {
   }, [litContracts, address])
 
   const loadData = useCallback(async() => {
-    console.log("loadData");
     await updateNonce();
     if (!safe || !safeApi) {
       return
@@ -49,8 +46,6 @@ function Transactions() {
 
   return (
     <div className="divide-y">
-      {nonce}
-      <button onClick={() => {updateNonce();}}>updateNonce</button>
       {transactions.map((t, index) => (
         <Transaction key={t.id} transaction={t} onUpdate={loadData} baseNonce={nonce} nonce={nonce + index} />
       ))}

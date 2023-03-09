@@ -4,6 +4,7 @@ import SessionSendTransactionModal from '@/walletconnect/views/SessionSendTransa
 import SessionRequestModal from '@/walletconnect/views/SessionSignModal'
 import SessionSignTypedDataModal from '@/walletconnect/views/SessionSignTypedDataModal'
 import SessionUnsuportedMethodModal from '@/walletconnect/views/SessionUnsuportedMethodModal'
+import SessionCreateTransactionModal from '@/walletconnect/views/SessionCreateTransactionModal'
 import LegacySessionProposalModal from '@/walletconnect/views/LegacySessionProposalModal'
 import LegacySessionSignModal from '@/walletconnect/views/LegacySessionSignModal'
 import LegacySessionSignTypedDataModal from '@/walletconnect/views/LegacySessionSignTypedDataModal'
@@ -21,6 +22,7 @@ export default function Modal() {
       {view === 'SessionSignTypedDataModal' && <SessionSignTypedDataModal />}
       {view === 'SessionSendTransactionModal' && <SessionSendTransactionModal />}
       {view === 'SessionUnsuportedMethodModal' && <SessionUnsuportedMethodModal />}
+      {view === 'SessionCreateTransactionModal' && <SessionCreateTransactionModal />}
       {view === 'LegacySessionProposalModal' && <LegacySessionProposalModal />}
       {view === 'LegacySessionSignModal' && <LegacySessionSignModal />}
       {view === 'LegacySessionSignTypedDataModal' && <LegacySessionSignTypedDataModal />}

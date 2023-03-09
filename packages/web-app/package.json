@@ -40,7 +40,8 @@
     "siwe": "^1.1.6",
     "usehooks-ts": "^2.9.1",
     "valtio": "1.6.0",
-    "wagmi": "^0.11.5"
+    "wagmi": "^0.11.5",
+    "web3": "^1.8.2"
   },
   "devDependencies": {
     "@types/node": "17.0.35",
