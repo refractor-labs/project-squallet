@@ -16,14 +16,18 @@ function PKP() {
 
       // mint token
       const mintCost = await litContracts.pkpNftContract.read.mintCost()
+      console.log('mintCost', mintCost)
       const tx = await litContracts.pkpNftContract.write.mintNext(2, { value: mintCost })
+      console.log('tx', tx)
       const txResp = await tx.wait()
+      console.log('txResp', txResp)
 
       // this token id belongs to the metamask that minted it
-      const tokenId = txResp.events[1].topics[3]
-      router.push(`/${router.query.safe}/pkp/${tokenId}`)
+      const transferEvent = txResp.events.find((e: any) => e.event === 'Transfer')
+      const tokenId = transferEvent?.topics[3]
+      await router.push(`/${router.query.safe}/pkp/${tokenId}`)
     } catch (err) {
-      console.log(err)
+      console.log('failed to mint pkp', err)
     }
     setLoading(false)
   }

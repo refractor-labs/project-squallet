@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "commonjs",
+    "lib": [ "es2015", "dom" ],
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "typeRoots": ["."],
+    "baseUrl": "."
+  },
+  "include": ["globa.d.ts", "./*.ts"],
+  "references": [
+    { "path": "../../litlib" }]
+}

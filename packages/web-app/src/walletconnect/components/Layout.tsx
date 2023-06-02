@@ -20,19 +20,18 @@ interface Props {
  * Container
  */
 export default function Layout({ children, initialized }: Props) {
-  const {
-    signerAddress,
-    address
-  } = useContext(WalletContext);
+  const { signerAddress, address } = useContext(WalletContext)
   useEffect(() => {
     if (!initialized) {
       return
     }
-    (async () => {
-      await Promise.all(signClient?.pairing?.values.map(v => {
-        return signClient.core.pairing.activate({ topic: v.topic })
-      }));
-    })();
+    ;(async () => {
+      await Promise.all(
+        signClient?.pairing?.values.map(v => {
+          return signClient.core.pairing.activate({ topic: v.topic })
+        })
+      )
+    })()
   }, [initialized])
   return (
     <>
@@ -41,17 +40,24 @@ export default function Layout({ children, initialized }: Props) {
           <RouteTransition>
             <Card.Body
               css={{
-                display: 'block',
+                display: 'block'
               }}
             >
               <PageHeader title={`PKP: ${address}`}>
-                <p className='btn btn-xs' >
-                  <Link target="_blank" href={`https://mumbai.polygonscan.com/address/${address}`}>Explorer</Link>
-                </p>              
+                <p className="btn btn-xs">
+                  <Link target="_blank" href={`https://chain.litprotocol.com/address/${address}`}>
+                    Explorer
+                  </Link>
+                </p>
               </PageHeader>
               <PageHeader title={`Connected wallet: ${signerAddress}`}>
-                <p className='btn btn-xs' >
-                  <Link target="_blank" href={`https://mumbai.polygonscan.com/address/${signerAddress}`}>Explorer</Link>
+                <p className="btn btn-xs">
+                  <Link
+                    target="_blank"
+                    href={`https://chain.litprotocol.com/address/${signerAddress}`}
+                  >
+                    Explorer
+                  </Link>
                 </p>
               </PageHeader>
               {children}
@@ -70,7 +76,7 @@ export default function Layout({ children, initialized }: Props) {
               bottom: 0,
               left: 0
             }}
-          >            
+          >
             <Navigation />
           </Card.Footer>
         </Fragment>

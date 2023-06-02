@@ -10,28 +10,23 @@ export default function useInitialization(context: Wallet) {
   const prevRelayerURLValue = useRef<string>('')
 
   const { relayerRegionURL } = useSnapshot(SettingsStore.state)
-  const {
-    publicKey,
-    address,
-    pkp,
-    signer,
-  } = context;
+  const { publicKey, address, pkp, signer } = context
 
   const onInitialize = useCallback(async () => {
     try {
       if (!signer || !publicKey || !pkp || !address) {
-        console.log('missing signer or pkp env vars')
+        console.log('missing signer or pkp env vars', signer, publicKey, pkp, address)
         return
       }
       const { eip155Addresses } = await restorePkpWallet(signer, {
         publicKey,
         pkpId: pkp,
-        pkpAddress: address,
+        pkpAddress: address
       })
 
       SettingsStore.setEIP155Address(eip155Addresses[0])
 
-      console.log("createSignClient")
+      console.log('createSignClient')
       await createSignClient(relayerRegionURL)
       prevRelayerURLValue.current = relayerRegionURL
 

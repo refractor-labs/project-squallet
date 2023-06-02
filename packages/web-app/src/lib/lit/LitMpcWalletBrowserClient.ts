@@ -1,13 +1,19 @@
-import { LitMpcWallet, LitWalletData, WalletRequests, WalletResponse } from '@/lib/lit/LitMpcWallet'
+import {
+  LitMpcWalletTypes,
+  LitWalletData,
+  WalletRequests,
+  WalletResponse
+} from '@refactor-labs-lit-protocol/litlib'
 import { LitContracts } from '@lit-protocol/contracts-sdk'
-import LitJsSdk from 'lit-js-sdk'
+import * as LitJsSdk from '@lit-protocol/lit-node-client'
 import { litActions } from '@/components/lit-actions-code'
+import { chainLit, litNetwork } from '@/constants'
 
 /**
  * Lit MPC client. This talks to the lit action, and makes sure the inputs are correctly formatted.
  * This also requests auth signatures from the user.
  */
-export class LitMpcWalletBrowserClient implements LitMpcWallet {
+export class LitMpcWalletBrowserClient implements LitMpcWalletTypes {
   private readonly wallet: LitWalletData
 
   constructor(wallet: LitWalletData) {
@@ -24,13 +30,13 @@ export class LitMpcWalletBrowserClient implements LitMpcWallet {
     const litContracts = new LitContracts()
     await litContracts.connect()
     console.log('connected lit contract client')
-    const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: 'serrano' })
+    const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: litNetwork })
     console.log('initialized lit client')
     await litNodeClient.connect()
     console.log('connected lit client')
     // get authentication signature to deploy call the action
     var authSig = await LitJsSdk.checkAndSignAuthMessage({
-      chain: 'mumbai'
+      chain: chainLit
     })
     console.log('created auth sig', authSig)
 

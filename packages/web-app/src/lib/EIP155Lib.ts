@@ -1,8 +1,8 @@
 import { BigNumber, ethers, providers, Signer, Wallet } from 'ethers'
 import { TransactionServiceI, TxService } from '@/lib/TransactionServiceI'
-import { TransactionModel, UnsignedMpcTransaction } from '@/lib/Transaction'
+import { TransactionModel, UnsignedMpcTransaction } from '../../../litlib/transaction.types'
 import { TransactionServiceStore, TransactionServiceStoreDb } from '@/lib/TxServiceStore'
-import { LitWalletData } from '@/lib/lit/LitMpcWallet'
+import { LitWalletData } from '../../../litlib/lit-mpc-wallet.types'
 import { LitMpcWalletBrowserClient } from '@/lib/lit/LitMpcWalletBrowserClient'
 
 /**

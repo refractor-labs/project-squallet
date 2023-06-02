@@ -1,0 +1,7 @@
+{
+  "name": "@refactor-labs-lit-protocol/lit-actions",
+  "version": "1.0.0",
+  "dependencies": {
+    "@refactor-labs-lit-protocol/litlib": "*"
+  }
+}

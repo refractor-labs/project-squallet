@@ -1,4 +1,4 @@
-import LitJsSdk from 'lit-js-sdk'
+import * as LitJsSdk from '@lit-protocol/lit-node-client'
 import { recoverAddress } from '@ethersproject/transactions'
 import { splitSignature, joinSignature } from '@ethersproject/bytes'
 import { recoverPublicKey, computePublicKey } from '@ethersproject/signing-key'
