@@ -1,5 +1,12 @@
-import { providers } from "ethers";
-import { TransactionModel } from "./transaction.types";
+import { providers, TypedDataDomain } from "ethers";
+import {
+  OwnerSignature,
+  TransactionModel,
+  TransactionRequestI,
+} from "./transaction.types";
+import { TypedDataField } from "@ethersproject/abstract-signer";
+import { SignatureLike } from "@ethersproject/bytes";
+import { BytesLike } from "@ethersproject/bytes/src.ts";
 
 export interface LitMpcWalletTypes {
   sendRequest(request: WalletRequests): Promise<WalletResponse>;
@@ -31,25 +38,28 @@ export type SignTransactionRequest = JsonRequest<
   {
     signedTransaction: TransactionModel;
     // todo maybe get rid of this since we have to check both this and the model transaction
-    transaction: providers.TransactionRequest;
+    transaction: TransactionRequestI;
   }
 >;
 
-export type SignMethodRequest = JsonRequest<
+//using eth personal sign
+export type SignMessageRequest = JsonRequest<
   "signMessage",
   {
     //todo
     signedTransaction: TransactionModel;
-    transaction: providers.TransactionRequest;
+    transaction: TransactionRequestI;
   }
 >;
 
+//sign typed data
 export type SignTypedDataRequest = JsonRequest<
   "signTypedData",
   {
-    //todo
-    signedTransaction: TransactionModel;
-    transaction: providers.TransactionRequest;
+    domain: TypedDataDomain;
+    types: Record<string, Array<TypedDataField>>;
+    value: Record<string, any>;
+    signatures: OwnerSignature[];
   }
 >;
 
@@ -62,7 +72,7 @@ export type UpgradeCodeRequest = JsonRequest<
 >;
 
 export type WalletRequests =
-  | SignMethodRequest
+  | SignMessageRequest
   | SignTransactionRequest
   | SignTypedDataRequest
   | UpgradeCodeRequest;

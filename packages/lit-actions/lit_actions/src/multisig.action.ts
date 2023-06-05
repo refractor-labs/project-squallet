@@ -3,6 +3,7 @@
  */
 
 import {
+  arrayifyUnsignedTransaction,
   hashUnsignedTransaction,
   serializeUnsignedTransaction,
   SignTransactionRequest,
@@ -114,7 +115,7 @@ const go = async () => {
     //transaction should have gas parameters in it.
     const { signedTransaction, transaction } = input.request;
     const sigShare = await LitActions.signEcdsa({
-      toSign: serializeUnsignedTransaction(transaction),
+      toSign: arrayifyUnsignedTransaction(transaction),
       publicKey,
       sigName,
     });

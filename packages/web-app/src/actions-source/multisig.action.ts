@@ -3,124 +3,155 @@
  */
 
 import {
+  arrayifyUnsignedTransaction,
+  equivalent,
   hashUnsignedTransaction,
-  serializeUnsignedTransaction,
+  SignMessageRequest,
   SignTransactionRequest,
+  SignTypedDataRequest,
   validAddress,
   verifySignature,
-} from "@refactor-labs-lit-protocol/litlib";
+  verifyTypedDataSignature
+} from '@refactor-labs-lit-protocol/litlib'
 
-const authorizedAddresses = ["0x182351E16c1F511e50eA4438aFE3d0f16ae4769B"];
-const threshold = 1;
+const authorizedAddresses = ['0x182351E16c1F511e50eA4438aFE3d0f16ae4769B']
+const threshold = 1
 
 const setResponse = (response: any) => {
   return LitActions.setResponse({
-    response: JSON.stringify(response),
-  });
-};
+    response: JSON.stringify(response)
+  })
+}
 const errorResponse = (message: any) => {
-  return setResponse({ success: false, data: message });
-};
+  return setResponse({ success: false, data: message })
+}
 const successResponse = (message: any) => {
-  return setResponse({ success: true, data: message });
-};
+  return setResponse({ success: true, data: message })
+}
 
-const allowedMethods: string[] = ["signMessage", "signTransaction"];
+const allowedMethods: string[] = ['signMessage', 'signTransaction', 'signTypedData']
 
 const governanceForMethod = {
-  signMessage: (input: any) => {
+  signMessage: (input: SignMessageRequest) => {
     const {
       request: { message, signatures },
-      method,
-    } = input;
+      method
+    } = input
     //todo
+    //sign typed data metamask
+    //https://github.com/MetaMask/eth-sig-util/blob/fb40290810a443df2ae137b3de554f782fff79f9/src/sign-typed-data.ts#L538
   },
-  signTransaction: (input: SignTransactionRequest) => {
-    const { request, method } = input;
-    const { signedTransaction, transaction } = request;
-
-    if (signedTransaction.signatures.length < threshold) {
-      return errorResponse("Not enough signatures");
+  signTypedData: (input: SignTypedDataRequest) => {
+    const {
+      request: { domain, types, value, signatures },
+      method
+    } = input
+    if (signatures.length < threshold) {
+      return errorResponse('Not enough signatures')
     }
-
-    const authorizedAddressesCopy = [...authorizedAddresses];
-    for (let signature of signedTransaction.signatures) {
+    const authorizedAddressesCopy = [...authorizedAddresses]
+    for (let signature of signatures) {
       if (!validAddress(signature.signerAddress)) {
-        return errorResponse("adddress not checksummed");
+        return errorResponse('adddress not checksummed')
       }
       if (authorizedAddressesCopy.includes(signature.signerAddress)) {
-        authorizedAddressesCopy.splice(
-          authorizedAddressesCopy.indexOf(signature.signerAddress),
-          1
-        );
+        authorizedAddressesCopy.splice(authorizedAddressesCopy.indexOf(signature.signerAddress), 1)
       } else {
-        return errorResponse("address not authorized");
+        return errorResponse('address not authorized')
       }
     }
-
-    const rawMessage = hashUnsignedTransaction(signedTransaction.transaction);
-    console.log("hashToSign", rawMessage);
-    //todo use sign typed data
-
-    for (
-      let i = 0;
-      i < signedTransaction.signatures.length && i < threshold;
-      i++
-    ) {
-      const { signerAddress, signature } = signedTransaction.signatures[i];
-      console.log("signerAddress", signerAddress, "signature", signature);
-      const recoveredAddress = verifySignature(
-        signedTransaction.transaction,
-        signature
-      );
-      console.log(
-        "recoveredAddress",
-        recoveredAddress,
-        "expected",
-        signerAddress
-      );
+    for (let i = 0; i < signatures.length && i < threshold; i++) {
+      const { signerAddress, signature } = signatures[i]
+      console.log('signerAddress', signerAddress, 'signature', signature)
+      const recoveredAddress = verifyTypedDataSignature(domain, types, value, signature)
+      console.log('recoveredAddress', recoveredAddress, 'expected', signerAddress)
 
       if (recoveredAddress !== signerAddress) {
-        console.log("Failed to verify signature!");
-        return errorResponse("invalid signature");
+        console.log('Failed to verify signature!')
+        return errorResponse('invalid signature')
       }
     }
-    return true;
+    return true
+
+    //todo
+    //sign typed data metamask
+    //https://github.com/MetaMask/eth-sig-util/blob/fb40290810a443df2ae137b3de554f782fff79f9/src/sign-typed-data.ts#L538
   },
-};
+  signTransaction: (input: SignTransactionRequest) => {
+    const { request, method } = input
+    const { signedTransaction, transaction } = request
+
+    if (signedTransaction.signatures.length < threshold) {
+      return errorResponse('Not enough signatures')
+    }
+
+    const authorizedAddressesCopy = [...authorizedAddresses]
+    for (let signature of signedTransaction.signatures) {
+      if (!validAddress(signature.signerAddress)) {
+        return errorResponse('adddress not checksummed')
+      }
+      if (authorizedAddressesCopy.includes(signature.signerAddress)) {
+        authorizedAddressesCopy.splice(authorizedAddressesCopy.indexOf(signature.signerAddress), 1)
+      } else {
+        return errorResponse('address not authorized')
+      }
+    }
+    //verify the signed transaction is equal to the transaction
+    if (!equivalent(signedTransaction, transaction)) {
+      //
+      return errorResponse('address not authorized')
+    }
+    const rawMessage = hashUnsignedTransaction(signedTransaction.transaction)
+    console.log('hashToSign', rawMessage)
+    //todo use sign typed data
+
+    for (let i = 0; i < signedTransaction.signatures.length && i < threshold; i++) {
+      const { signerAddress, signature } = signedTransaction.signatures[i]
+      console.log('signerAddress', signerAddress, 'signature', signature)
+      const recoveredAddress = verifySignature(signedTransaction.transaction, signature)
+      console.log('recoveredAddress', recoveredAddress, 'expected', signerAddress)
+
+      if (recoveredAddress !== signerAddress) {
+        console.log('Failed to verify signature!')
+        return errorResponse('invalid signature')
+      }
+    }
+    return true
+  }
+}
 
 const go = async () => {
-  const input = { request, method, sigName, publicKey };
+  const input = { request, method, sigName, publicKey }
   if (!allowedMethods.includes(input.method)) {
-    console.log("Invalid method", input.method);
-    return errorResponse("Invalid method");
+    console.log('Invalid method', input.method)
+    return errorResponse('Invalid method')
   }
   // @ts-ignore
-  const ok = governanceForMethod[input.method](input);
+  const ok = governanceForMethod[input.method](input)
   if (!ok) {
-    return;
+    return
   }
 
-  if (input.method === "signMessage") {
+  if (input.method === 'signMessage') {
     // todo support typed data eip712 as well as plain sign message
-    const message = request.message;
+    const message = request.message
     const sigShare = await LitActions.ethPersonalSignMessageEcdsa({
       message,
       publicKey,
-      sigName,
-    });
-    return successResponse(message);
-  } else if (input.method === "signTransaction") {
+      sigName
+    })
+    return successResponse(message)
+  } else if (input.method === 'signTransaction') {
     //transaction should have gas parameters in it.
-    const { signedTransaction, transaction } = input.request;
+    const { signedTransaction, transaction } = input.request
     const sigShare = await LitActions.signEcdsa({
-      toSign: serializeUnsignedTransaction(transaction),
+      toSign: arrayifyUnsignedTransaction(transaction),
       publicKey,
-      sigName,
-    });
+      sigName
+    })
 
-    return successResponse(transaction);
+    return successResponse(transaction)
   }
-};
+}
 
-go();
+go()

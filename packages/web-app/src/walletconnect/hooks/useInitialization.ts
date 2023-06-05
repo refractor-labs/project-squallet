@@ -4,8 +4,9 @@ import { createSignClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useSnapshot } from 'valtio'
 import { Wallet, WalletContext } from '@/contexts/wallet'
+import { WalletStandalone } from '@/contexts/wallet-standalone'
 
-export default function useInitialization(context: Wallet) {
+export default function useInitialization(context: WalletStandalone) {
   const [initialized, setInitialized] = useState(false)
   const prevRelayerURLValue = useRef<string>('')
 

@@ -14,7 +14,7 @@ export type Action = {
   id: string
   cid: string
 }
-export type Wallet = {
+export type WalletStandalone = {
   pkp: string
   address: string
   publicKey: string
@@ -25,11 +25,8 @@ export type Wallet = {
   chainId: string
   litContracts: LitContracts
   litNodeClient: any
-  safe: string
-  signers: string[]
-  threshhold: number
 }
-export const WalletContext = createContext<Wallet>({
+export const WalletContextStandalone = createContext<WalletStandalone>({
   pkp: '',
   address: '',
   publicKey: '',
@@ -39,10 +36,7 @@ export const WalletContext = createContext<Wallet>({
   actions: [],
   chainId: '',
   litContracts,
-  litNodeClient,
-  safe: '',
-  signers: [],
-  threshhold: 0
+  litNodeClient
 })
 
 type Props = {
@@ -57,9 +51,10 @@ const hexToString = (hex: string): string => {
   return hashStr
 }
 
-const rpc = 'https://eth-mainnet.g.alchemy.com/v2/_G2nJ6rJsA4hR3q0BotWHVLoK40HF4FA'
-const network = 'homestead'
-const provider = new ethers.providers.JsonRpcProvider(rpc, network)
+// const rpc = 'https://eth-mainnet.g.alchemy.com/v2/_G2nJ6rJsA4hR3q0BotWHVLoK40HF4FA'
+// const rpc = 'https://chain-rpc.litprotocol.com/http'
+// const network = 'chronicle'
+// const provider = new ethers.providers.JsonRpcProvider(rpc, network)
 
 export default function ({ children }: Props) {
   const router = useRouter()
@@ -71,9 +66,6 @@ export default function ({ children }: Props) {
   const [owner, setOwner] = useState('')
   const [actions, setActions] = useState<string[]>([])
   const [chainId, setChainId] = useState('')
-  const [safe, setSafe] = useState('')
-  const [threshhold, setThreshold] = useState(0)
-  const [signers, setSigners] = useState<string[]>([])
 
   const reload = useCallback(() => {
     if (!router.query) {
@@ -83,36 +75,46 @@ export default function ({ children }: Props) {
       setAddress('')
       setPublicKey('')
       setPkp('')
-      setSafe('')
     }
     ;(async () => {
-      const safe = router.query.safe as string
-      if (!safe) {
-        clear()
-        return
-      }
-      setSafe(safe)
-      const contract = new ethers.Contract(safe, gnosis.abi, provider)
-      setSigners(await contract.getOwners())
-      setThreshold((await contract.getThreshold()).toNumber())
+      // const contract = new ethers.Contract(safe, gnosis.abi, provider)
+      // setSigners(await contract.getOwners())
+      // setThreshold((await contract.getThreshold()).toNumber())
 
       const pkp = router.query.pkp as string
+      console.log('pkp!', pkp)
       if (!pkp) {
         clear()
         return
       }
       try {
+        console.log('connecting...')
         await litContracts.connect()
+        console.log('connected!!!!')
         const publicKey = await litContracts.pkpNftContract.read.getPubkey(pkp)
-        console.log(publicKey)
+        console.log('publicKey', publicKey)
         setPublicKey(publicKey)
         setAddress(ethers.utils.computeAddress(publicKey))
         setPkp(pkp as string)
         setSigner(litContracts.signer)
-        setSignerAddress(await litContracts.signer.getAddress())
-        setOwner(await litContracts.pkpNftContract.read.ownerOf(pkp))
-        setActions(await litContracts.pkpPermissionsContractUtil.read.getPermittedActions(pkp))
-        setChainId((await litContracts.provider.getNetwork()).chainId)
+        console.log('signer', litContracts.signer)
+        await Promise.all([
+          async () => setSignerAddress(await litContracts.signer.getAddress()),
+          async () => setOwner(await litContracts.pkpNftContract.read.ownerOf(pkp)),
+          async () =>
+            setActions(await litContracts.pkpPermissionsContractUtil.read.getPermittedActions(pkp)),
+          async () => setChainId((await litContracts.provider.getNetwork()).chainId)
+        ])
+        console.log('all done with wallet context!', {
+          pkp,
+          publicKey,
+          address,
+          signer,
+          signerAddress,
+          owner,
+          actions,
+          chainId
+        })
       } catch (err) {
         console.error(err)
         clear()
@@ -127,7 +129,7 @@ export default function ({ children }: Props) {
   }, [reload])
 
   return (
-    <WalletContext.Provider
+    <WalletContextStandalone.Provider
       value={{
         address,
         pkp,
@@ -135,19 +137,16 @@ export default function ({ children }: Props) {
         signer,
         signerAddress,
         owner,
-        safe,
         actions: actions.map(a => ({
           id: a,
           cid: hexToString(a)
         })),
         chainId,
         litContracts,
-        litNodeClient,
-        signers,
-        threshhold
+        litNodeClient
       }}
     >
       {children}
-    </WalletContext.Provider>
+    </WalletContextStandalone.Provider>
   )
 }

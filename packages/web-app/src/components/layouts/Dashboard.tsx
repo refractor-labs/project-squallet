@@ -8,6 +8,7 @@ import useInitialization from '@/walletconnect/hooks/useInitialization'
 import useWalletConnectEventsManager from '@/walletconnect/hooks/useWalletConnectEventsManager'
 import Layout from '@/walletconnect/components/Layout'
 import { useRouter } from 'next/router'
+import { WalletContextStandalone } from '@/contexts/wallet-standalone'
 
 const user = {
   name: 'Tom Cook',
@@ -30,9 +31,10 @@ function classNames(...classes: string[]) {
 }
 type Props = { children: React.ReactNode }
 export default function DashboardLayout({ children }: Props) {
-  const wallet = useContext(WalletContext);
+  const wallet = useContext(WalletContextStandalone)
   const initialized = useInitialization(wallet)
-  const router = useRouter();
+  const router = useRouter()
+  console.log('here in the layout')
   useWalletConnectEventsManager(initialized)
   useEffect(() => {
     const c = () => {
@@ -49,9 +51,9 @@ export default function DashboardLayout({ children }: Props) {
     return () => clearInterval(interval)
   }, [])
 
-  if (router.asPath.indexOf('/pkp/') !== -1 && !wallet.pkp) {
-    return null
-  }
+  // if (router.asPath.indexOf('/pkp/') !== -1 && !wallet.pkp) {
+  //   return null
+  // }
 
   return (
     <>
@@ -66,17 +68,15 @@ export default function DashboardLayout({ children }: Props) {
       <div className="min-h-full">
         <main>
           <div className="mx-auto max-w-4xl py-6">
-            {
-              router.asPath.indexOf('/pkp/') !== -1 ? (
-                <div className="card bg-base-100 w-full max-w-full shadow-xl border break-all divide-y gap-6">
-                  <div className="card-body min-h-screen">
-                      {initialized && (
-                        <Layout initialized>{children}</Layout>
-                      )}                        
-                  </div>
+            {router.asPath.indexOf('/pkp/') !== -1 ? (
+              <div className="card bg-base-100 w-full max-w-full shadow-xl border break-all divide-y gap-6">
+                <div className="card-body min-h-screen">
+                  {initialized && <Layout initialized>{children}</Layout>}
                 </div>
-              ) : children
-            }
+              </div>
+            ) : (
+              children
+            )}
           </div>
         </main>
       </div>
