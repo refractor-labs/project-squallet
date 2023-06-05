@@ -25,7 +25,7 @@ function PKP() {
       // this token id belongs to the metamask that minted it
       const transferEvent = txResp.events.find((e: any) => e.event === 'Transfer')
       const tokenId = transferEvent?.topics[3]
-      await router.push(`/${router.query.safe}/pkp/${tokenId}`)
+      await router.push(`/pkp/${tokenId}`)
     } catch (err) {
       console.log('failed to mint pkp', err)
     }

@@ -3,12 +3,11 @@ import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Fund from '../fund'
 import LitAction from '../lit-action'
-import { WalletContext } from '@/contexts/wallet'
 import useInitialization from '@/walletconnect/hooks/useInitialization'
 import useWalletConnectEventsManager from '@/walletconnect/hooks/useWalletConnectEventsManager'
 import Layout from '@/walletconnect/components/Layout'
 import { useRouter } from 'next/router'
-import { WalletContextStandalone } from '@/contexts/wallet-standalone'
+import { WalletContext } from '@/contexts/wallet-standalone'
 
 const user = {
   name: 'Tom Cook',
@@ -31,11 +30,13 @@ function classNames(...classes: string[]) {
 }
 type Props = { children: React.ReactNode }
 export default function DashboardLayout({ children }: Props) {
-  const wallet = useContext(WalletContextStandalone)
+  const wallet = useContext(WalletContext)
+  console.log('Dashboard wallet:', wallet)
   const initialized = useInitialization(wallet)
   const router = useRouter()
-  console.log('here in the layout')
+  console.log('here in the layout,initialized', initialized)
   useWalletConnectEventsManager(initialized)
+
   useEffect(() => {
     const c = () => {
       const elem = document.getElementById('lit-connect-modal')
@@ -55,6 +56,7 @@ export default function DashboardLayout({ children }: Props) {
   //   return null
   // }
 
+  // console.log('initialized', initialized)
   return (
     <>
       {/*

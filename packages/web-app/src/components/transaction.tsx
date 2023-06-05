@@ -1,4 +1,4 @@
-import { WalletContext } from '@/contexts/wallet'
+import { WalletContext } from '@/contexts/wallet-standalone'
 import useApi from '@/hooks/useApi'
 import { TransactionDetailed } from '@refactor-labs-lit-protocol/api-client'
 import { ethers } from 'ethers'
@@ -22,14 +22,14 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
   const [loading, setLoading] = useState(false)
   const {
     actions,
-    address,
+    pkpAddress,
     signer,
     signers,
     threshhold,
     signerAddress,
     safe,
     litNodeClient,
-    publicKey,
+    pkpPublicKey,
     litContracts
   } = useContext(WalletContext)
 
@@ -75,7 +75,7 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
           threshhold,
           rpc: 'https://ethereum.publicnode.com',
           network: 'homestead',
-          publicKey,
+          pkpPublicKey: publicKey,
           sigName: 'sig1',
           signatures: transaction.signatures.map(s => s.signature)
         }

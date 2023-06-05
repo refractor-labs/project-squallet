@@ -1,4 +1,4 @@
-import { WalletContext } from '@/contexts/wallet'
+import { WalletContext } from '@/contexts/wallet-standalone'
 import ProjectInfoCard from '@/walletconnect/components/ProjectInfoCard'
 import RequestDataCard from '@/walletconnect/components/RequestDataCard'
 import RequesDetailsCard from '@/walletconnect/components/RequestDetalilsCard'
@@ -15,10 +15,10 @@ import useApi from '@/hooks/useApi'
 
 export default function SessionSendTransactionModal() {
   const [loading, setLoading] = useState(false)
-  const { litContracts, address, safe } = useContext(WalletContext)
+  const { litContracts, pkpAddress } = useContext(WalletContext)
   const [tx, setTx] = useState<any>(null)
   const { safeApi } = useApi()
-
+  const safe = ''
   // Get request and wallet data from store
   const requestEvent = ModalStore.state.data?.requestEvent
   const requestSession = ModalStore.state.data?.requestSession
@@ -37,17 +37,17 @@ export default function SessionSendTransactionModal() {
     if (!transaction) {
       return
     }
-    (async () => {
-      transaction.nonce = await litContracts.provider.getTransactionCount(address)
-      const tx = JSON.parse(JSON.stringify(transaction));
+    ;(async () => {
+      transaction.nonce = await litContracts.provider.getTransactionCount(pkpAddress)
+      const tx = JSON.parse(JSON.stringify(transaction))
       const feeData = await litContracts.provider.getFeeData()
       tx.type = 2
-      tx.chainId = chainId.indexOf(':') !== -1 ? chainId.split(':')[1] : chainId,
-      tx.maxFeePerGas = feeData.maxFeePerGas.toHexString()
+      ;(tx.chainId = chainId.indexOf(':') !== -1 ? chainId.split(':')[1] : chainId),
+        (tx.maxFeePerGas = feeData.maxFeePerGas.toHexString())
       delete tx.gasPrice
       tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString()
       setTx(tx)
-    })();
+    })()
   }, [transaction])
 
   async function onSave() {
@@ -58,7 +58,7 @@ export default function SessionSendTransactionModal() {
     //   response: formatJsonRpcResult(id, hash),
     // })
     ModalStore.close()
-    setLoading(false);
+    setLoading(false)
   }
 
   // Handle reject action

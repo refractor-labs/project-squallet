@@ -1,15 +1,20 @@
-import type { AppProps } from 'next/app'
+import type { AppProps, AppType } from 'next/app'
 import '../../public/main.css'
 import DashboardLayout from '@/components/layouts/Dashboard'
 import WalletStandalone from '@/contexts/wallet-standalone'
+import { WagmiConfig } from 'wagmi'
+import { wagmiClient } from '@/wagmi'
+import { trpc } from '../utils/trpc'
 
-export default function App({ Component, pageProps }: AppProps) {
-  console.log('pizza in App', Component)
+const MyApp: AppType = ({ Component, pageProps }) => {
   return (
-    <WalletStandalone>
-      <DashboardLayout>
-        <Component {...pageProps} />
-      </DashboardLayout>
-    </WalletStandalone>
+    <WagmiConfig client={wagmiClient}>
+      <WalletStandalone>
+        <DashboardLayout>
+          <Component {...pageProps} />
+        </DashboardLayout>
+      </WalletStandalone>
+    </WagmiConfig>
   )
 }
+export default trpc.withTRPC(MyApp)

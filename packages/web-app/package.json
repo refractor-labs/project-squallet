@@ -14,14 +14,18 @@
     "@headlessui/react": "^1.7.11",
     "@heroicons/react": "^2.0.15",
     "@json-rpc-tools/utils": "1.7.6",
+    "@lit-protocol/constants": "2.2.21",
     "@lit-protocol/contracts-sdk": "2.2.21",
     "@lit-protocol/lit-node-client": "^2.2.21",
     "@lit-protocol/sdk-browser": "^1.1.242",
-    "@lit-protocol/constants": "2.2.21",
     "@next/font": "13.1.6",
     "@nextui-org/react": "^1.0.8-beta.5",
     "@refactor-labs-lit-protocol/api-client": "*",
-
+    "@tanstack/react-query": "^4.29.12",
+    "@trpc/client": "^10.29.1",
+    "@trpc/next": "^10.29.1",
+    "@trpc/react-query": "^10.29.1",
+    "@trpc/server": "^10.29.1",
     "@walletconnect/client": "1.8.0",
     "@walletconnect/legacy-types": "^2.0.0",
     "@walletconnect/sign-client": "2.3.3",
@@ -37,14 +41,13 @@
     "siwe": "^1.1.6",
     "usehooks-ts": "^2.9.1",
     "valtio": "1.6.0",
-    "wagmi": "^0.11.5",
-    "web3": "^1.8.2"
+    "wagmi": "^0.12.13",
+    "web3": "^1.8.2",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@lit-protocol/types": "^2.2.21",
-
     "@types/node": "18.13.0",
-
     "@types/react": "18.2.0",
     "@walletconnect/types": "2.0.0-rc.4",
     "eslint": "8.33.0",

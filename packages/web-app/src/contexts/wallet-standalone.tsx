@@ -2,10 +2,15 @@ import { LitContracts } from '@lit-protocol/contracts-sdk'
 import * as LitJsSdk from '@lit-protocol/lit-node-client'
 import { ethers, Signer } from 'ethers'
 import { useRouter } from 'next/router'
-import { createContext, ReactNode, useCallback, useEffect, useState } from 'react'
+import { createContext, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import base58 from 'bs58'
 import { gnosis } from '@/abis/gnosis'
 import { litNetwork } from '@/constants'
+import { IEIP155Lib } from '@/lib/EIP155Lib'
+import { restorePkpWallet } from '@/walletconnect/utils/EIP155WalletUtil'
+import { useAccount, useConnect, useDisconnect, useSigner } from 'wagmi'
+import { InjectedConnector } from '@wagmi/connectors/injected'
+import { trpc } from '@/utils/trpc'
 
 const litContracts = new LitContracts()
 const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: litNetwork })
@@ -15,9 +20,9 @@ export type Action = {
   cid: string
 }
 export type WalletStandalone = {
-  pkp: string
-  address: string
-  publicKey: string
+  pkpId: string
+  pkpAddress: string
+  pkpPublicKey: string
   signer: Signer | null
   signerAddress: string
   owner: string
@@ -25,18 +30,20 @@ export type WalletStandalone = {
   chainId: string
   litContracts: LitContracts
   litNodeClient: any
+  pkpWallet: IEIP155Lib | null
 }
-export const WalletContextStandalone = createContext<WalletStandalone>({
-  pkp: '',
-  address: '',
-  publicKey: '',
+export const WalletContext = createContext<WalletStandalone>({
+  pkpId: '',
+  pkpAddress: '',
+  pkpPublicKey: '',
   signer: null,
   signerAddress: '',
   owner: '',
   actions: [],
   chainId: '',
   litContracts,
-  litNodeClient
+  litNodeClient,
+  pkpWallet: null
 })
 
 type Props = {
@@ -57,24 +64,41 @@ const hexToString = (hex: string): string => {
 // const provider = new ethers.providers.JsonRpcProvider(rpc, network)
 
 export default function ({ children }: Props) {
+  const { address: signerAddress } = useAccount()
+  const { data: signer } = useSigner()
+  const { connect } = useConnect({
+    connector: new InjectedConnector()
+  })
+  const { disconnect } = useDisconnect()
+
   const router = useRouter()
-  const [address, setAddress] = useState('')
-  const [publicKey, setPublicKey] = useState('')
-  const [pkp, setPkp] = useState('')
-  const [signer, setSigner] = useState<Signer | null>(null)
-  const [signerAddress, setSignerAddress] = useState('')
-  const [owner, setOwner] = useState('')
-  const [actions, setActions] = useState<string[]>([])
+
+  const restoredPkpQuery = trpc.actions.restorePkp.useQuery(
+    { pkpId: router.query.pkp as string },
+    {
+      enabled: !!router.query.pkp
+    }
+  )
+  // console.log('restoredPkpQuery', restoredPkpQuery.data)
+  // const [address, setAddress] = useState('')
+  // const [publicKey, setPublicKey] = useState('')
+  // const [pkp, setPkp] = useState('')
+  // const [signer, setSigner] = useState<Signer | null>(null)
+  // const [signerAddress, setSignerAddress] = useState('')
+  // const [owner, setOwner] = useState('')
+  // const [actions, setActions] = useState<string[]>([])
   const [chainId, setChainId] = useState('')
+  const [pkpWallet, setPkpWallet] = useState<IEIP155Lib | null>(null)
 
   const reload = useCallback(() => {
-    if (!router.query) {
+    if (!router.query || !connect) {
       return
     }
     const clear = () => {
-      setAddress('')
-      setPublicKey('')
-      setPkp('')
+      //not needed since it's automatically cleared from the router query state
+      // setAddress('')
+      // setPublicKey('')
+      // setPkp('')
     }
     ;(async () => {
       // const contract = new ethers.Contract(safe, gnosis.abi, provider)
@@ -82,45 +106,74 @@ export default function ({ children }: Props) {
       // setThreshold((await contract.getThreshold()).toNumber())
 
       const pkp = router.query.pkp as string
-      console.log('pkp!', pkp)
-      if (!pkp) {
+      // console.log('pkp!', pkp)
+      if (!pkp || !restoredPkpQuery.data) {
+        // console.log('no pkp or signer or restoredPkpQuery.data', {
+        //   pkp,
+        //   data: restoredPkpQuery.data,
+        //   signer
+        // })
         clear()
         return
       }
+      if (!signer) {
+        await connect()
+        return
+      }
+
       try {
         console.log('connecting...')
-        await litContracts.connect()
+        await connect()
+        // await litContracts.connect()
         console.log('connected!!!!')
-        const publicKey = await litContracts.pkpNftContract.read.getPubkey(pkp)
-        console.log('publicKey', publicKey)
-        setPublicKey(publicKey)
-        setAddress(ethers.utils.computeAddress(publicKey))
-        setPkp(pkp as string)
-        setSigner(litContracts.signer)
-        console.log('signer', litContracts.signer)
-        await Promise.all([
-          async () => setSignerAddress(await litContracts.signer.getAddress()),
-          async () => setOwner(await litContracts.pkpNftContract.read.ownerOf(pkp)),
-          async () =>
-            setActions(await litContracts.pkpPermissionsContractUtil.read.getPermittedActions(pkp)),
-          async () => setChainId((await litContracts.provider.getNetwork()).chainId)
-        ])
-        console.log('all done with wallet context!', {
-          pkp,
-          publicKey,
-          address,
-          signer,
-          signerAddress,
-          owner,
-          actions,
-          chainId
+        // const publicKey = await litContracts.pkpNftContract.read.getPubkey(pkp)
+        // console.log('publicKey', publicKey)
+        // setPublicKey(publicKey)
+        // const addressPkp = ethers.utils.computeAddress(publicKey)
+        // setAddress(addressPkp)
+        // setPkp(pkp as string)
+        // setSigner(litContracts.signer)
+        const wallet = await restorePkpWallet(signer, {
+          pkpId: restoredPkpQuery.data.pkpId,
+          publicKey: restoredPkpQuery.data.pkpPublicKey,
+          pkpAddress: restoredPkpQuery.data.pkpAddress
         })
+
+        console.log('pkp wallet is ', wallet)
+        setPkpWallet(wallet.eip155Wallets[wallet.eip155Addresses[0]])
+        // console.log('signer', litContracts.signer)
+        // await Promise.all([
+        //   // (async () => setSignerAddress(await litContracts.signer.getAddress()))(),
+        //   (async () => {
+        //     // console.log('fetching owner')
+        //     const owner = await litContracts.pkpNftContract.read.ownerOf(pkp)
+        //     // console.log('fetched owner', owner)
+        //     setOwner(owner)
+        //   })(),
+        //   (async () =>
+        //     setActions(
+        //       await litContracts.pkpPermissionsContractUtil.read.getPermittedActions(pkp)
+        //     ))(),
+        //   (async () => setChainId((await litContracts.provider.getNetwork()).chainId))()
+        // ])
+
+        // console.log('all done with wallet context!', {
+        //   pkp,
+        //   publicKey: restoredPkpQuery.data?.pkpPublicKey,
+        //   address: restoredPkpQuery.data?.pkpAddress,
+        //   signer: signer,
+        //   signerAddress,
+        //   owner: restoredPkpQuery.data?.owner,
+        //   actions: restoredPkpQuery.data?.permittedActions,
+        //   chainId,
+        //   pkpWallet
+        // })
       } catch (err) {
         console.error(err)
         clear()
       }
     })()
-  }, [router])
+  }, [router, signer, restoredPkpQuery.data, signerAddress])
 
   useEffect(() => {
     reload()
@@ -128,25 +181,33 @@ export default function ({ children }: Props) {
     return () => document.removeEventListener('reload', reload)
   }, [reload])
 
-  return (
-    <WalletContextStandalone.Provider
-      value={{
-        address,
-        pkp,
-        publicKey,
-        signer,
-        signerAddress,
-        owner,
-        actions: actions.map(a => ({
-          id: a,
-          cid: hexToString(a)
-        })),
-        chainId,
-        litContracts,
-        litNodeClient
-      }}
-    >
-      {children}
-    </WalletContextStandalone.Provider>
-  )
+  const wallet: WalletStandalone = useMemo(() => {
+    return {
+      pkpAddress: restoredPkpQuery.data?.pkpAddress || '',
+      pkpId: restoredPkpQuery.data?.pkpId || '',
+      pkpPublicKey: restoredPkpQuery.data?.pkpPublicKey || '',
+      signer: signer || null,
+      signerAddress: signerAddress || '',
+      owner: restoredPkpQuery.data?.owner || '',
+      actions: restoredPkpQuery.data?.permittedActions || [],
+      chainId,
+      litContracts,
+      litNodeClient,
+      pkpWallet
+    }
+  }, [
+    restoredPkpQuery.data?.pkpAddress,
+    restoredPkpQuery.data?.pkpId,
+    restoredPkpQuery.data?.pkpPublicKey,
+    signer,
+    signerAddress,
+    restoredPkpQuery.data?.owner,
+    restoredPkpQuery.data?.permittedActions,
+    chainId,
+    litContracts,
+    litNodeClient,
+    pkpWallet
+  ])
+
+  return <WalletContext.Provider value={wallet}>{children}</WalletContext.Provider>
 }

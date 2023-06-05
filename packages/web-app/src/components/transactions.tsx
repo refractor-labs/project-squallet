@@ -1,44 +1,43 @@
 import useApi from '@/hooks/useApi'
 import { TransactionDetailed } from '@refactor-labs-lit-protocol/api-client'
 import { useRouter } from 'next/router'
-import {useCallback, useContext, useEffect, useState} from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import Transaction from './transaction'
-import {WalletContext} from "@/contexts/wallet";
+import { WalletContext } from '@/contexts/wallet-standalone'
 
 function Transactions() {
   const [transactions, setTransactions] = useState<TransactionDetailed[] | null>(null)
   const [nonce, setNonce] = useState<number | null>(null)
-  const {
-    address,
-    litContracts
-  } = useContext(WalletContext)
+  const { pkpAddress, litContracts } = useContext(WalletContext)
 
   const router = useRouter()
   const { safeApi } = useApi()
   const safe = router.query.safe as string
 
   const updateNonce = useCallback(async () => {
-    if (!address) {
+    if (!pkpAddress) {
       return
     }
     await litContracts.connect()
     try {
-      const nonce = await litContracts.provider.getTransactionCount(address)
+      const nonce = await litContracts.provider.getTransactionCount(pkpAddress)
       setNonce(nonce)
     } catch (err) {
       console.error(err)
     }
-  }, [litContracts, address])
+  }, [litContracts, pkpAddress])
 
-  const loadData = useCallback(async() => {
-    await updateNonce();
+  const loadData = useCallback(async () => {
+    await updateNonce()
     if (!safe || !safeApi) {
       return
     }
     safeApi.getTransactions(safe).then(r => setTransactions(r.data))
   }, [safeApi, safe, updateNonce])
 
-  useEffect(() => {loadData()}, [loadData])
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   if (!transactions || nonce === null) {
     return null
@@ -47,7 +46,13 @@ function Transactions() {
   return (
     <div className="divide-y">
       {transactions.map((t, index) => (
-        <Transaction key={t.id} transaction={t} onUpdate={loadData} baseNonce={nonce} nonce={nonce + index} />
+        <Transaction
+          key={t.id}
+          transaction={t}
+          onUpdate={loadData}
+          baseNonce={nonce}
+          nonce={nonce + index}
+        />
       ))}
     </div>
   )

@@ -5,14 +5,14 @@ import { Fragment, useContext, useState } from 'react'
 import { createLegacySignClient } from '@/walletconnect/utils/LegacyWalletConnectUtil'
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Input, Loading, Text } from '@nextui-org/react'
-import { WalletContextStandalone } from '@/contexts/wallet-standalone'
+import { WalletContext } from '@/contexts/wallet-standalone'
 import { ethers } from 'ethers'
 
 function WalletConnectPKPStandalonePage() {
   console.log('pizza in WalletConnectPKPStandalonePage')
   const [uri, setUri] = useState('')
   const [loading, setLoading] = useState(false)
-  const walletContext = useContext(WalletContextStandalone)
+  const walletContext = useContext(WalletContext)
   console.log('walletContext', walletContext)
   async function onConnect(uri: string) {
     try {
@@ -34,8 +34,6 @@ function WalletConnectPKPStandalonePage() {
       setLoading(false)
     }
   }
-
-  ethers.utils.verifyTypedData()
 
   return (
     <div className="divide-y space-y-10">

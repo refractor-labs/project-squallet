@@ -1,6 +1,6 @@
 import { EIP155PkpLib, IEIP155Lib } from '@/lib/EIP155Lib'
 import { Signer } from 'ethers'
-import { LitWalletData } from '../../../../litlib/lit-mpc-wallet.types'
+import { LitWalletData } from '../../../../litlib/squallet-wallet.types'
 import { useLocalStorage } from 'usehooks-ts'
 
 export let wallet1: IEIP155Lib

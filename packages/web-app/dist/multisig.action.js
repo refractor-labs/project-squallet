@@ -1,6 +1,3 @@
-import { gnosis } from '@/abis/gnosis'
-
-export const getCode = (address: string) => `
 "use strict";
 
 // ../litlib/ethers-transaction.ts
@@ -186,4 +183,3 @@ var go = async () => {
   }
 };
 go();
-`

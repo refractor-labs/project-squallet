@@ -1,4 +1,4 @@
-import getlitConfig from './getlit.json' assert { type: 'json' };
+import getlitConfig from './getlit-backup.json' assert { type: 'json' };
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';

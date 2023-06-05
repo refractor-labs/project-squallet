@@ -1,33 +1,32 @@
-import { WalletContext } from '@/contexts/wallet'
+import { WalletContext } from '@/contexts/wallet-standalone'
 import { Avatar, Row } from '@nextui-org/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useContext } from 'react'
-import { WalletContextStandalone } from '@/contexts/wallet-standalone'
 
 export default function Navigation() {
-  const { pkp } = useContext(WalletContextStandalone)
+  const { pkpId } = useContext(WalletContext)
   return (
     <Row justify="space-between" align="center">
-      <Link href={`/pkp/${pkp}/wallet`} passHref legacyBehavior>
+      <Link href={`/pkp/${pkpId}/wallet`} passHref legacyBehavior>
         <a className="navLink">
           <Image alt="accounts icon" src="/icons/accounts-icon.svg" width={27} height={27} />
         </a>
       </Link>
 
-      <Link href={`/pkp/${pkp}/key`} passHref legacyBehavior>
+      <Link href={`/pkp/${pkpId}/key`} passHref legacyBehavior>
         <a className="navLink">
           <Image alt="sessions icon" src="/icons/accounts-icon.svg" width={27} height={27} />
         </a>
       </Link>
 
-      <Link href={`/pkp/${pkp}/transactions`} passHref legacyBehavior>
+      <Link href={`/pkp/${pkpId}/transactions`} passHref legacyBehavior>
         <a className="navLink">
           <Image alt="sessions icon" src="/icons/checkmark-icon.svg" width={27} height={27} />
         </a>
       </Link>
 
-      <Link href={`/pkp/${pkp}`} passHref legacyBehavior>
+      <Link href={`/pkp/${pkpId}`} passHref legacyBehavior>
         <a className="navLink">
           <Avatar
             size="lg"
@@ -45,19 +44,19 @@ export default function Navigation() {
         </a>
       </Link>
 
-      <Link href={`/pkp/${pkp}/sessions`} passHref legacyBehavior>
+      <Link href={`/pkp/${pkpId}/sessions`} passHref legacyBehavior>
         <a className="navLink">
           <Image alt="sessions icon" src="/icons/sessions-icon.svg" width={27} height={27} />
         </a>
       </Link>
 
-      <Link href={`/pkp/${pkp}/pairings`} passHref legacyBehavior>
+      <Link href={`/pkp/${pkpId}/pairings`} passHref legacyBehavior>
         <a className="navLink">
           <Image alt="pairings icon" src="/icons/pairings-icon.svg" width={25} height={25} />
         </a>
       </Link>
 
-      <Link href={`/pkp/${pkp}/settings`} passHref legacyBehavior>
+      <Link href={`/pkp/${pkpId}/settings`} passHref legacyBehavior>
         <a className="navLink">
           <Image alt="settings icon" src="/icons/settings-icon.svg" width={27} height={27} />
         </a>

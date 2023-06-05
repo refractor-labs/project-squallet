@@ -8,7 +8,8 @@ import { TypedDataField } from "@ethersproject/abstract-signer";
 import { SignatureLike } from "@ethersproject/bytes";
 import { BytesLike } from "@ethersproject/bytes/src.ts";
 
-export interface LitMpcWalletTypes {
+// Interface for the squallet lit action. Makes sure interactions conform to the squallet json protocol.
+export interface SqualletWalletTypes {
   sendRequest(request: WalletRequests): Promise<WalletResponse>;
 }
 

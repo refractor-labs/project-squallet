@@ -1,4 +1,4 @@
-import { WalletContext } from '@/contexts/wallet'
+import { WalletContext } from '@/contexts/wallet-standalone'
 import Navigation from '@/walletconnect/components/Navigation'
 import RouteTransition from '@/walletconnect/components/RouteTransition'
 import { Card, Container, Loading } from '@nextui-org/react'
@@ -20,7 +20,7 @@ interface Props {
  * Container
  */
 export default function Layout({ children, initialized }: Props) {
-  const { signerAddress, address } = useContext(WalletContext)
+  const { signerAddress, pkpAddress } = useContext(WalletContext)
   useEffect(() => {
     if (!initialized) {
       return
@@ -43,9 +43,12 @@ export default function Layout({ children, initialized }: Props) {
                 display: 'block'
               }}
             >
-              <PageHeader title={`PKP: ${address}`}>
+              <PageHeader title={`PKP: ${pkpAddress}`}>
                 <p className="btn btn-xs">
-                  <Link target="_blank" href={`https://chain.litprotocol.com/address/${address}`}>
+                  <Link
+                    target="_blank"
+                    href={`https://chain.litprotocol.com/address/${pkpAddress}`}
+                  >
                     Explorer
                   </Link>
                 </p>

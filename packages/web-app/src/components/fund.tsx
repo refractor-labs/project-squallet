@@ -1,38 +1,38 @@
-import { WalletContext } from '@/contexts/wallet'
 import { ethers } from 'ethers'
 import { useCallback, useContext, useEffect, useState } from 'react'
+import { WalletContext } from '@/contexts/wallet-standalone'
 
 export default function Fund() {
-  const { publicKey, address, pkp, litContracts } = useContext(WalletContext)
+  const { pkpPublicKey, pkpAddress, pkpId, litContracts } = useContext(WalletContext)
   const [loading, setLoading] = useState(false)
   const [balance, setBalance] = useState('0')
   const [nonce, setNonce] = useState(0)
 
   const updateBalance = useCallback(async () => {
-    if (!address) {
+    if (!pkpAddress) {
       return
     }
     await litContracts.connect()
     try {
-      const balance = await litContracts.provider.getBalance(address)
+      const balance = await litContracts.provider.getBalance(pkpAddress)
       setBalance(ethers.utils.formatUnits(balance.toString(), 18))
     } catch (err) {
       console.error(err)
     }
-  }, [address])
+  }, [pkpAddress])
 
   const updateNonce = useCallback(async () => {
-    if (!address) {
+    if (!pkpAddress) {
       return
     }
     await litContracts.connect()
     try {
-      const nonce = await litContracts.provider.getTransactionCount(address)
+      const nonce = await litContracts.provider.getTransactionCount(pkpAddress)
       setNonce(nonce)
     } catch (err) {
       console.error(err)
     }
-  }, [address])
+  }, [pkpAddress])
 
   useEffect(() => {
     updateBalance()
@@ -50,11 +50,11 @@ export default function Fund() {
 
       console.log('Sending gas to PKP')
       const gasTx = await litContracts.signer.sendTransaction({
-        to: address,
-        value: '10000000000000000'
+        to: pkpAddress,
+        value: '100000'
       })
       console.log(await gasTx.wait())
-      console.log(`Gas sent to ${address}`)
+      console.log(`Gas sent to ${pkpAddress}`)
 
       await updateBalance()
     } catch (err) {
@@ -63,18 +63,18 @@ export default function Fund() {
     setLoading(false)
   }
 
-  if (!address) {
+  if (!pkpAddress) {
     return null
   }
 
   return (
     <div className="break-all text-xs space-y-6">
       <h2 className="font-bold">Public key</h2>
-      <code>{publicKey}</code>
+      <code>{pkpPublicKey}</code>
       <h2 className="font-bold">PKP Address</h2>
-      <code>{address}</code>
+      <code>{pkpAddress}</code>
       <h2 className="font-bold">PKP ID</h2>
-      <code>{pkp}</code>
+      <code>{pkpId}</code>
       <h2 className="font-bold">Balance</h2>
       <code>{balance} MATIC</code>
       <h2 className="font-bold">Nonce</h2>

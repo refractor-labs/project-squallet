@@ -1,19 +1,18 @@
 import {
-  LitMpcWalletTypes,
+  SqualletWalletTypes,
   LitWalletData,
   WalletRequests,
   WalletResponse
 } from '@refactor-labs-lit-protocol/litlib'
 import { LitContracts } from '@lit-protocol/contracts-sdk'
 import * as LitJsSdk from '@lit-protocol/lit-node-client'
-import { litActions } from '@/components/lit-actions-code'
 import { chainLit, litNetwork } from '@/constants'
 
 /**
  * Lit MPC client. This talks to the lit action, and makes sure the inputs are correctly formatted.
  * This also requests auth signatures from the user.
  */
-export class LitMpcWalletBrowserClient implements LitMpcWalletTypes {
+export class SqualletWalletBrowserClient implements SqualletWalletTypes {
   private readonly wallet: LitWalletData
 
   constructor(wallet: LitWalletData) {

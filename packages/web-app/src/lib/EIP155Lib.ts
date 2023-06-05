@@ -1,9 +1,13 @@
 import { BigNumber, ethers, providers, Signer, Wallet } from 'ethers'
 import { TransactionServiceI, TxService } from '@/lib/TransactionServiceI'
-import { TransactionModel, UnsignedMpcTransaction } from '../../../litlib/transaction.types'
+import {
+  TransactionModel,
+  TransactionRequestI,
+  UnsignedMpcTransaction
+} from '../../../litlib/transaction.types'
 import { TransactionServiceStore, TransactionServiceStoreDb } from '@/lib/TxServiceStore'
-import { LitWalletData } from '../../../litlib/lit-mpc-wallet.types'
-import { LitMpcWalletBrowserClient } from '@/lib/lit/LitMpcWalletBrowserClient'
+import { LitWalletData } from '../../../litlib/squallet-wallet.types'
+import { SqualletWalletBrowserClient } from '@/lib/lit/SqualletWalletBrowserClient'
 
 /**
  * Types
@@ -36,13 +40,13 @@ const staticTransactionServiceStore = new TransactionServiceStoreDb()
 export class EIP155PkpLib implements IEIP155Lib {
   wallet: Signer
   readonly transactionService: TransactionServiceI
-  readonly litClient: LitMpcWalletBrowserClient
+  readonly litClient: SqualletWalletBrowserClient
   private abortFlag = false
 
   constructor(
     wallet: Signer,
     transactionService: TransactionServiceI,
-    litClient: LitMpcWalletBrowserClient
+    litClient: SqualletWalletBrowserClient
   ) {
     this.wallet = wallet
     this.transactionService = transactionService
@@ -50,11 +54,11 @@ export class EIP155PkpLib implements IEIP155Lib {
   }
 
   static async init({ wallet, eoaSigner }: { eoaSigner: Signer; wallet: LitWalletData }) {
-    console.log('fetcing chain id')
+    console.log('EIP155PkpLib: fetching chain id')
     const chainId = await eoaSigner.getChainId()
     const walletSigner = new ethers.VoidSigner(wallet.pkpAddress, eoaSigner.provider)
     console.log('VoidSigner', wallet)
-    const litClient = new LitMpcWalletBrowserClient(wallet)
+    const litClient = new SqualletWalletBrowserClient(wallet)
     //tx service should be scoped to the eoa signer
     const out = new EIP155PkpLib(
       walletSigner,
@@ -89,7 +93,7 @@ export class EIP155PkpLib implements IEIP155Lib {
     this.abortFlag = true
   }
 
-  async signTransaction(transaction: providers.TransactionRequest) {
+  async signTransaction(transaction: TransactionRequestI) {
     console.log('got request signTransaction', transaction)
     const tx: UnsignedMpcTransaction = {
       nonce: toNumber(transaction.nonce),
@@ -98,7 +102,7 @@ export class EIP155PkpLib implements IEIP155Lib {
       maxPriorityFeePerGas: 0,
       from: await this.getAddress(),
       to: transaction.to || ethers.constants.AddressZero,
-      value: transaction.value || '0x0',
+      value: transaction.value || '0',
       data: transaction.data || '0x',
       chainId: transaction.chainId || 0,
       gasLimit: transaction.gasLimit || '0x0'
