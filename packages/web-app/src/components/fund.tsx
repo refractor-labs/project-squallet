@@ -1,20 +1,24 @@
 import { ethers } from 'ethers'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import { WalletContext } from '@/contexts/wallet-standalone'
+import { useProvider } from 'wagmi'
 
 export default function Fund() {
-  const { pkpPublicKey, pkpAddress, pkpId, litContracts } = useContext(WalletContext)
+  const provider = useProvider()
+  const { pkpPublicKey, pkpAddress, pkpId, litContracts, signer } = useContext(WalletContext)
   const [loading, setLoading] = useState(false)
   const [balance, setBalance] = useState('0')
   const [nonce, setNonce] = useState(0)
 
   const updateBalance = useCallback(async () => {
-    if (!pkpAddress) {
+    console.log('updating balance')
+    if (!pkpAddress || !signer) {
       return
     }
-    await litContracts.connect()
+    // await litContracts.connect()
     try {
-      const balance = await litContracts.provider.getBalance(pkpAddress)
+      const balance = await provider.getBalance(pkpAddress)
+      console.log('Got balance', balance.toString())
       setBalance(ethers.utils.formatUnits(balance.toString(), 18))
     } catch (err) {
       console.error(err)
@@ -22,12 +26,12 @@ export default function Fund() {
   }, [pkpAddress])
 
   const updateNonce = useCallback(async () => {
-    if (!pkpAddress) {
+    if (!pkpAddress || !signer) {
       return
     }
-    await litContracts.connect()
+    // await litContracts.connect()
     try {
-      const nonce = await litContracts.provider.getTransactionCount(pkpAddress)
+      const nonce = await provider.getTransactionCount(pkpAddress)
       setNonce(nonce)
     } catch (err) {
       console.error(err)
@@ -46,12 +50,15 @@ export default function Fund() {
     try {
       setLoading(true)
       // initialization
-      await litContracts.connect()
+      // await litContracts.connect()
+      if (!signer) {
+        console.log('No signer')
+        return
+      }
 
-      console.log('Sending gas to PKP')
-      const gasTx = await litContracts.signer.sendTransaction({
+      const gasTx = await signer.sendTransaction({
         to: pkpAddress,
-        value: '100000'
+        value: '10000000000000000'
       })
       console.log(await gasTx.wait())
       console.log(`Gas sent to ${pkpAddress}`)

@@ -5,6 +5,7 @@ import { MetaMaskConnector } from '@wagmi/connectors/metaMask'
 import { InjectedConnector } from '@wagmi/connectors/injected'
 import { infuraProvider } from '@wagmi/core/providers/infura'
 import { chronicleChain } from '@/utils/chains'
+import { polygonMumbai, polygon } from '@wagmi/chains'
 
 const INFURA_KEY = process.env.NEXT_PUBLIC_INFURA_KEY as string
 
@@ -12,9 +13,11 @@ export const { chains, provider, webSocketProvider } = configureChains(
   [
     mainnet,
     chronicleChain,
+    polygonMumbai,
+    polygon,
     ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [goerli] : [])
   ],
-  [infuraProvider({ apiKey: INFURA_KEY }), publicProvider()]
+  [infuraProvider({ apiKey: INFURA_KEY })]
 )
 // Set up client
 export const wagmiClient = createClient({

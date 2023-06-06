@@ -10,10 +10,10 @@ export const chronicleChain = {
     decimals: 18
   },
   rpcUrls: {
-    // infura: {
-    //   http: ['https://sepolia.infura.io/v3'],
-    //   webSocket: ['wss://sepolia.infura.io/ws/v3']
-    // },
+    infura: {
+      http: ['https://chain-rpc.litprotocol.com/http'],
+      // webSocket: ['wss://sepolia.infura.io/ws/v3']
+    },
     default: {
       http: ['https://chain-rpc.litprotocol.com/http']
     },

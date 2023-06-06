@@ -1,7 +1,9 @@
 // @flow
 import * as React from 'react'
 import { useCallback } from 'react'
-import { useAccount, useConnect, useNetwork, useSwitchNetwork } from 'wagmi'
+import { Chain, mainnet, useAccount, useConnect, useNetwork, useSwitchNetwork } from 'wagmi'
+import { polygonMumbai } from '@wagmi/chains'
+import { chronicleChain } from '@/utils/chains'
 
 export const SelectChain = () => {
   const { connector: activeConnector, isConnected } = useAccount()
@@ -24,7 +26,12 @@ export const SelectChain = () => {
     [chain, isLoading, pendingChainId, switchNetwork]
   )
 
-  console.log('connect', connect)
+  // const [chainLocalState, setChainLocalState] = React.useState<Chain>(mainnet)
+  // React.useEffect(() => {
+  //   if (chain) setChainLocalState(chain)
+  //   else setChainLocalState(mainnet)
+  // }, [])
+
   if (!isConnected) {
     return (
       <button
@@ -37,9 +44,11 @@ export const SelectChain = () => {
   }
   return (
     <div>
+      <div>Connected to {chain?.name}</div>
       <select onChange={onSelect}>
-        <option value="1">Ethereum</option>
-        <option value="175177">Chronicle</option>
+        <option value={mainnet.id}>{mainnet.name}</option>
+        <option value={chronicleChain.id}>{chronicleChain.name}</option>
+        <option value={polygonMumbai.id}>{polygonMumbai.name}</option>
       </select>
     </div>
   )

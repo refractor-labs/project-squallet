@@ -1,19 +1,19 @@
 import { LitContracts } from '@lit-protocol/contracts-sdk'
-import * as LitJsSdk from '@lit-protocol/lit-node-client'
+// import * as LitJsSdk from '@lit-protocol/lit-node-client'
 import { ethers, Signer } from 'ethers'
 import { useRouter } from 'next/router'
 import { createContext, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import base58 from 'bs58'
 import { gnosis } from '@/abis/gnosis'
-import { litNetwork } from '@/constants'
+// import { litNetwork } from '@/constants'
 import { IEIP155Lib } from '@/lib/EIP155Lib'
 import { restorePkpWallet } from '@/walletconnect/utils/EIP155WalletUtil'
 import { useAccount, useConnect, useDisconnect, useNetwork, useSigner } from 'wagmi'
 import { InjectedConnector } from '@wagmi/connectors/injected'
 import { trpc } from '@/utils/trpc'
 
-const litContracts = new LitContracts()
-const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: litNetwork })
+// const litContracts = new LitContracts()
+// const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: litNetwork })
 
 export type Action = {
   id: string
@@ -28,7 +28,7 @@ export type WalletStandalone = {
   owner: string
   actions: Action[]
   chainId: number | null
-  litContracts: LitContracts
+  litContracts: any
   litNodeClient: any
   pkpWallet: IEIP155Lib | null
 }
@@ -41,8 +41,8 @@ export const WalletContext = createContext<WalletStandalone>({
   owner: '',
   actions: [],
   chainId: null,
-  litContracts,
-  litNodeClient,
+  litContracts: null,
+  litNodeClient: null,
   pkpWallet: null
 })
 
@@ -194,8 +194,8 @@ export default function WalletStandaloneContext({ children }: Props) {
       owner: restoredPkpQuery.data?.owner || '',
       actions: restoredPkpQuery.data?.permittedActions || [],
       chainId: chain?.id || null,
-      litContracts,
-      litNodeClient,
+      litContracts: null,
+      litNodeClient: null,
       pkpWallet
     }
   }, [
@@ -207,8 +207,8 @@ export default function WalletStandaloneContext({ children }: Props) {
     restoredPkpQuery.data?.owner,
     restoredPkpQuery.data?.permittedActions,
     chain?.id,
-    litContracts,
-    litNodeClient,
+    // litContracts,
+    // litNodeClient,
     pkpWallet
   ])
 
