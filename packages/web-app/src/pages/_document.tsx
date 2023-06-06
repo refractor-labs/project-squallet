@@ -1,4 +1,5 @@
 import { Html, Head, Main, NextScript } from 'next/document'
+import { CssBaseline } from '@nextui-org/react'
 
 export default function Document() {
   return (
@@ -11,6 +12,7 @@ export default function Document() {
         />
         <script src="https://cdn.tailwindcss.com"></script>
         {/*<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.js"></script>*/}
+        {/*{CssBaseline.flush()}*/}
       </Head>
       <body>
         <Main />

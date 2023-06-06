@@ -8,6 +8,7 @@ import useWalletConnectEventsManager from '@/walletconnect/hooks/useWalletConnec
 import Layout from '@/walletconnect/components/Layout'
 import { useRouter } from 'next/router'
 import { WalletContext } from '@/contexts/wallet-standalone'
+import { SelectChain } from '../SelectChain'
 
 const user = {
   name: 'Tom Cook',
@@ -70,6 +71,7 @@ export default function DashboardLayout({ children }: Props) {
       <div className="min-h-full">
         <main>
           <div className="mx-auto max-w-4xl py-6">
+            <SelectChain />
             {router.asPath.indexOf('/pkp/') !== -1 ? (
               <div className="card bg-base-100 w-full max-w-full shadow-xl border break-all divide-y gap-6">
                 <div className="card-body min-h-screen">

@@ -8,7 +8,7 @@ import { gnosis } from '@/abis/gnosis'
 import { litNetwork } from '@/constants'
 import { IEIP155Lib } from '@/lib/EIP155Lib'
 import { restorePkpWallet } from '@/walletconnect/utils/EIP155WalletUtil'
-import { useAccount, useConnect, useDisconnect, useSigner } from 'wagmi'
+import { useAccount, useConnect, useDisconnect, useNetwork, useSigner } from 'wagmi'
 import { InjectedConnector } from '@wagmi/connectors/injected'
 import { trpc } from '@/utils/trpc'
 
@@ -27,7 +27,7 @@ export type WalletStandalone = {
   signerAddress: string
   owner: string
   actions: Action[]
-  chainId: string
+  chainId: number | null
   litContracts: LitContracts
   litNodeClient: any
   pkpWallet: IEIP155Lib | null
@@ -40,7 +40,7 @@ export const WalletContext = createContext<WalletStandalone>({
   signerAddress: '',
   owner: '',
   actions: [],
-  chainId: '',
+  chainId: null,
   litContracts,
   litNodeClient,
   pkpWallet: null
@@ -63,7 +63,8 @@ const hexToString = (hex: string): string => {
 // const network = 'chronicle'
 // const provider = new ethers.providers.JsonRpcProvider(rpc, network)
 
-export default function ({ children }: Props) {
+export default function WalletStandaloneContext({ children }: Props) {
+  const { chain, chains } = useNetwork()
   const { address: signerAddress } = useAccount()
   const { data: signer } = useSigner()
   const { connect } = useConnect({
@@ -87,7 +88,7 @@ export default function ({ children }: Props) {
   // const [signerAddress, setSignerAddress] = useState('')
   // const [owner, setOwner] = useState('')
   // const [actions, setActions] = useState<string[]>([])
-  const [chainId, setChainId] = useState('')
+  // const [chainId, setChainId] = useState<number | null>(null)
   const [pkpWallet, setPkpWallet] = useState<IEIP155Lib | null>(null)
 
   const reload = useCallback(() => {
@@ -141,6 +142,8 @@ export default function ({ children }: Props) {
 
         console.log('pkp wallet is ', wallet)
         setPkpWallet(wallet.eip155Wallets[wallet.eip155Addresses[0]])
+
+        // setChainId(await signer.getChainId())
         // console.log('signer', litContracts.signer)
         // await Promise.all([
         //   // (async () => setSignerAddress(await litContracts.signer.getAddress()))(),
@@ -190,7 +193,7 @@ export default function ({ children }: Props) {
       signerAddress: signerAddress || '',
       owner: restoredPkpQuery.data?.owner || '',
       actions: restoredPkpQuery.data?.permittedActions || [],
-      chainId,
+      chainId: chain?.id || null,
       litContracts,
       litNodeClient,
       pkpWallet
@@ -203,7 +206,7 @@ export default function ({ children }: Props) {
     signerAddress,
     restoredPkpQuery.data?.owner,
     restoredPkpQuery.data?.permittedActions,
-    chainId,
+    chain?.id,
     litContracts,
     litNodeClient,
     pkpWallet

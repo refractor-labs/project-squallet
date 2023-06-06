@@ -24,10 +24,9 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     actions,
     pkpAddress,
     signer,
-    signers,
-    threshhold,
+    // signers,
+    // threshhold,
     signerAddress,
-    safe,
     litNodeClient,
     pkpPublicKey,
     litContracts

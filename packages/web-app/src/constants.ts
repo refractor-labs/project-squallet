@@ -3,4 +3,4 @@ export const chainLit = 'chronicle'
 //lit protocol network
 export const litNetwork = 'serrano'
 
-export let walletNetwork = 'ethereum'
+export let walletNetwork = 'mumbai'

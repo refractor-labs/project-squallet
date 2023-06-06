@@ -19,7 +19,7 @@
     "@lit-protocol/lit-node-client": "^2.2.21",
     "@lit-protocol/sdk-browser": "^1.1.242",
     "@next/font": "13.1.6",
-    "@nextui-org/react": "^1.0.8-beta.5",
+    "@nextui-org/react": "^1.0.0-beta.13",
     "@refactor-labs-lit-protocol/api-client": "*",
     "@tanstack/react-query": "^4.29.12",
     "@trpc/client": "^10.29.1",
