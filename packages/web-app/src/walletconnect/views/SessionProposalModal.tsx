@@ -25,8 +25,10 @@ export default function SessionProposalModal() {
 
   // Get required proposal data
   const { id, params } = proposal
+  console.log('proposal', proposal)
   const { proposer, requiredNamespaces, relays } = params
 
+  console.log('requiredNamespaces', requiredNamespaces)
   // Add / remove address from EIP155 selection
   function onSelectAccount(chain: string, account: string) {
     console.log('selected account', chain, account)
@@ -84,6 +86,7 @@ export default function SessionProposalModal() {
 
   // Render account selection checkboxes based on chain
   function renderAccountSelection(chain: string) {
+    console.log('renderAccountSelection chain', chain)
     if (isEIP155Chain(chain)) {
       return (
         <ProposalSelectSection

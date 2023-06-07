@@ -167,6 +167,7 @@ export default function LitAction() {
                 href={`https://squallet-ipfs.infura-ipfs.io/ipfs/${a.cid}`}
                 className="underline"
                 target="_blank"
+                rel="noreferrer"
               >
                 {a.cid}
               </a>

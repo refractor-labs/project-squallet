@@ -4,9 +4,9 @@ import {
   WalletRequests,
   WalletResponse
 } from '@refactor-labs-lit-protocol/litlib'
-import { LitContracts } from '@lit-protocol/contracts-sdk'
 import * as LitJsSdk from '@lit-protocol/lit-node-client'
-import { chainLit, litNetwork } from '@/constants'
+import { chainLit, litNetwork, walletNetwork } from '@/constants'
+import { Signer } from 'ethers'
 
 /**
  * Lit MPC client. This talks to the lit action, and makes sure the inputs are correctly formatted.
@@ -14,9 +14,13 @@ import { chainLit, litNetwork } from '@/constants'
  */
 export class SqualletWalletBrowserClient implements SqualletWalletTypes {
   private readonly wallet: LitWalletData
+  private readonly signer: Signer
+  private readonly chainId: number
 
-  constructor(wallet: LitWalletData) {
+  constructor(wallet: LitWalletData, eoaSigner: Signer, chainId: number) {
     this.wallet = wallet
+    this.signer = eoaSigner
+    this.chainId = chainId
   }
 
   async sendRequest(request: WalletRequests): Promise<WalletResponse> {
@@ -26,8 +30,8 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
     }
     console.log('multisig-cid', cid)
 
-    const litContracts = new LitContracts()
-    await litContracts.connect()
+    // const litContracts = new LitContracts()
+    // await litContracts.connect()
     console.log('connected lit contract client')
     const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: litNetwork })
     console.log('initialized lit client')
@@ -35,7 +39,7 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
     console.log('connected lit client')
     // get authentication signature to deploy call the action
     var authSig = await LitJsSdk.checkAndSignAuthMessage({
-      chain: chainLit
+      chain: walletNetwork
     })
     console.log('created auth sig', authSig)
 

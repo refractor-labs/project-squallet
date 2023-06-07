@@ -9,8 +9,6 @@ import { rejectEIP155Request } from '@/walletconnect/utils/EIP155RequestHandlerU
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Divider, Loading, Modal, Text } from '@nextui-org/react'
 import { Fragment, useContext, useEffect, useState } from 'react'
-import { ethers } from 'ethers'
-import { formatJsonRpcResult } from '@json-rpc-tools/utils'
 import useApi from '@/hooks/useApi'
 
 export default function SessionSendTransactionModal() {
@@ -23,18 +21,12 @@ export default function SessionSendTransactionModal() {
   const requestEvent = ModalStore.state.data?.requestEvent
   const requestSession = ModalStore.state.data?.requestSession
 
-  // Ensure request and wallet are defined
-  if (!requestEvent || !requestSession) {
-    return <Text>Missing request data</Text>
-  }
-
-  // Get required proposal data
-  const { topic, params, id } = requestEvent
-  const { request, chainId } = params
-  const transaction = request.params[0]
-
   useEffect(() => {
     if (!transaction) {
+      return
+    }
+    // Ensure request and wallet are defined
+    if (!requestEvent || !requestSession) {
       return
     }
     ;(async () => {
@@ -48,7 +40,17 @@ export default function SessionSendTransactionModal() {
       tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString()
       setTx(tx)
     })()
-  }, [transaction])
+  }, [requestEvent])
+
+  // Ensure request and wallet are defined
+  if (!requestEvent || !requestSession) {
+    return <Text>Missing request data</Text>
+  }
+
+  // Get required proposal data
+  const { topic, params, id } = requestEvent
+  const { request, chainId } = params
+  const transaction = request.params[0]
 
   async function onSave() {
     setLoading(true)

@@ -21,11 +21,11 @@ export default function WalletTransaction() {
   const signTransactionMutation = useMutation(async (id: number) => {
     //
     // lalalal/
-    const tx = transactionsQuery?.data?[id]
+    const tx = transactionsQuery?.data?.[id]
     if (typeof walletAddress !== 'string' || !signer || !tx) {
       throw new Error('Invalid wallet address or signer')
     }
-    new TxService(walletAddress, signer, new TransactionServiceStoreDb()).signTransaction()
+    // new TxService(walletAddress, signer, new TransactionServiceStoreDb()).signTransaction()
   })
 
   return (

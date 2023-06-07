@@ -10,7 +10,7 @@ export default function Document() {
           rel="stylesheet"
           type="text/css"
         />
-        <script src="https://cdn.tailwindcss.com"></script>
+        <script async src="https://cdn.tailwindcss.com"></script>
         {/*<script src="https://cdn.jsdelivr.net/npm/@lit-protocol/lit-node-client-vanilla/lit-node-client.js"></script>*/}
         {/*{CssBaseline.flush()}*/}
       </Head>

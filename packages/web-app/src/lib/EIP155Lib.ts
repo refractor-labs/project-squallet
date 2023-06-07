@@ -58,7 +58,7 @@ export class EIP155PkpLib implements IEIP155Lib {
     const chainId = await eoaSigner.getChainId()
     const walletSigner = new ethers.VoidSigner(wallet.pkpAddress, eoaSigner.provider)
     console.log('VoidSigner', wallet)
-    const litClient = new SqualletWalletBrowserClient(wallet)
+    const litClient = new SqualletWalletBrowserClient(wallet, eoaSigner, chainId)
     //tx service should be scoped to the eoa signer
     const out = new EIP155PkpLib(
       walletSigner,
