@@ -23,6 +23,28 @@ export default function SessionSendTransactionModal() {
   const requestEvent = ModalStore.state.data?.requestEvent
   const requestSession = ModalStore.state.data?.requestSession
 
+  useEffect(() => {
+    if (!requestEvent?.params?.request?.params?.length) {
+      return
+    }
+    // Get required proposal data
+    const { topic, params, id } = requestEvent
+    const { request, chainId } = params
+    const transaction = request.params[0]
+    const fn = async () => {
+      transaction.nonce = await litContracts.provider.getTransactionCount(address)
+      const tx = JSON.parse(JSON.stringify(transaction))
+      const feeData = await litContracts.provider.getFeeData()
+      tx.type = 2
+      tx.chainId = chainId.indexOf(':') !== -1 ? chainId.split(':')[1] : chainId
+      tx.maxFeePerGas = feeData.maxFeePerGas?.toHexString()
+      delete tx.gasPrice
+      tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas?.toHexString()
+      setTx(tx)
+    }
+    fn()
+  }, [requestEvent])
+
   // Ensure request and wallet are defined
   if (!requestEvent || !requestSession) {
     return <Text>Missing request data</Text>
@@ -33,23 +55,6 @@ export default function SessionSendTransactionModal() {
   const { request, chainId } = params
   const transaction = request.params[0]
 
-  useEffect(() => {
-    if (!transaction) {
-      return
-    }
-    (async () => {
-      transaction.nonce = await litContracts.provider.getTransactionCount(address)
-      const tx = JSON.parse(JSON.stringify(transaction));
-      const feeData = await litContracts.provider.getFeeData()
-      tx.type = 2
-      tx.chainId = chainId.indexOf(':') !== -1 ? chainId.split(':')[1] : chainId,
-      tx.maxFeePerGas = feeData.maxFeePerGas.toHexString()
-      delete tx.gasPrice
-      tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString()
-      setTx(tx)
-    })();
-  }, [transaction])
-
   async function onSave() {
     setLoading(true)
     await safeApi.createTransaction(safe, topic, id.toString(10), tx)
@@ -58,7 +63,7 @@ export default function SessionSendTransactionModal() {
     //   response: formatJsonRpcResult(id, hash),
     // })
     ModalStore.close()
-    setLoading(false);
+    setLoading(false)
   }
 
   // Handle reject action

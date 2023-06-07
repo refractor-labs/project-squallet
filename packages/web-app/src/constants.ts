@@ -1,1 +1,1 @@
-export const litNetworkChainName = 'mumbai'
+export const litNetworkChainName = 'chronicle'

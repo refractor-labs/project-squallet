@@ -49,9 +49,10 @@ export default function Fund() {
       await litContracts.connect()
 
       console.log('Sending gas to PKP')
+      await litContracts.connect()
       const gasTx = await litContracts.signer.sendTransaction({
         to: address,
-        value: '10000000000000000'
+        value: '1000000000'
       })
       console.log(await gasTx.wait())
       console.log(`Gas sent to ${address}`)
