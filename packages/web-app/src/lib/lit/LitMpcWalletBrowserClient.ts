@@ -1,7 +1,8 @@
 import { LitMpcWallet, LitWalletData, WalletRequests, WalletResponse } from '@/lib/lit/LitMpcWallet'
 import { LitContracts } from '@lit-protocol/contracts-sdk'
-import LitJsSdk from 'lit-js-sdk'
+import * as LitJsSdk from '@lit-protocol/lit-node-client'
 import { litActions } from '@/components/lit-actions-code'
+import { litNetworkChainName } from '@/constants'
 
 /**
  * Lit MPC client. This talks to the lit action, and makes sure the inputs are correctly formatted.
@@ -30,7 +31,7 @@ export class LitMpcWalletBrowserClient implements LitMpcWallet {
     console.log('connected lit client')
     // get authentication signature to deploy call the action
     var authSig = await LitJsSdk.checkAndSignAuthMessage({
-      chain: 'mumbai'
+      chain: litNetworkChainName
     })
     console.log('created auth sig', authSig)
 

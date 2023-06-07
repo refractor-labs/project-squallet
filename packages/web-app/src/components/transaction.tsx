@@ -3,12 +3,13 @@ import useApi from '@/hooks/useApi'
 import { TransactionDetailed } from '@refactor-labs-lit-protocol/api-client'
 import { ethers } from 'ethers'
 import { useCallback, useContext, useEffect, useState } from 'react'
-import LitJsSdk from 'lit-js-sdk'
+import * as LitJsSdk from '@lit-protocol/lit-node-client'
 
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { formatJsonRpcResult } from '@json-rpc-tools/utils'
 import ModalStore from '@/walletconnect/store/ModalStore'
 import { Text } from '@nextui-org/react'
+import { litNetworkChainName } from '@/constants'
 
 type Props = {
   transaction: TransactionDetailed
@@ -42,7 +43,7 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     ...transaction.transaction,
     nonce
   }
-  const hash = ethers.utils.keccak256(ethers.utils.serializeTransaction(tx));
+  const hash = ethers.utils.keccak256(ethers.utils.serializeTransaction(tx))
 
   const sign = async () => {
     if (!signer || !safeApi) {
@@ -51,7 +52,7 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     try {
       const signature = await signer.signMessage(hash)
       await safeApi.createSignature(safe, transaction.id, signature, signerAddress, nonce)
-      await onUpdate();
+      await onUpdate()
     } catch {}
   }
 
@@ -59,10 +60,10 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     if (!transaction?.transaction) {
       return
     }
-    setLoading(true);
+    setLoading(true)
     try {
-      var authSig = await (LitJsSdk as any).checkAndSignAuthMessage({ chain: 'mumbai' })
-      await litNodeClient.connect();
+      var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain: litNetworkChainName })
+      await litNodeClient.connect()
       // this does both deployment action calling in the same code
       // need to break it down to upload to ipfs separately
       const resp = await litNodeClient.executeJs({
@@ -85,13 +86,10 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
         setLoading(false)
         return
       }
-      const serialized2 = ethers.utils.serializeTransaction(
-        tx,
-        resp.signatures.sig1.signature
-      )
+      const serialized2 = ethers.utils.serializeTransaction(tx, resp.signatures.sig1.signature)
       // console.log(serialized2)
       const sent = await litContracts.provider.sendTransaction(serialized2)
-      await sent.wait();
+      await sent.wait()
       await safeApi.patchTransaction(safe, transaction.id, sent.hash)
       await onUpdate()
       if (transaction.topic && transaction.requestId) {
@@ -165,7 +163,7 @@ ${JSON.stringify(tx, null, 2)}
             transaction.signatures.length < threshhold ||
             loading ||
             baseNonce !== nonce ||
-            transaction.signatures.some((signature) => {
+            transaction.signatures.some(signature => {
               return signature.nonce !== nonce
             })
           }

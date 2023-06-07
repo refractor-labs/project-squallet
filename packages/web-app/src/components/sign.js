@@ -1,4 +1,4 @@
-import LitJsSdk from 'lit-js-sdk'
+import * as LitJsSdk from '@lit-protocol/lit-node-client'
 import { recoverAddress } from '@ethersproject/transactions'
 import { splitSignature, joinSignature } from '@ethersproject/bytes'
 import { recoverPublicKey, computePublicKey } from '@ethersproject/signing-key'
@@ -10,6 +10,7 @@ import { hashUnsignedTransaction } from '@/lib/action/lit-lib'
 import erc20 from '@/abis/erc20'
 import { ipfs } from '@/utils/ipfs'
 import { useLocalStorage } from 'usehooks-ts'
+import { litNetworkChainName } from '../constants'
 
 // this code will be run on the node
 const litActionCode = `
@@ -64,7 +65,7 @@ function Sign() {
 
     // get authentication signature to deploy call the action
     var authSig = await LitJsSdk.checkAndSignAuthMessage({
-      chain: 'mumbai'
+      chain: litNetworkChainName
     })
 
     // this does both deployment action calling in the same code
@@ -166,7 +167,7 @@ function Sign() {
 
     // get authentication signature to deploy call the action
     var authSig = await LitJsSdk.checkAndSignAuthMessage({
-      chain: 'mumbai'
+      chain: litNetworkChainName
     })
 
     // this does both deployment action calling in the same code
@@ -325,7 +326,7 @@ function Sign() {
 
       // get authentication signature to deploy call the action
       var authSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain: 'mumbai'
+        chain: litNetworkChainName
       })
 
       const serialized = ethers.utils.serializeTransaction(tx)

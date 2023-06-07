@@ -1,26 +1,19 @@
 import { ipfs } from '@/utils/ipfs'
 import { useContext, useState } from 'react'
 import { ethers } from 'ethers'
-import LitJsSdk from 'lit-js-sdk'
+import * as LitJsSdk from '@lit-protocol/lit-node-client'
 import { WalletContext } from '@/contexts/wallet'
 import { useRouter } from 'next/router'
 import { getCode } from '@/utils/code'
 import { gnosis } from '@/abis/gnosis'
+import { litNetworkChainName } from '@/constants'
 
 export default function LitAction() {
-  const {
-    publicKey,
-    address,
-    pkp,
-    owner,
-    actions,
-    chainId,
-    litContracts,
-    litNodeClient,
-  } = useContext(WalletContext);
+  const { publicKey, address, pkp, owner, actions, chainId, litContracts, litNodeClient } =
+    useContext(WalletContext)
   const [loading, setLoading] = useState(false)
-  const router = useRouter();
-  const safe = (router.query.safe || '0x7169C30D4cfb727C7A463dA8c33A18B8f11C2230') as string;
+  const router = useRouter()
+  const safe = (router.query.safe || '0x7169C30D4cfb727C7A463dA8c33A18B8f11C2230') as string
 
   const onClickDelete = async (id: string) => {
     if (!actions?.length || actions.length === 1) {
@@ -51,7 +44,7 @@ export default function LitAction() {
     tx.gasLimit = estimation.toHexString()
 
     // get authentication signature to deploy call the action
-    var authSig = await (LitJsSdk as any).checkAndSignAuthMessage({ chain: 'mumbai' })
+    var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain: litNetworkChainName })
 
     // this does both deployment action calling in the same code
     // need to break it down to upload to ipfs separately
@@ -71,7 +64,7 @@ export default function LitAction() {
     const sent = await litContracts.provider.sendTransaction(serialized2)
     console.log(sent)
     console.log(await sent.wait())
-    document.dispatchEvent(new Event('reload'));
+    document.dispatchEvent(new Event('reload'))
   }
   const onClickCreate = async () => {
     setLoading(true)
@@ -102,7 +95,7 @@ export default function LitAction() {
         tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString()
         tx.gasLimit = estimation.toHexString()
         // get authentication signature to deploy call the action
-        var authSig = await (LitJsSdk as any).checkAndSignAuthMessage({ chain: 'mumbai' })
+        var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain: litNetworkChainName })
 
         console.log({
           ipfsId: actions[actions.length - 1].cid,
@@ -147,7 +140,7 @@ export default function LitAction() {
         )
         await transferTx.wait()
       }
-      document.dispatchEvent(new Event('reload'));
+      document.dispatchEvent(new Event('reload'))
     } catch (err) {
       console.log(err)
     }
@@ -167,28 +160,28 @@ export default function LitAction() {
         {actions?.map(a => {
           return (
             <p key={a.id} className="space-x-2">
-              <a href={`https://ipfs.stibits.com/${a.cid}`} className="underline" target="_blank">
+              <a
+                href={`https://ipfs.stibits.com/${a.cid}`}
+                className="underline"
+                target="_blank"
+                rel="noreferrer"
+              >
                 {a.cid}
               </a>
-              <button
-                onClick={() => onClickDelete(a.id)}
-                className="btn btn-xs btn-ghost text-xs"
-              >
+              <button onClick={() => onClickDelete(a.id)} className="btn btn-xs btn-ghost text-xs">
                 x
               </button>
             </p>
           )
         })}
       </span>
-      {
-        owner !== address && (
-          <div className="card-actions justify-end">
-            <button className={`btn btn-sm ${loading ? 'loading' : ''}`} onClick={onClickCreate}>
-              {owner === address ? 'Update Signers' : 'Transfer Onwership to PKP'}
-            </button>
-          </div>  
-        )
-      }
+      {owner !== address && (
+        <div className="card-actions justify-end">
+          <button className={`btn btn-sm ${loading ? 'loading' : ''}`} onClick={onClickCreate}>
+            {owner === address ? 'Update Signers' : 'Transfer Onwership to PKP'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
