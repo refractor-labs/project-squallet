@@ -1,5 +1,5 @@
 import { SignatureLike } from "@ethersproject/bytes";
-import { ethers, providers, TypedDataDomain } from "ethers";
+import ethers from "ethers";
 import {
   TransactionModel,
   TransactionRequest,
@@ -68,7 +68,7 @@ export const verifySignature = (
 };
 
 export const verifyTypedDataSignature = (
-  domain: TypedDataDomain,
+  domain: ethers.TypedDataDomain,
   types: Record<string, TypedDataField[]>,
   value: Record<string, any>,
   signature: SignatureLike

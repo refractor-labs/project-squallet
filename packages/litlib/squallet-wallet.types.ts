@@ -1,12 +1,10 @@
-import { providers, TypedDataDomain } from "ethers";
+import ethers from "ethers";
 import {
   OwnerSignature,
   TransactionModel,
   TransactionRequestI,
 } from "./transaction.types";
 import { TypedDataField } from "@ethersproject/abstract-signer";
-import { SignatureLike } from "@ethersproject/bytes";
-import { BytesLike } from "@ethersproject/bytes/src.ts";
 
 // Interface for the squallet lit action. Makes sure interactions conform to the squallet json protocol.
 export interface SqualletWalletTypes {
@@ -57,7 +55,7 @@ export type SignMessageRequest = JsonRequest<
 export type SignTypedDataRequest = JsonRequest<
   "signTypedData",
   {
-    domain: TypedDataDomain;
+    domain: ethers.TypedDataDomain;
     types: Record<string, Array<TypedDataField>>;
     value: Record<string, any>;
     signatures: OwnerSignature[];

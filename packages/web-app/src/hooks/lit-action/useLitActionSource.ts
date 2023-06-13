@@ -30,7 +30,6 @@ export const useLitActionSource = () => {
 
       return { action: a.action, src: src }
     })
-    console.log('sources', sources)
     return sources
   })
 }

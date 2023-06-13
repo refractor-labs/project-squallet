@@ -54,15 +54,16 @@ export class SafeController extends Controller {
   public async getTransactions(
     @Path() address: string
   ): Promise<TransactionDetailed[]> {
-    return prisma.transaction.findMany({
+    const t = await prisma.transaction.findMany({
       where: {
         address: address.toLocaleLowerCase(),
-        hash: "",
+        // hash: "",
       },
       include: {
         signatures: true,
       },
     });
+    return t;
   }
 
   @Patch("{address}/transactions/{transactionId}")

@@ -1,4 +1,4 @@
-import { BigNumberish, ethers } from "ethers";
+import ethers from "ethers";
 import { BytesLike } from "@ethersproject/bytes";
 import { AccessListish } from "@ethersproject/transactions";
 
@@ -12,11 +12,11 @@ export interface UnsignedMpcTransaction {
   // maxFeePerGas?: BigNumberish
   maxPriorityFeePerGas: 0;
   maxFeePerGas: 0;
-  gasLimit: BigNumberish;
+  gasLimit: ethers.BigNumberish;
 
   from: string;
   to: string;
-  value?: BigNumberish;
+  value?: ethers.BigNumberish;
   data?: BytesLike;
 
   //
@@ -44,11 +44,11 @@ export interface TransactionRequestI
   from: string;
   nonce: number;
 
-  gasLimit: BigNumberish;
-  gasPrice?: BigNumberish;
+  gasLimit: ethers.BigNumberish;
+  gasPrice?: ethers.BigNumberish;
 
   data?: BytesLike;
-  value?: BigNumberish;
+  value?: ethers.BigNumberish;
   chainId: number;
 
   type: 2;
@@ -67,11 +67,11 @@ export class TransactionRequest implements TransactionRequestI {
   from: string;
   nonce: number;
 
-  gasLimit: BigNumberish;
-  gasPrice?: BigNumberish;
+  gasLimit: ethers.BigNumberish;
+  gasPrice?: ethers.BigNumberish;
 
   data?: BytesLike;
-  value?: BigNumberish;
+  value?: ethers.BigNumberish;
   chainId: number;
 
   type: 2;

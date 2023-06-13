@@ -12,6 +12,25 @@ import { Text } from '@nextui-org/react'
 import { chainLit } from '@/constants'
 import { useLitActionSource } from '@/hooks/lit-action/useLitActionSource'
 import { useActiveAction, useMultisigConfig } from '@/hooks/lit-action/useMultisigConfig'
+import { useMutation } from '@tanstack/react-query'
+import { useNetwork, useSwitchNetwork } from 'wagmi'
+import { useLitClient } from '@/hooks/lit-action/useLitClient'
+
+const chainIdToLitChainName = (chainId: number) => {
+  switch (chainId) {
+    case 1:
+      return 'mainnet'
+    case 4:
+      return 'rinkeby'
+    case 5:
+      return 'goerli'
+    case 80001:
+      return 'mumbai'
+    case 175177:
+      return 'chronicle'
+  }
+  throw new Error('unknown chain id: ' + chainId)
+}
 
 type Props = {
   transaction: TransactionDetailed
@@ -21,7 +40,7 @@ type Props = {
 }
 
 function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
-  const [loading, setLoading] = useState(false)
+  // const [loading, setLoading] = useState(false)
   const {
     // actions,
     pkpAddress,
@@ -29,31 +48,45 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     // signers,
     // threshhold,
     signerAddress,
-    litNodeClient,
+    // litNodeClient,
     pkpPublicKey,
     litContracts,
     pkpWallet
   } = useWalletContext()
+  const { data: litNodeClient } = useLitClient()
+
+  const { chain } = useNetwork()
+  const { error, isLoading, pendingChainId, switchNetwork } = useSwitchNetwork()
   const msConfig = useActiveAction()
 
   const { safeApi } = useApi()
 
   const safe = pkpAddress
 
-  if (!transaction || !transaction.transaction || !pkpAddress || !msConfig.data) {
-    return null
-  }
-
   const tx = {
     ...transaction.transaction,
     nonce
   }
+
+  let chainMismatch = false
+  const txChain = transaction.transaction?.chainId as string | undefined
+  if (typeof chain?.id !== 'number' || txChain !== chain?.id?.toString()) {
+    chainMismatch = true
+  }
+
   const hash = ethers.utils.keccak256(ethers.utils.serializeTransaction(tx))
 
   const sign = async () => {
-    if (!signer || !safeApi) {
+    if (!signer || !safeApi || !chain?.id || !txChain) {
       return
     }
+    if (chainMismatch) {
+      console.log('chain mismatch', txChain, 'actual', chain?.id)
+      switchNetwork?.(parseInt(txChain))
+      return
+      //request to switch network
+    }
+    //switch the network to the correct one
 
     // pkpWallet.
     try {
@@ -63,14 +96,26 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     } catch {}
   }
 
-  const broadcast = async () => {
-    if (!transaction?.transaction || !msConfig.data) {
+  const { mutate: broadcastMutation, isLoading: loading } = useMutation(async () => {
+    if (!transaction?.transaction || !msConfig.data || !txChain || !litNodeClient) {
       return
     }
-    setLoading(true)
+    if (chainMismatch) {
+      console.log('chain mismatch', txChain, 'actual', chain?.id)
+      switchNetwork?.(parseInt(txChain))
+      return
+      //request to switch network
+    }
+    // setLoading(true)
+    console.log('chain is', chain)
     try {
-      var authSig = await LitJsSdk.checkAndSignAuthMessage({ chain: chainLit })
+      var authSig = await LitJsSdk.checkAndSignAuthMessage({
+        chain: chainIdToLitChainName(chain?.id as number)
+      })
+
+      console.log('got the auth sig!!!!!', authSig)
       await litNodeClient.connect()
+      console.log('connected!')
       // this does both deployment action calling in the same code
       // need to break it down to upload to ipfs separately
 
@@ -81,18 +126,17 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
         // all jsParams can be used anywhere in your litActionCode
         jsParams: {
           tx,
-          threshold: msConfig.data.threshold,
           rpc: 'https://ethereum.publicnode.com',
           network: 'homestead',
-          pkpPublicKey: publicKey,
+          pkpPublicKey,
           sigName: 'sig1',
           signatures: transaction.signatures.map(s => s.signature)
         }
       })
-      // console.log(resp)
+      console.log(resp)
       if (!resp?.signatures?.sig1) {
         alert('Invalid signature')
-        setLoading(false)
+        // setLoading(false)
         return
       }
       const serialized2 = ethers.utils.serializeTransaction(tx, resp.signatures.sig1.signature)
@@ -115,7 +159,16 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
       console.log(err)
       alert('See console for error')
     }
-    setLoading(false)
+    // setLoading(false)
+  })
+
+  const broadcast = useCallback(() => {
+    broadcastMutation()
+  }, [broadcastMutation])
+
+  if (!transaction || !transaction.transaction || !pkpAddress || !msConfig.data) {
+    // console.log('hey hey hey, null!!', { transaction, pkpAddress, msConfig })
+    return null
   }
 
   const deleteTransaction = async () => {
@@ -138,7 +191,7 @@ ${JSON.stringify(tx, null, 2)}
         </pre>
       </div>
       <div className="space-y-4 py-4 text-xs">
-        {msConfig.data[0].signers.map((signer, index) => {
+        {msConfig.data.signers.map((signer, index) => {
           const isSigner = signerAddress.toLocaleLowerCase() === signer.toLocaleLowerCase()
           const signature = transaction.signatures?.find(
             signature => signature.signer.toLocaleLowerCase() === signer.toLocaleLowerCase()

@@ -5,8 +5,8 @@ import {
   verifySignature
 } from '../lib/action/lit-lib'
 
-const authorizedAddresses = ['0x182351E16c1F511e50eA4438aFE3d0f16ae4769B']
-const threshold = 1
+const authorizedAddresses = ['%%authorizedAddresses%%']
+const threshold = 1337
 
 const setResponse = response => {
   return Lit.Actions.setResponse({

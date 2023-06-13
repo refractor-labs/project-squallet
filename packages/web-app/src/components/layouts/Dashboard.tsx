@@ -35,7 +35,6 @@ export default function DashboardLayout({ children }: Props) {
   console.log('Dashboard wallet:', wallet)
   const initialized = useInitialization(wallet)
   const router = useRouter()
-  console.log('here in the layout,initialized', initialized)
   useWalletConnectEventsManager(initialized)
 
   useEffect(() => {

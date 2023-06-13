@@ -5,9 +5,9 @@ import { useCallback, useContext, useEffect, useState } from 'react'
 import Transaction from './transaction'
 import { WalletContext } from '@/contexts/wallet-standalone'
 import { useProvider } from 'wagmi'
+import { useQuery } from '@tanstack/react-query'
 
 function Transactions() {
-  const [transactions, setTransactions] = useState<TransactionDetailed[] | null>(null)
   const [nonce, setNonce] = useState<number | null>(null)
   const { pkpAddress, litContracts } = useContext(WalletContext)
 
@@ -29,18 +29,19 @@ function Transactions() {
     }
   }, [litContracts, pkpAddress])
 
-  const loadData = useCallback(async () => {
-    await updateNonce()
-    if (!pkpAddress || !safeApi) {
-      return
+  const { data: transactions, refetch } = useQuery(
+    ['use-transactions', safeApi, pkpAddress, updateNonce],
+    async ({ signal }) => {
+      await updateNonce()
+      if (!pkpAddress || !safeApi) {
+        return
+      }
+      const data = await safeApi.getTransactions(pkpAddress, { signal })
+      return data.data
     }
-    safeApi.getTransactions(pkpAddress).then(r => setTransactions(r.data))
-  }, [safeApi, pkpAddress, updateNonce])
+  )
 
-  useEffect(() => {
-    loadData()
-  }, [loadData])
-
+  console.log({ transactions, nonce })
   if (!transactions || nonce === null) {
     return null
   }
@@ -51,7 +52,7 @@ function Transactions() {
         <Transaction
           key={t.id}
           transaction={t}
-          onUpdate={loadData}
+          onUpdate={refetch}
           baseNonce={nonce}
           nonce={nonce + index}
         />

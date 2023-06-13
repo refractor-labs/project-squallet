@@ -4,7 +4,7 @@ import { useLitActionSource } from '@/hooks/lit-action/useLitActionSource'
 
 export type MsConfig = { signers: string[]; threshold: number; action: Action; src: string }
 // extract the signers and threshold from the source code.
-const regex = /var\s*authorizedAddresses\s*=\s*(\[.+\]);\svar\s*threshold\s*=\s*(\d+);/g
+const regex = /var\s*authorizedAddresses\s*=\s*(\[.+\]);\s*var\s*threshold\s*=\s*(\d+);/g
 export const useMultisigConfig = () => {
   const wallet = useWalletContext()
   const { data: sources } = useLitActionSource()
@@ -17,6 +17,7 @@ export const useMultisigConfig = () => {
       const sourcesWithMatches = sources.map(source => {
         //
         const matches = Array.from(source.src.matchAll(regex))
+        console.log('matches', matches)
         if (matches.length > 1) {
           console.log('error, src code does not contain multisig config')
           return { ...source, signers: [], threshold: 0 }
@@ -25,7 +26,6 @@ export const useMultisigConfig = () => {
         const threshold = parseInt(matches[0][2])
         return { ...source, signers, threshold }
       })
-      console.log('sourcesWithMatches', sourcesWithMatches)
       return sourcesWithMatches
     }
   )
@@ -35,9 +35,9 @@ export const useActiveAction = () => {
   const msConfig = useMultisigConfig()
   return useQuery(['useActiveAction', msConfig.data], async () => {
     if (!msConfig.data) {
-      return null
+      return
     }
-    const active = msConfig.data.find(a => !a.signers)
+    const active = msConfig.data.find(a => !!a.signers)
     if (!active) {
       throw new Error('no active action found')
     }

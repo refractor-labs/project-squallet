@@ -14,8 +14,8 @@ import {
   verifyTypedDataSignature,
 } from "@refactor-labs-lit-protocol/litlib";
 
-const authorizedAddresses = ["0x182351E16c1F511e50eA4438aFE3d0f16ae4769B"];
-const threshold = 1;
+const authorizedAddresses = ["%%OWNER_ADDRESS%%"];
+const threshold = "%%THRESHOLD%%";
 
 const setResponse = (response: any) => {
   return LitActions.setResponse({
