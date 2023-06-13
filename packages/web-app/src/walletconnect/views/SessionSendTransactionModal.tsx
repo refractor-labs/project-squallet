@@ -10,19 +10,20 @@ import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Divider, Loading, Modal, Text } from '@nextui-org/react'
 import { Fragment, useContext, useEffect, useState } from 'react'
 import useApi from '@/hooks/useApi'
+import { useProvider } from 'wagmi'
 
 export default function SessionSendTransactionModal() {
   const [loading, setLoading] = useState(false)
-  const { litContracts, pkpAddress } = useContext(WalletContext)
+  const { litContracts, pkpAddress, signer } = useContext(WalletContext)
+  const provider = useProvider()
   const [tx, setTx] = useState<any>(null)
   const { safeApi } = useApi()
-  const safe = ''
   // Get request and wallet data from store
   const requestEvent = ModalStore.state.data?.requestEvent
   const requestSession = ModalStore.state.data?.requestSession
 
   useEffect(() => {
-    if (!transaction) {
+    if (!transaction || !provider) {
       return
     }
     // Ensure request and wallet are defined
@@ -30,14 +31,17 @@ export default function SessionSendTransactionModal() {
       return
     }
     ;(async () => {
-      transaction.nonce = await litContracts.provider.getTransactionCount(pkpAddress)
+      transaction.nonce = await provider.getTransactionCount(pkpAddress)
       const tx = JSON.parse(JSON.stringify(transaction))
-      const feeData = await litContracts.provider.getFeeData()
+      const feeData = await provider.getFeeData()
+      if (!feeData.maxPriorityFeePerGas || !feeData.maxFeePerGas) {
+        throw new Error('Missing fee data: ' + JSON.stringify(feeData))
+      }
       tx.type = 2
-      ;(tx.chainId = chainId.indexOf(':') !== -1 ? chainId.split(':')[1] : chainId),
-        (tx.maxFeePerGas = feeData.maxFeePerGas.toHexString())
+      tx.chainId = chainId.indexOf(':') !== -1 ? chainId.split(':')[1] : chainId
+      tx.maxFeePerGas = feeData.maxFeePerGas?.toHexString()
       delete tx.gasPrice
-      tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.toHexString()
+      tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas?.toHexString()
       setTx(tx)
     })()
   }, [requestEvent])
@@ -54,13 +58,18 @@ export default function SessionSendTransactionModal() {
 
   async function onSave() {
     setLoading(true)
-    await safeApi.createTransaction(safe, topic, id.toString(10), tx)
-    // await signClient.respond({
-    //   topic,
-    //   response: formatJsonRpcResult(id, hash),
-    // })
-    ModalStore.close()
-    setLoading(false)
+    try {
+      await safeApi.createTransaction(pkpAddress, topic, id.toString(10), tx)
+      // await signClient.respond({
+      //   topic,
+      //   response: formatJsonRpcResult(id, hash),
+      // })
+      ModalStore.close()
+    } catch (e) {
+      console.error('failed to save Transaction, trying again?', e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Handle reject action

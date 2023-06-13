@@ -14,6 +14,10 @@ import {
 } from "tsoa";
 import { Signature, Transaction } from "@prisma/client";
 import { prisma } from "../config";
+import {
+  hashUnsignedTransaction,
+  UnsignedMpcTransaction,
+} from "@refactor-labs-lit-protocol/litlib";
 
 type TransactionDetailed = Transaction & {
   signatures: Signature[];
@@ -30,11 +34,12 @@ export class SafeController extends Controller {
     @Query() topic: string,
     @Query() requestId: string
   ): Promise<TransactionDetailed> {
-    return prisma.transaction.create({
+    const hash = hashUnsignedTransaction(transaction);
+    const res = await prisma.transaction.create({
       data: {
         address: address.toLocaleLowerCase(),
         transaction,
-        hash: "",
+        hash,
         topic,
         requestId,
       },
@@ -42,6 +47,7 @@ export class SafeController extends Controller {
         signatures: true,
       },
     });
+    return res;
   }
 
   @Get("{address}/transactions")

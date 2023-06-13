@@ -4,6 +4,7 @@ import ModalStore from '@/walletconnect/store/ModalStore'
 import { Button, Col, Divider, Loading, Modal, Row, Text } from '@nextui-org/react'
 import { Fragment, useCallback, useContext, useState } from 'react'
 import useApi from '@/hooks/useApi'
+import { useNetwork, useSwitchNetwork } from 'wagmi'
 
 export default function SessionCreateTransactionModal() {
   const [loading, setLoading] = useState(false)
@@ -19,7 +20,7 @@ export default function SessionCreateTransactionModal() {
   const createTransaction = useCallback(async () => {
     setLoading(true)
     const feeData = await litContracts.provider.getFeeData()
-    const safe = ''
+    const safe = pkpAddress
     await safeApi.createTransaction(safe, '', '', {
       to,
       data,

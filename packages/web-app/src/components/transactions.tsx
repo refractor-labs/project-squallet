@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import Transaction from './transaction'
 import { WalletContext } from '@/contexts/wallet-standalone'
+import { useProvider } from 'wagmi'
 
 function Transactions() {
   const [transactions, setTransactions] = useState<TransactionDetailed[] | null>(null)
@@ -12,15 +13,16 @@ function Transactions() {
 
   const router = useRouter()
   const { safeApi } = useApi()
-  const safe = router.query.safe as string
+  // const safe = router.query.safe as string
+  const provider = useProvider()
 
   const updateNonce = useCallback(async () => {
     if (!pkpAddress) {
       return
     }
-    await litContracts.connect()
+    // await litContracts.connect()
     try {
-      const nonce = await litContracts.provider.getTransactionCount(pkpAddress)
+      const nonce = await provider.getTransactionCount(pkpAddress)
       setNonce(nonce)
     } catch (err) {
       console.error(err)
@@ -29,11 +31,11 @@ function Transactions() {
 
   const loadData = useCallback(async () => {
     await updateNonce()
-    if (!safe || !safeApi) {
+    if (!pkpAddress || !safeApi) {
       return
     }
-    safeApi.getTransactions(safe).then(r => setTransactions(r.data))
-  }, [safeApi, safe, updateNonce])
+    safeApi.getTransactions(pkpAddress).then(r => setTransactions(r.data))
+  }, [safeApi, pkpAddress, updateNonce])
 
   useEffect(() => {
     loadData()

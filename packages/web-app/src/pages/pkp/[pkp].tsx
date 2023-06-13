@@ -7,13 +7,16 @@ import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Input, Loading, Text } from '@nextui-org/react'
 import { WalletContext } from '@/contexts/wallet-standalone'
 import { ethers } from 'ethers'
+import { useLitActionSource } from '@/hooks/lit-action/useLitActionSource'
+import { useMultisigConfig } from '@/hooks/lit-action/useMultisigConfig'
 
 function WalletConnectPKPStandalonePage() {
-  console.log('pizza in WalletConnectPKPStandalonePage')
   const [uri, setUri] = useState('')
   const [loading, setLoading] = useState(false)
   const walletContext = useContext(WalletContext)
-  console.log('walletContext', walletContext)
+  // console.log('walletContext', walletContext)
+  const sources = useLitActionSource()
+  const parsed = useMultisigConfig()
   async function onConnect(uri: string) {
     try {
       setLoading(true)

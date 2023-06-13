@@ -2,7 +2,15 @@ import { LitContracts } from '@lit-protocol/contracts-sdk'
 // import * as LitJsSdk from '@lit-protocol/lit-node-client'
 import { ethers, Signer } from 'ethers'
 import { useRouter } from 'next/router'
-import { createContext, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from 'react'
 import base58 from 'bs58'
 import { gnosis } from '@/abis/gnosis'
 // import { litNetwork } from '@/constants'
@@ -213,4 +221,8 @@ export default function WalletStandaloneContext({ children }: Props) {
   ])
 
   return <WalletContext.Provider value={wallet}>{children}</WalletContext.Provider>
+}
+
+export const useWalletContext = () => {
+  return useContext(WalletContext)
 }

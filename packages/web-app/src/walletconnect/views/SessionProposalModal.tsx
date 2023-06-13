@@ -10,6 +10,7 @@ import { Button, Divider, Modal, Text } from '@nextui-org/react'
 import { SessionTypes } from '@walletconnect/types'
 import { getSdkError } from '@walletconnect/utils'
 import { Fragment, useState } from 'react'
+import { useNetwork, useSwitchNetwork } from 'wagmi'
 
 export default function SessionProposalModal() {
   const [selectedAccounts, setSelectedAccounts] = useState<Record<string, string[]>>({})
@@ -31,7 +32,7 @@ export default function SessionProposalModal() {
   console.log('requiredNamespaces', requiredNamespaces)
   // Add / remove address from EIP155 selection
   function onSelectAccount(chain: string, account: string) {
-    console.log('selected account', chain, account)
+    // console.log('selected account', chain, account)
     if (selectedAccounts[chain]?.includes(account)) {
       const newSelectedAccounts = selectedAccounts[chain]?.filter(a => a !== account)
       setSelectedAccounts(prev => ({

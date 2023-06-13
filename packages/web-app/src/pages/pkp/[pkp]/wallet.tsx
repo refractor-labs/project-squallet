@@ -6,6 +6,7 @@ import SettingsStore from '@/walletconnect/store/SettingsStore'
 import { Text } from '@nextui-org/react'
 import { Fragment, ReactElement } from 'react'
 import { useSnapshot } from 'valtio'
+import { useLitActionSource } from '@/hooks/lit-action/useLitActionSource'
 
 export default function WalletPage() {
   const { testNets, eip155Address } = useSnapshot(SettingsStore.state)

@@ -1,4 +1,4 @@
-import { WalletContext } from '@/contexts/wallet-standalone'
+import { useWalletContext, WalletContext } from '@/contexts/wallet-standalone'
 import useApi from '@/hooks/useApi'
 import { TransactionDetailed } from '@refactor-labs-lit-protocol/api-client'
 import { ethers } from 'ethers'
@@ -10,6 +10,8 @@ import { formatJsonRpcResult } from '@json-rpc-tools/utils'
 import ModalStore from '@/walletconnect/store/ModalStore'
 import { Text } from '@nextui-org/react'
 import { chainLit } from '@/constants'
+import { useLitActionSource } from '@/hooks/lit-action/useLitActionSource'
+import { useActiveAction, useMultisigConfig } from '@/hooks/lit-action/useMultisigConfig'
 
 type Props = {
   transaction: TransactionDetailed
@@ -21,7 +23,7 @@ type Props = {
 function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
   const [loading, setLoading] = useState(false)
   const {
-    actions,
+    // actions,
     pkpAddress,
     signer,
     // signers,
@@ -29,12 +31,16 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     signerAddress,
     litNodeClient,
     pkpPublicKey,
-    litContracts
-  } = useContext(WalletContext)
+    litContracts,
+    pkpWallet
+  } = useWalletContext()
+  const msConfig = useActiveAction()
 
   const { safeApi } = useApi()
 
-  if (!transaction || !transaction.transaction || !signers) {
+  const safe = pkpAddress
+
+  if (!transaction || !transaction.transaction || !pkpAddress || !msConfig.data) {
     return null
   }
 
@@ -48,15 +54,17 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     if (!signer || !safeApi) {
       return
     }
+
+    // pkpWallet.
     try {
       const signature = await signer.signMessage(hash)
-      await safeApi.createSignature(safe, transaction.id, signature, signerAddress, nonce)
+      await safeApi.createSignature(pkpAddress, transaction.id, signature, signerAddress, nonce)
       await onUpdate()
     } catch {}
   }
 
   const broadcast = async () => {
-    if (!transaction?.transaction) {
+    if (!transaction?.transaction || !msConfig.data) {
       return
     }
     setLoading(true)
@@ -65,13 +73,15 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
       await litNodeClient.connect()
       // this does both deployment action calling in the same code
       // need to break it down to upload to ipfs separately
+
+      // pkpWallet.pkpWallet
       const resp = await litNodeClient.executeJs({
-        ipfsId: actions[0].cid,
+        ipfsId: msConfig.data.action.cid, //todo, more intelligently pick the action
         authSig,
         // all jsParams can be used anywhere in your litActionCode
         jsParams: {
           tx,
-          threshhold,
+          threshold: msConfig.data.threshold,
           rpc: 'https://ethereum.publicnode.com',
           network: 'homestead',
           pkpPublicKey: publicKey,
@@ -89,7 +99,7 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
       // console.log(serialized2)
       const sent = await litContracts.provider.sendTransaction(serialized2)
       await sent.wait()
-      await safeApi.patchTransaction(safe, transaction.id, sent.hash)
+      await safeApi.patchTransaction(pkpAddress, transaction.id, sent.hash)
       await onUpdate()
       if (transaction.topic && transaction.requestId) {
         try {
@@ -128,7 +138,7 @@ ${JSON.stringify(tx, null, 2)}
         </pre>
       </div>
       <div className="space-y-4 py-4 text-xs">
-        {signers.map((signer, index) => {
+        {msConfig.data[0].signers.map((signer, index) => {
           const isSigner = signerAddress.toLocaleLowerCase() === signer.toLocaleLowerCase()
           const signature = transaction.signatures?.find(
             signature => signature.signer.toLocaleLowerCase() === signer.toLocaleLowerCase()
@@ -159,7 +169,7 @@ ${JSON.stringify(tx, null, 2)}
           onClick={broadcast}
           className={`btn w-full btn-success ${loading ? ' loading ' : ''}`}
           disabled={
-            transaction.signatures.length < threshhold ||
+            transaction.signatures.length < msConfig.data.threshold ||
             loading ||
             baseNonce !== nonce ||
             transaction.signatures.some(signature => {
