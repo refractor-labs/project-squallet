@@ -36,8 +36,9 @@
       chainId: tx.chainId,
       nonce: tx.nonce,
       type: 2,
-      maxPriorityFeePerGas: 0,
-      maxFeePerGas: 0,
+      maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
+      //todo fix these
+      maxFeePerGas: tx.maxFeePerGas,
       gasLimit: tx.gasLimit,
       from: tx.from,
       to: tx.to,
@@ -68,7 +69,7 @@
 
   // lit_actions/src/multisig.action.ts
   var authorizedAddresses = ["%%OWNER_ADDRESS%%"];
-  var threshold = "%%THRESHOLD%%";
+  var threshold = 1337;
   var setResponse = (response) => {
     return LitActions.setResponse({
       response: JSON.stringify(response)
@@ -111,7 +112,9 @@
             1
           );
         } else {
-          return errorResponse("address not authorized");
+          return errorResponse(
+            "address not authorized: " + signature.signerAddress
+          );
         }
       }
       for (let i = 0; i < signatures.length && i < threshold; i++) {
@@ -142,6 +145,8 @@
       if (signedTransaction.signatures.length < threshold) {
         return errorResponse("Not enough signatures");
       }
+      console.log("signedTransaction", JSON.stringify(signedTransaction));
+      console.log("transaction", JSON.stringify(transaction));
       const authorizedAddressesCopy = [...authorizedAddresses];
       for (let signature of signedTransaction.signatures) {
         if (!validAddress(signature.signerAddress)) {
@@ -153,11 +158,13 @@
             1
           );
         } else {
-          return errorResponse("address not authorized");
+          return errorResponse(
+            "address not authorized: " + signature.signerAddress
+          );
         }
       }
       if (!equivalent(signedTransaction, transaction)) {
-        return errorResponse("address not authorized");
+        return errorResponse("transactions not equal");
       }
       const rawMessage = hashUnsignedTransaction(signedTransaction.transaction);
       console.log("hashToSign", rawMessage);

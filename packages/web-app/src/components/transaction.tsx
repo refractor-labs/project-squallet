@@ -15,6 +15,12 @@ import { useActiveAction, useMultisigConfig } from '@/hooks/lit-action/useMultis
 import { useMutation } from '@tanstack/react-query'
 import { useNetwork, useSwitchNetwork } from 'wagmi'
 import { useLitClient } from '@/hooks/lit-action/useLitClient'
+import {
+  SignTransactionRequest,
+  TransactionRequestI,
+  UnsignedMpcTransaction
+} from '@refactor-labs-lit-protocol/litlib'
+import { useWalletClient } from '@/hooks/lit-action/useWalletClient'
 
 const chainIdToLitChainName = (chainId: number) => {
   switch (chainId) {
@@ -53,6 +59,7 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     litContracts,
     pkpWallet
   } = useWalletContext()
+  const { data: walletClient } = useWalletClient()
   const { data: litNodeClient } = useLitClient()
 
   const { chain } = useNetwork()
@@ -90,6 +97,7 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
 
     // pkpWallet.
     try {
+      //todo use walletClient for this
       const signature = await signer.signMessage(hash)
       await safeApi.createSignature(pkpAddress, transaction.id, signature, signerAddress, nonce)
       await onUpdate()
@@ -97,7 +105,13 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
   }
 
   const { mutate: broadcastMutation, isLoading: loading } = useMutation(async () => {
-    if (!transaction?.transaction || !msConfig.data || !txChain || !litNodeClient) {
+    if (
+      !transaction?.transaction ||
+      !msConfig.data ||
+      !txChain ||
+      !litNodeClient ||
+      !walletClient
+    ) {
       return
     }
     if (chainMismatch) {
@@ -120,26 +134,43 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
       // need to break it down to upload to ipfs separately
 
       // pkpWallet.pkpWallet
-      const resp = await litNodeClient.executeJs({
-        ipfsId: msConfig.data.action.cid, //todo, more intelligently pick the action
-        authSig,
-        // all jsParams can be used anywhere in your litActionCode
-        jsParams: {
-          tx,
-          rpc: 'https://ethereum.publicnode.com',
-          network: 'homestead',
-          pkpPublicKey,
-          sigName: 'sig1',
-          signatures: transaction.signatures.map(s => s.signature)
+      const request: SignTransactionRequest = {
+        method: 'signTransaction',
+        request: {
+          signedTransaction: {
+            transaction: transaction.transaction as UnsignedMpcTransaction,
+            signatures: transaction.signatures.map(s => ({
+              signerAddress: ethers.utils.getAddress(s.signer),
+              signature: s.signature
+            })),
+            hash: transaction.hash as string,
+            walletAddress: ethers.utils.getAddress(transaction.address)
+          },
+          transaction: transaction.transaction as TransactionRequestI
         }
-      })
+      }
+      const resp = await walletClient.sendRequest(request)
+      // const resp = await litNodeClient.executeJs({
+      //   ipfsId: msConfig.data.action.cid,
+      //   authSig,
+      //   // all jsParams can be used anywhere in your litActionCode
+      //   jsParams: {
+      //     tx,
+      //     rpc: 'https://ethereum.publicnode.com',
+      //     network: 'homestead',
+      //     pkpPublicKey,
+      //     sigName: 'sig1',
+      //     signatures: transaction.signatures.map(s => s.signature)
+      //   }
+      // })
+
       console.log(resp)
-      if (!resp?.signatures?.sig1) {
+      if (!resp.data?.signatures?.sig1) {
         alert('Invalid signature')
         // setLoading(false)
         return
       }
-      const serialized2 = ethers.utils.serializeTransaction(tx, resp.signatures.sig1.signature)
+      const serialized2 = ethers.utils.serializeTransaction(tx, resp.data.signatures.sig1.signature)
       // console.log(serialized2)
       const sent = await litContracts.provider.sendTransaction(serialized2)
       await sent.wait()
@@ -181,6 +212,7 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
 
   return (
     <div className="py-6 text-xs">
+      <span>{transaction.hash}</span>
       <div className="mockup-code">
         <pre className="px-4">
           <code>

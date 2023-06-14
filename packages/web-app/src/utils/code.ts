@@ -191,8 +191,7 @@ go();
 export const getCodeV2 = (owners: string[], threshold: number) => {
   const ownersString = JSON.stringify(owners)
 
-  return `
-"use strict";
+  return `"use strict";
 (() => {
   // global-externals:ethers
   var ethers_default = ethers;
@@ -230,8 +229,9 @@ export const getCodeV2 = (owners: string[], threshold: number) => {
       chainId: tx.chainId,
       nonce: tx.nonce,
       type: 2,
-      maxPriorityFeePerGas: 0,
-      maxFeePerGas: 0,
+      maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
+      //todo fix these
+      maxFeePerGas: tx.maxFeePerGas,
       gasLimit: tx.gasLimit,
       from: tx.from,
       to: tx.to,
@@ -305,7 +305,9 @@ export const getCodeV2 = (owners: string[], threshold: number) => {
             1
           );
         } else {
-          return errorResponse("address not authorized");
+          return errorResponse(
+            "address not authorized: " + signature.signerAddress
+          );
         }
       }
       for (let i = 0; i < signatures.length && i < threshold; i++) {
@@ -336,6 +338,8 @@ export const getCodeV2 = (owners: string[], threshold: number) => {
       if (signedTransaction.signatures.length < threshold) {
         return errorResponse("Not enough signatures");
       }
+      console.log("signedTransaction", JSON.stringify(signedTransaction));
+      console.log("transaction", JSON.stringify(transaction));
       const authorizedAddressesCopy = [...authorizedAddresses];
       for (let signature of signedTransaction.signatures) {
         if (!validAddress(signature.signerAddress)) {
@@ -347,11 +351,13 @@ export const getCodeV2 = (owners: string[], threshold: number) => {
             1
           );
         } else {
-          return errorResponse("address not authorized");
+          return errorResponse(
+            "address not authorized: " + signature.signerAddress
+          );
         }
       }
       if (!equivalent(signedTransaction, transaction)) {
-        return errorResponse("address not authorized");
+        return errorResponse("transactions not equal");
       }
       const rawMessage = hashUnsignedTransaction(signedTransaction.transaction);
       console.log("hashToSign", rawMessage);
@@ -406,6 +412,5 @@ export const getCodeV2 = (owners: string[], threshold: number) => {
   };
   go();
 })();
-
 `
 }

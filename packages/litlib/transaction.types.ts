@@ -1,4 +1,4 @@
-import ethers from "ethers";
+import ethers, { BigNumberish } from "ethers";
 import { BytesLike } from "@ethersproject/bytes";
 import { AccessListish } from "@ethersproject/transactions";
 
@@ -8,10 +8,10 @@ export interface UnsignedMpcTransaction {
 
   type: 2;
   // EIP-1559; Type 2
-  // maxPriorityFeePerGas?: BigNumberish
-  // maxFeePerGas?: BigNumberish
-  maxPriorityFeePerGas: 0;
-  maxFeePerGas: 0;
+  maxPriorityFeePerGas: BigNumberish;
+  maxFeePerGas: BigNumberish;
+  // maxPriorityFeePerGas: 0;
+  // maxFeePerGas: 0;
   gasLimit: ethers.BigNumberish;
 
   from: string;

@@ -19,6 +19,8 @@ import { restorePkpWallet } from '@/walletconnect/utils/EIP155WalletUtil'
 import { useAccount, useConnect, useDisconnect, useNetwork, useSigner } from 'wagmi'
 import { InjectedConnector } from '@wagmi/connectors/injected'
 import { trpc } from '@/utils/trpc'
+import { SqualletWalletBrowserClient } from '@/lib/lit/SqualletWalletBrowserClient'
+import { SqualletWalletTypes } from '@refactor-labs-lit-protocol/litlib'
 
 // const litContracts = new LitContracts()
 // const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: litNetwork })
@@ -98,6 +100,7 @@ export default function WalletStandaloneContext({ children }: Props) {
   // const [actions, setActions] = useState<string[]>([])
   // const [chainId, setChainId] = useState<number | null>(null)
   const [pkpWallet, setPkpWallet] = useState<IEIP155Lib | null>(null)
+  // const [walletClient, setWalletClient] = useState<SqualletWalletTypes | null>(null)
 
   const reload = useCallback(() => {
     if (!router.query || !connect) {
@@ -149,7 +152,19 @@ export default function WalletStandaloneContext({ children }: Props) {
         })
 
         console.log('pkp wallet is ', wallet)
-        setPkpWallet(wallet.eip155Wallets[wallet.eip155Addresses[0]])
+        const pkpWallet = wallet.eip155Wallets[wallet.eip155Addresses[0]]
+        setPkpWallet(pkpWallet)
+        // const litClient = new SqualletWalletBrowserClient(
+        //   {
+        //     pkpId: restoredPkpQuery.data.pkpId,
+        //     publicKey: restoredPkpQuery.data.pkpPublicKey,
+        //     pkpAddress: restoredPkpQuery.data.pkpAddress
+        //   },
+        //   signer,
+        //   80001
+        //   // (restoredPkpQuery.data?.permittedActions || [])[0].cid
+        // ) //chain id doesn't get used here
+        // setWalletClient(litClient)
 
         // setChainId(await signer.getChainId())
         // console.log('signer', litContracts.signer)

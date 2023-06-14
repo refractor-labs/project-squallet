@@ -15,7 +15,7 @@ import {
 } from "@refactor-labs-lit-protocol/litlib";
 
 const authorizedAddresses = ["%%OWNER_ADDRESS%%"];
-const threshold = "%%THRESHOLD%%";
+const threshold = 1337;
 
 const setResponse = (response: any) => {
   return LitActions.setResponse({
@@ -64,7 +64,9 @@ const governanceForMethod = {
           1
         );
       } else {
-        return errorResponse("address not authorized");
+        return errorResponse(
+          "address not authorized: " + signature.signerAddress
+        );
       }
     }
     for (let i = 0; i < signatures.length && i < threshold; i++) {
@@ -102,6 +104,9 @@ const governanceForMethod = {
       return errorResponse("Not enough signatures");
     }
 
+    console.log("signedTransaction", JSON.stringify(signedTransaction));
+    console.log("transaction", JSON.stringify(transaction));
+
     const authorizedAddressesCopy = [...authorizedAddresses];
     for (let signature of signedTransaction.signatures) {
       if (!validAddress(signature.signerAddress)) {
@@ -113,13 +118,14 @@ const governanceForMethod = {
           1
         );
       } else {
-        return errorResponse("address not authorized");
+        return errorResponse(
+          "address not authorized: " + signature.signerAddress
+        );
       }
     }
     //verify the signed transaction is equal to the transaction
     if (!equivalent(signedTransaction, transaction)) {
-      //
-      return errorResponse("address not authorized");
+      return errorResponse("transactions not equal");
     }
     const rawMessage = hashUnsignedTransaction(signedTransaction.transaction);
     console.log("hashToSign", rawMessage);

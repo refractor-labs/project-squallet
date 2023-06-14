@@ -7,6 +7,7 @@ import {
 import * as LitJsSdk from '@lit-protocol/lit-node-client'
 import { chainLit, litNetwork, walletNetwork } from '@/constants'
 import { Signer } from 'ethers'
+import { Action } from '@/contexts/wallet-standalone'
 
 /**
  * Lit MPC client. This talks to the lit action, and makes sure the inputs are correctly formatted.
@@ -16,19 +17,20 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
   private readonly wallet: LitWalletData
   private readonly signer: Signer
   private readonly chainId: number
+  private readonly actionCid: string
 
-  constructor(wallet: LitWalletData, eoaSigner: Signer, chainId: number) {
+  constructor(wallet: LitWalletData, eoaSigner: Signer, chainId: number, actionCid: string) {
     this.wallet = wallet
     this.signer = eoaSigner
     this.chainId = chainId
+    this.actionCid = actionCid
   }
 
   async sendRequest(request: WalletRequests): Promise<WalletResponse> {
-    const cid = window.localStorage.getItem('multisig-cid')
+    const cid = this.actionCid
     if (!cid) {
-      throw new Error('multisig-cid not found in local storage, upload it first')
+      throw new Error('multisig-cid not found')
     }
-    console.log('multisig-cid', cid)
 
     // const litContracts = new LitContracts()
     // await litContracts.connect()

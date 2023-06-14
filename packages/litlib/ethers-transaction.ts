@@ -42,8 +42,8 @@ export const serializeUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
     chainId: tx.chainId,
     nonce: tx.nonce,
     type: 2,
-    maxPriorityFeePerGas: 0,
-    maxFeePerGas: 0,
+    maxPriorityFeePerGas: tx.maxPriorityFeePerGas, //todo fix these
+    maxFeePerGas: tx.maxFeePerGas,
     gasLimit: tx.gasLimit,
     from: tx.from,
     to: tx.to,
