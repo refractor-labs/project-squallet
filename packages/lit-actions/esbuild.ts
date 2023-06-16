@@ -8,11 +8,17 @@ const globals = {
     // namedExports: ["ethers"],
     defaultExport: true,
   },
+  crypto: {
+    varName: "crypto",
+    // namedExports: ["ethers"],
+    defaultExport: true,
+  },
 };
 
 esbuild.build({
   entryPoints: ["lit_actions/src/multisig.action.ts"],
   outdir: "dist",
   bundle: true,
+  // platform: "node",
   plugins: [globalExternals(globals)],
 });

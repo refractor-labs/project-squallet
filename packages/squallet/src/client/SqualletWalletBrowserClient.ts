@@ -7,6 +7,7 @@ import {
   WalletResponse,
 } from "./squallet-wallet.types";
 
+import { AuthSig, nodeSiwe } from "./node-siwe";
 /**
  * Lit MPC client. This talks to the lit action, and makes sure the inputs are correctly formatted.
  * This also requests auth signatures from the user.
@@ -54,10 +55,15 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
     console.log("initialized lit client");
     await litNodeClient.connect();
     console.log("connected lit client");
-    // get authentication signature to deploy call the action
-    var authSig = await LitJsSdk.checkAndSignAuthMessage({
-      chain: walletNetwork,
-    });
+    let authSig: AuthSig;
+    if (isNode()) {
+      authSig = await nodeSiwe(this.signer);
+    } else {
+      // get authentication signature to deploy call the action
+      authSig = await LitJsSdk.checkAndSignAuthMessage({
+        chain: walletNetwork,
+      });
+    }
     console.log("created auth sig", authSig);
 
     const sigName = "sig1";
@@ -83,7 +89,8 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
     const { response, logs } = resp; //todo parse response with zod
     console.log("Lit action response logs", logs);
 
-    if (!response) {
+    const responseCast = JSON.parse(JSON.stringify(response)) as WalletResponse;
+    if (!responseCast.success) {
       return {
         success: false,
         error: "lit action failed",
@@ -99,3 +106,21 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
     };
   }
 }
+
+export const isNode = () => {
+  var isNode = false;
+  // @ts-ignore
+  if (typeof process === "object") {
+    // @ts-ignore
+    if (typeof process.versions === "object") {
+      // @ts-ignore
+      if (typeof process.versions.node !== "undefined") {
+        isNode = true;
+      }
+    }
+  }
+  return isNode;
+};
+export const isBrowser = () => {
+  return isNode() === false;
+};

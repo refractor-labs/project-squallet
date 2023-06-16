@@ -1,5 +1,5 @@
 {
-  "name": "@refactor-labs-lit-protocol/litlib",
+  "name": "@refactor-labs-lit-protocol/squallet",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
@@ -16,6 +16,7 @@
     "@lit-protocol/auth-helpers": "^2.2.25",
     "@lit-protocol/contracts-sdk": "^2.2.20",
     "@lit-protocol/lit-node-client": "2.2.20",
+    "@refactor-labs-lit-protocol/litlib": "*",
     "bs58": "^5.0.0",
     "ethers": "5.7.2",
     "lit-siwe": "^1.1.8"

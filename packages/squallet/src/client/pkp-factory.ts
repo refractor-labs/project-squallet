@@ -20,22 +20,24 @@ export const factoryCreatePkp = async ({
   // if (owners.length < threshold) {
   //   throw new Error("threshold must be less than or equal to owners.length");
   // }
+
+  const ipfsCid = await ipfs(code);
+  const newCid = ipfsCid.cid;
+
   const litContracts = new LitContracts({ signer });
   console.log("litContracts", litContracts);
   await litContracts.connect();
   const mintCost = await litContracts.pkpNftContract.read.mintCost();
-  console.log("mintCost", mintCost);
+  // console.log("mintCost", mintCost);
   const tx = await litContracts.pkpNftContract.write.mintNext(2, {
     value: mintCost,
   });
-  console.log("tx", tx);
+  // console.log("tx", tx);
   const txResp = await tx.wait();
-  console.log("txResp", txResp);
+  // console.log("txResp", txResp);
   const transferEvent = txResp.events.find((e: any) => e.event === "Transfer");
   const pkpId = transferEvent?.topics[3];
 
-  const newCid = await ipfs(code);
-  // const newCid = ipfsResp.cid;
   const signerAddress = await litContracts.signer.getAddress();
   const { chainId } = await litContracts.provider.getNetwork();
 
@@ -44,7 +46,7 @@ export const factoryCreatePkp = async ({
 
   await litContracts.pkpPermissionsContractUtil.write.addPermittedAction(
     pkpId,
-    newCid.toString()
+    newCid
   );
   try {
     const transferTx = await litContracts.pkpNftContract.write.transferFrom(

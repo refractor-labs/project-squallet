@@ -1847,6 +1847,30 @@
     util "^0.12.4"
     web-vitals "^3.0.4"
 
+"@lit-protocol/auth-browser@^2.2.25":
+  version "2.2.25"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/auth-browser/-/auth-browser-2.2.25.tgz#45a8aadd6691a730ff720c51128f3144842cb763"
+  integrity sha512-6u5+FyH3G33rm6sQswU2gs0kjQqveS4eC+OR0ij+Mjydp0wdqwlT/MWkgxzYVaWivaMPuVORQWP9PudUAOIAAA==
+  dependencies:
+    "@lit-protocol/auth-helpers" "2.2.25"
+    "@lit-protocol/constants" "2.2.25"
+    "@lit-protocol/misc" "2.2.25"
+    "@lit-protocol/misc-browser" "2.2.25"
+    "@lit-protocol/types" "2.2.25"
+    "@lit-protocol/uint8arrays" "2.2.25"
+    "@walletconnect/ethereum-provider" "2.7.0"
+    "@web3modal/standalone" "2.2.1"
+    ethers "^5.7.1"
+    lit-connect-modal "^0.1.11"
+    lit-siwe "^1.1.8"
+    siwe "^2.0.5"
+    siwe-recap "0.0.2-alpha.0"
+    tslib "^2.3.0"
+    tweetnacl "^1.0.3"
+    tweetnacl-util "^0.13.3"
+    util "^0.12.4"
+    web-vitals "^3.0.4"
+
 "@lit-protocol/auth-helpers@2.2.20":
   version "2.2.20"
   resolved "https://registry.yarnpkg.com/@lit-protocol/auth-helpers/-/auth-helpers-2.2.20.tgz#88676891c6bc621ff27b1a376e1e15898c9a3566"
@@ -1856,7 +1880,7 @@
     siwe-recap "0.0.2-alpha.0"
     tslib "^2.3.0"
 
-"@lit-protocol/auth-helpers@2.2.25":
+"@lit-protocol/auth-helpers@2.2.25", "@lit-protocol/auth-helpers@^2.2.25":
   version "2.2.25"
   resolved "https://registry.yarnpkg.com/@lit-protocol/auth-helpers/-/auth-helpers-2.2.25.tgz#8505be75853b7cf4b6bbb76b7cb926a73acac67e"
   integrity sha512-jfXDImsoLEggn9RRjF12SH0WOpI2NndB6CPnPawr56kMM+or2JPfcVoz4LKPswSTiqXfnEjQJTobgOhlDppZfw==
@@ -2094,6 +2118,19 @@
     siwe-recap "0.0.2-alpha.0"
     tslib "^2.3.0"
 
+"@lit-protocol/misc-browser@2.2.25":
+  version "2.2.25"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/misc-browser/-/misc-browser-2.2.25.tgz#0c2ad139f44f7e4d8dfd0b2553accc408b412da6"
+  integrity sha512-tdkwbJ7+mYhkqmMJMdR/Ag63wnOeWI8uiImXDXYle8oYow0HAyCHIy11al+ViCPB6tgIAa0PqK3bhBAtOSOrEA==
+  dependencies:
+    "@lit-protocol/auth-helpers" "2.2.25"
+    "@lit-protocol/constants" "2.2.25"
+    "@lit-protocol/types" "2.2.25"
+    "@lit-protocol/uint8arrays" "2.2.25"
+    siwe "^2.0.5"
+    siwe-recap "0.0.2-alpha.0"
+    tslib "^2.3.0"
+
 "@lit-protocol/misc@2.2.20":
   version "2.2.20"
   resolved "https://registry.yarnpkg.com/@lit-protocol/misc/-/misc-2.2.20.tgz#4c3fed71c054cd39ba696e98d4cccb27ba56e1c6"
@@ -2151,6 +2188,13 @@
   version "2.2.20"
   resolved "https://registry.yarnpkg.com/@lit-protocol/uint8arrays/-/uint8arrays-2.2.20.tgz#5a98867ef192a87ef67d5733d4c539b77162833a"
   integrity sha512-Uw15rzltxyU3rWuFFR/XKyk0POL7/7nNbtq9IA/wheFYtLl8SCzlb0Nh6IKdeoL5Jl8iPkj/XVrJDYZ+Xa9Klg==
+  dependencies:
+    tslib "^2.3.0"
+
+"@lit-protocol/uint8arrays@2.2.25":
+  version "2.2.25"
+  resolved "https://registry.yarnpkg.com/@lit-protocol/uint8arrays/-/uint8arrays-2.2.25.tgz#4ff9224676fdabaf6f70990c2b057b0c7e407267"
+  integrity sha512-g7z5i5pr4Fu+KQvfOxJnhr3S1lspEWYtkXZDzdB3QVu5XZfouP95Dw105pN8x/vHKWvASO/tNEozJ4nVie2+8A==
   dependencies:
     tslib "^2.3.0"
 

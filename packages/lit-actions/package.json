@@ -7,5 +7,8 @@
   "devDependencies": {
     "@fal-works/esbuild-plugin-global-externals": "^2.1.2",
     "esbuild": "^0.18.2"
+  },
+  "scripts": {
+    "build": "ts-node esbuild.ts"
   }
 }

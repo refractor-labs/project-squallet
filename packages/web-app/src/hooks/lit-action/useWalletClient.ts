@@ -1,8 +1,10 @@
 import { useWalletContext } from '@/contexts/wallet-standalone'
 import { useQuery } from '@tanstack/react-query'
-import { SqualletWalletBrowserClient } from '../../../../litlib/src/client/SqualletWalletBrowserClient'
 import { noRefetchParams } from '@/hooks/util'
-import { SqualletWalletTypes } from '@refactor-labs-lit-protocol/litlib'
+import {
+  SqualletWalletBrowserClient,
+  SqualletWalletTypes
+} from '@refactor-labs-lit-protocol/litlib'
 
 export const useWalletClient = () => {
   const wallet = useWalletContext()

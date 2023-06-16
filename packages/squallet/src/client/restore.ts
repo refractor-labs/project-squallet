@@ -1,12 +1,18 @@
-import { ethers } from "ethers";
 import { LitContracts } from "@lit-protocol/contracts-sdk";
-import base58 from "bs58";
+import * as base58 from "bs58";
+import {
+  InfuraProvider,
+  JsonRpcProvider,
+  Networkish,
+} from "@ethersproject/providers";
+import { computeAddress } from "@ethersproject/transactions";
 
 export const getChronicleProvider = () => {
-  return new ethers.providers.JsonRpcProvider(
-    "https://chain-rpc.litprotocol.com/http",
-    175177
-  );
+  return new JsonRpcProvider("https://chain-rpc.litprotocol.com/http", 175177);
+};
+
+export const getInfuraProvider = (network: Networkish) => {
+  return new InfuraProvider(network, process.env.INFURA_KEY as string);
 };
 
 export const restorePkpInfo = async (pkpId: string) => {
@@ -25,7 +31,7 @@ export const restorePkpInfo = async (pkpId: string) => {
     permittedActionsPromise,
   ]);
 
-  const addressPkp = ethers.utils.computeAddress(publicKey);
+  const addressPkp = computeAddress(publicKey);
   return {
     pkpId: pkpId,
     pkpPublicKey: publicKey,

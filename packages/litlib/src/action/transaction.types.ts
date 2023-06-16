@@ -54,8 +54,8 @@ export interface TransactionRequestI
   type: 2;
   accessList?: AccessListish;
 
-  maxPriorityFeePerGas: 0;
-  maxFeePerGas: 0;
+  maxPriorityFeePerGas: ethers.BigNumberish;
+  maxFeePerGas: ethers.BigNumberish;
 
   // customData?: Record<string, any>;
   // ccipReadEnabled?: boolean;
@@ -77,8 +77,8 @@ export class TransactionRequest implements TransactionRequestI {
   type: 2;
   accessList?: AccessListish;
 
-  maxPriorityFeePerGas: 0;
-  maxFeePerGas: 0;
+  maxPriorityFeePerGas: ethers.BigNumberish;
+  maxFeePerGas: ethers.BigNumberish;
 
   private constructor(input: TransactionRequestI) {
     this.to = input.to;
