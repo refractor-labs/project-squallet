@@ -1,4 +1,7 @@
-import { TransactionModel, UnsignedMpcTransaction } from '../../../litlib/transaction.types'
+import {
+  TransactionModel,
+  UnsignedMpcTransaction
+} from '../../../litlib/src/action/transaction.types'
 import { hashUnsignedTransaction } from '@/lib/action/lit-lib'
 import { Signature, Transaction } from '@prisma/client'
 

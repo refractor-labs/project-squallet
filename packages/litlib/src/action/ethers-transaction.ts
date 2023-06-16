@@ -1,19 +1,26 @@
-import { SignatureLike } from "@ethersproject/bytes";
-import ethers from "ethers";
+import { SignatureLike, arrayify } from "@ethersproject/bytes";
 import {
   TransactionModel,
   TransactionRequest,
   TransactionRequestI,
   UnsignedMpcTransaction,
 } from "./transaction.types";
-import { TypedDataField } from "@ethersproject/abstract-signer";
+import {
+  TypedDataDomain,
+  TypedDataField,
+} from "@ethersproject/abstract-signer";
+import { serialize } from "@ethersproject/transactions";
+import { hashMessage } from "@ethersproject/hash";
+import { getAddress } from "@ethersproject/address";
+import { verifyTypedData, verifyMessage } from "@ethersproject/wallet";
+import { toUtf8Bytes } from "@ethersproject/strings";
 
 /**
  * Sign a standard transaction. Ignoring gas price and priority. Forces 1559 txns.
  * @param tx {UnsignedMpcTransaction}
  */
 export const hashUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
-  return ethers.utils.hashMessage(serializeUnsignedTransaction(tx));
+  return hashMessage(serializeUnsignedTransaction(tx));
 };
 /**
  * verify the model and equal to the transaction
@@ -26,8 +33,8 @@ export const equivalent = (
 ) => {
   //transaction is the one that was signed by the owner and will be broadcast
   return (
-    serializeUnsignedTransaction(signedTransaction.transaction) ===
-    ethers.utils.serializeTransaction(TransactionRequest.from(transaction))
+    serialize(signedTransaction.transaction) ===
+    serialize(TransactionRequest.from(transaction))
   );
 };
 
@@ -51,11 +58,12 @@ export const serializeUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
     data: tx.data,
     accessList: tx.accessList,
   };
-  return ethers.utils.serializeTransaction(txCopy);
+  return serialize(txCopy);
+  // return ethers.utils.serializeTransaction(txCopy);
 };
 
 export const arrayifyUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
-  return ethers.utils.arrayify(serializeUnsignedTransaction(tx));
+  return arrayify(serializeUnsignedTransaction(tx));
 };
 
 export const verifySignature = (
@@ -63,22 +71,22 @@ export const verifySignature = (
   signature: SignatureLike
 ) => {
   const rawMessage = hashUnsignedTransaction(transaction);
-  const message = ethers.utils.toUtf8Bytes(rawMessage);
-  return ethers.utils.verifyMessage(message, signature);
+  const message = toUtf8Bytes(rawMessage);
+  return verifyMessage(message, signature);
 };
 
 export const verifyTypedDataSignature = (
-  domain: ethers.TypedDataDomain,
+  domain: TypedDataDomain,
   types: Record<string, TypedDataField[]>,
   value: Record<string, any>,
   signature: SignatureLike
 ) => {
-  return ethers.utils.verifyTypedData(domain, types, value, signature);
+  return verifyTypedData(domain, types, value, signature);
 };
 
 export const validAddress = (address: string) => {
   try {
-    return ethers.utils.getAddress(address) === address;
+    return getAddress(address) === address;
   } catch (e) {
     return false;
   }

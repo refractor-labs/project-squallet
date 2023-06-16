@@ -31,7 +31,12 @@ export default function SessionSendTransactionModal() {
       return
     }
     ;(async () => {
-      transaction.nonce = await provider.getTransactionCount(pkpAddress)
+      let nonce = 0
+      try {
+        nonce = await provider.getTransactionCount(pkpAddress)
+      } catch (e) {
+        console.error('failed to fetch getTransactionCount' + e)
+      }
       const tx = JSON.parse(JSON.stringify(transaction))
       const feeData = await provider.getFeeData()
       if (!feeData.maxPriorityFeePerGas || !feeData.maxFeePerGas) {
@@ -59,6 +64,7 @@ export default function SessionSendTransactionModal() {
   async function onSave() {
     setLoading(true)
     try {
+      console.log('saving transaction', tx, pkpAddress, topic, id)
       await safeApi.createTransaction(pkpAddress, topic, id.toString(10), tx)
       // await signClient.respond({
       //   topic,

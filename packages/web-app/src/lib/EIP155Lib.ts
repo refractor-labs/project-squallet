@@ -4,10 +4,10 @@ import {
   TransactionModel,
   TransactionRequestI,
   UnsignedMpcTransaction
-} from '../../../litlib/transaction.types'
+} from '../../../litlib/src/action/transaction.types'
 import { TransactionServiceStore, TransactionServiceStoreDb } from '@/lib/TxServiceStore'
-import { LitWalletData } from '../../../litlib/squallet-wallet.types'
-import { SqualletWalletBrowserClient } from '@/lib/lit/SqualletWalletBrowserClient'
+import { LitWalletData } from '../../../litlib/src/client/squallet-wallet.types'
+import { SqualletWalletBrowserClient } from '../../../litlib/src/client/SqualletWalletBrowserClient'
 
 /**
  * Types

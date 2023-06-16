@@ -1,6 +1,6 @@
 import { useWalletContext } from '@/contexts/wallet-standalone'
 import { useQuery } from '@tanstack/react-query'
-import { SqualletWalletBrowserClient } from '@/lib/lit/SqualletWalletBrowserClient'
+import { SqualletWalletBrowserClient } from '../../../../litlib/src/client/SqualletWalletBrowserClient'
 import { noRefetchParams } from '@/hooks/util'
 import { SqualletWalletTypes } from '@refactor-labs-lit-protocol/litlib'
 
@@ -16,7 +16,7 @@ export const useWalletClient = () => {
       return new SqualletWalletBrowserClient(
         {
           pkpId: wallet.pkpId,
-          publicKey: wallet.pkpPublicKey,
+          pkpPublicKey: wallet.pkpPublicKey,
           pkpAddress: wallet.pkpAddress
         },
         wallet.signer,

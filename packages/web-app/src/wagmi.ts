@@ -6,8 +6,10 @@ import { InjectedConnector } from '@wagmi/connectors/injected'
 import { infuraProvider } from '@wagmi/core/providers/infura'
 import { chronicleChain } from '@/utils/chains'
 import { polygonMumbai, polygon } from '@wagmi/chains'
+import { alchemyProvider } from '@wagmi/core/providers/alchemy'
 
 const INFURA_KEY = process.env.NEXT_PUBLIC_INFURA_KEY as string
+const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_KEY as string
 
 export const { chains, provider, webSocketProvider } = configureChains(
   [
@@ -17,7 +19,7 @@ export const { chains, provider, webSocketProvider } = configureChains(
     polygon,
     ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [goerli] : [])
   ],
-  [infuraProvider({ apiKey: INFURA_KEY })]
+  [alchemyProvider({ apiKey: alchemyKey }), infuraProvider({ apiKey: INFURA_KEY })]
 )
 // Set up client
 export const wagmiClient = createClient({

@@ -1,6 +1,6 @@
 import { EIP155PkpLib, IEIP155Lib } from '@/lib/EIP155Lib'
 import { Signer } from 'ethers'
-import { LitWalletData } from '../../../../litlib/squallet-wallet.types'
+import { LitWalletData } from '../../../../litlib/src/client/squallet-wallet.types'
 import { useLocalStorage } from 'usehooks-ts'
 
 export let wallet1: IEIP155Lib
@@ -24,7 +24,7 @@ export async function restorePkpWallet(
   if (!pkpAddress || !publicKey || !pkpId) throw new Error('Missing PKP env vars')
   const wallet: LitWalletData = {
     pkpAddress,
-    publicKey,
+    pkpPublicKey: publicKey,
     pkpId
   }
 

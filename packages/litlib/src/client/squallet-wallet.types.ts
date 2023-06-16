@@ -3,12 +3,15 @@ import {
   OwnerSignature,
   TransactionModel,
   TransactionRequestI,
-} from "./transaction.types";
+} from "../action";
 import { TypedDataField } from "@ethersproject/abstract-signer";
 
 // Interface for the squallet lit action. Makes sure interactions conform to the squallet json protocol.
 export interface SqualletWalletTypes {
-  sendRequest(request: WalletRequests): Promise<WalletResponse>;
+  sendRequest(
+    request: WalletRequests,
+    opts?: { litNetwork: string; walletNetwork: string }
+  ): Promise<WalletResponse>;
 }
 
 // The response common interface
@@ -77,7 +80,11 @@ export type WalletRequests =
   | UpgradeCodeRequest;
 
 export interface LitWalletData {
-  publicKey: string;
+  pkpPublicKey: string;
   pkpAddress: string;
   pkpId: string;
 }
+export type Action = {
+  id: string;
+  cid: string;
+};

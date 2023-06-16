@@ -6,6 +6,7 @@ import base58 from 'bs58'
 import { TRPCError } from '@trpc/server'
 import { ipfs } from '@/utils/ipfs'
 import { getCode, getCodeV2 } from '@/utils/code'
+import { factoryCreatePkp, getChronicleProvider } from '@refactor-labs-lit-protocol/litlib'
 
 const fromHexString = (hexString: string) =>
   Uint8Array.from((hexString.match(/.{1,2}/g) as any).map((byte: string) => parseInt(byte, 16)))
@@ -20,8 +21,8 @@ const restorePkpInfo = async (pkpId: string) => {
     'https://chain-rpc.litprotocol.com/http',
     175177
   )
-  const signer = new ethers.Wallet(process.env.LIT_PRIVATE_KEY as string, provider)
-  const litContracts = new LitContracts({ signer })
+  // const signer = new ethers.Wallet(process.env.LIT_PRIVATE_KEY as string, provider)
+  const litContracts = new LitContracts({ provider })
   await litContracts.connect()
   const publicKeyPromise = litContracts.pkpNftContract.read.getPubkey(pkpId)
 
@@ -81,46 +82,50 @@ const createPkp = procedure
         message: 'threshold must be less than or equal to owners.length'
       })
     }
-    const provider = new ethers.providers.JsonRpcProvider(
-      'https://chain-rpc.litprotocol.com/http',
-      175177
-    )
+    const provider = getChronicleProvider()
 
     const signer = new ethers.Wallet(process.env.LIT_PRIVATE_KEY as string, provider)
-    const litContracts = new LitContracts({ signer })
-    await litContracts.connect()
 
-    // mint token
-    const mintCost = await litContracts.pkpNftContract.read.mintCost()
-    console.log('mintCost', mintCost)
-    const tx = await litContracts.pkpNftContract.write.mintNext(2, { value: mintCost })
-    console.log('tx', tx)
-    const txResp = await tx.wait()
-    console.log('txResp', txResp)
-
-    const transferEvent = txResp.events.find((e: any) => e.event === 'Transfer')
-    const pkpId = transferEvent?.topics[3]
-
-    const ipfsResp = await ipfs.add(getCodeV2(input.owners, input.threshold))
-    const newCid = ipfsResp.cid
-    const signerAddress = await litContracts.signer.getAddress()
-    const { chainId } = await litContracts.provider.getNetwork()
-
-    const pkp = await restorePkpInfo(pkpId.toString())
-    const { pkpAddress } = pkp
-
-    await litContracts.pkpPermissionsContractUtil.write.addPermittedAction(pkpId, newCid.toString())
-    try {
-      const transferTx = await litContracts.pkpNftContract.write.transferFrom(
-        signerAddress,
-        pkpAddress,
-        pkpId
-      )
-      await transferTx.wait()
-    } catch (e) {
-      console.log('transferTx error', e)
-      throw e
+    const code = getCodeV2(input.owners, input.threshold)
+    const ipfsWrapper = async (code: string) => {
+      const ipfsResp = await ipfs.add(getCodeV2(input.owners, input.threshold))
+      return { cid: ipfsResp.cid.toString() }
     }
+    const pkp = await factoryCreatePkp({ signer, code, ipfs: ipfsWrapper })
+    // // const litContracts = new LitContracts({ signer })
+    // // await litContracts.connect()
+    // //
+    // // // mint token
+    // // const mintCost = await litContracts.pkpNftContract.read.mintCost()
+    // // console.log('mintCost', mintCost)
+    // // const tx = await litContracts.pkpNftContract.write.mintNext(2, { value: mintCost })
+    // // console.log('tx', tx)
+    // // const txResp = await tx.wait()
+    // // console.log('txResp', txResp)
+    // //
+    // // const transferEvent = txResp.events.find((e: any) => e.event === 'Transfer')
+    // // const pkpId = transferEvent?.topics[3]
+    // //
+    // // const ipfsResp = await ipfs.add(getCodeV2(input.owners, input.threshold))
+    // // const newCid = ipfsResp.cid
+    // // const signerAddress = await litContracts.signer.getAddress()
+    // // const { chainId } = await litContracts.provider.getNetwork()
+    // //
+    // // const pkp = await restorePkpInfo(pkpId.toString())
+    // // const { pkpAddress } = pkp
+    //
+    // await litContracts.pkpPermissionsContractUtil.write.addPermittedAction(pkpId, newCid.toString())
+    // try {
+    //   const transferTx = await litContracts.pkpNftContract.write.transferFrom(
+    //     signerAddress,
+    //     pkpAddress,
+    //     pkpId
+    //   )
+    //   await transferTx.wait()
+    // } catch (e) {
+    //   console.log('transferTx error', e)
+    //   throw e
+    // }
 
     return pkp
   })
