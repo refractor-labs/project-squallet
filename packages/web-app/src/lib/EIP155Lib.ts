@@ -6,8 +6,8 @@ import {
   UnsignedMpcTransaction
 } from '../../../litlib/src/action/transaction.types'
 import { TransactionServiceStore, TransactionServiceStoreDb } from '@/lib/TxServiceStore'
-import { LitWalletData } from '../../../litlib/src/client/squallet-wallet.types'
-import { SqualletWalletBrowserClient } from '../../../litlib/src/client/SqualletWalletBrowserClient'
+import { SqualletWalletBrowserClient } from '@refactor-labs-lit-protocol/squallet'
+import { LitWalletData } from '@refactor-labs-lit-protocol/litlib'
 
 /**
  * Types
@@ -58,7 +58,7 @@ export class EIP155PkpLib implements IEIP155Lib {
     const chainId = await eoaSigner.getChainId()
     const walletSigner = new ethers.VoidSigner(wallet.pkpAddress, eoaSigner.provider)
     console.log('VoidSigner', wallet)
-    const litClient = new SqualletWalletBrowserClient(wallet, eoaSigner, chainId)
+    const litClient = new SqualletWalletBrowserClient(wallet, eoaSigner, chainId, '')
     //tx service should be scoped to the eoa signer
     const out = new EIP155PkpLib(
       walletSigner,

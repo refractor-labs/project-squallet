@@ -19,8 +19,6 @@ import { restorePkpWallet } from '@/walletconnect/utils/EIP155WalletUtil'
 import { useAccount, useConnect, useDisconnect, useNetwork, useSigner } from 'wagmi'
 import { InjectedConnector } from '@wagmi/connectors/injected'
 import { trpc } from '@/utils/trpc'
-import { SqualletWalletBrowserClient } from '../../../litlib/src/client/SqualletWalletBrowserClient'
-import { SqualletWalletTypes } from '@refactor-labs-lit-protocol/litlib'
 
 // const litContracts = new LitContracts()
 // const litNodeClient = new LitJsSdk.LitNodeClient({ litNetwork: litNetwork })

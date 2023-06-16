@@ -15,7 +15,7 @@ import {
 } from "@refactor-labs-lit-protocol/litlib";
 
 const authorizedAddresses = ["%%OWNER_ADDRESS%%"];
-const threshold = 1337;
+const threshold = 11337012321;
 
 const setResponse = (response: any) => {
   return LitActions.setResponse({

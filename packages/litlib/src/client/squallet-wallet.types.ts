@@ -6,7 +6,7 @@ import {
   OwnerSignature,
   TransactionModel,
   TransactionRequestI,
-} from "@refactor-labs-lit-protocol/litlib";
+} from "../action";
 
 // Interface for the squallet lit action. Makes sure interactions conform to the squallet json protocol.
 export interface SqualletWalletTypes {

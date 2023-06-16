@@ -1,13 +1,13 @@
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { Signer } from "ethers";
+
+import { AuthSig, nodeSiwe } from "./node-siwe";
 import {
   LitWalletData,
   SqualletWalletTypes,
   WalletRequests,
   WalletResponse,
-} from "./squallet-wallet.types";
-
-import { AuthSig, nodeSiwe } from "./node-siwe";
+} from "@refactor-labs-lit-protocol/litlib";
 /**
  * Lit MPC client. This talks to the lit action, and makes sure the inputs are correctly formatted.
  * This also requests auth signatures from the user.
