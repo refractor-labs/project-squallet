@@ -34,8 +34,9 @@ export default function SessionSendTransactionModal() {
       let nonce = 0
       try {
         nonce = await provider.getTransactionCount(pkpAddress)
+        console.log('pizza got nonce here', nonce)
       } catch (e) {
-        console.error('failed to fetch getTransactionCount' + e)
+        console.error('pizza failed to fetch getTransactionCount' + e)
       }
       const tx = JSON.parse(JSON.stringify(transaction))
       const feeData = await provider.getFeeData()

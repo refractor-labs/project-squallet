@@ -20,7 +20,17 @@ export interface SqualletWalletTypes {
 export interface WalletResponse {
   success: boolean;
   error?: string;
-  data: any;
+  signatures: Record<
+    string,
+    {
+      dataSigned: string;
+      publicKey: string;
+      r: string;
+      recid: number;
+      s: string;
+      signature: string;
+    }
+  >;
 }
 
 // all the support actions that the lit wallet can do. not final

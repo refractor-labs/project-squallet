@@ -24,10 +24,11 @@ function Transactions() {
     try {
       const nonce = await provider.getTransactionCount(pkpAddress)
       setNonce(nonce)
+      console.log('pizza NONCE set to ', nonce)
     } catch (err) {
-      console.error(err)
+      console.error('pizza NONCE error', err)
     }
-  }, [litContracts, pkpAddress])
+  }, [provider, pkpAddress, setNonce])
 
   const { data: transactions, refetch } = useQuery(
     ['use-transactions', safeApi, pkpAddress, updateNonce],

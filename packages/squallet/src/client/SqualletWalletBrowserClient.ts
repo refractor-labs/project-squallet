@@ -45,9 +45,6 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
       throw new Error("multisig-cid not found");
     }
 
-    // const litContracts = new LitContracts()
-    // await litContracts.connect()
-
     console.log("connected lit contract client");
     const litNodeClient = new LitJsSdk.LitNodeClient({
       litNetwork: litNetwork,
@@ -94,15 +91,14 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
       return {
         success: false,
         error: "lit action failed",
-        data: null,
+        signatures: {},
       };
     }
-    const signatureObj = resp.signatures[sigName];
 
     //todo send request to lit node
     return {
       success: true,
-      data: signatureObj.signature,
+      signatures: resp.signatures,
     };
   }
 }

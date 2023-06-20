@@ -13,7 +13,7 @@ import { chainLit } from '@/constants'
 import { useLitActionSource } from '@/hooks/lit-action/useLitActionSource'
 import { useActiveAction, useMultisigConfig } from '@/hooks/lit-action/useMultisigConfig'
 import { useMutation } from '@tanstack/react-query'
-import { useNetwork, useSwitchNetwork } from 'wagmi'
+import { useNetwork, useProvider, useSwitchNetwork } from 'wagmi'
 import { useLitClient } from '@/hooks/lit-action/useLitClient'
 import {
   SignTransactionRequest,
@@ -21,6 +21,7 @@ import {
   UnsignedMpcTransaction
 } from '@refactor-labs-lit-protocol/litlib'
 import { useWalletClient } from '@/hooks/lit-action/useWalletClient'
+import { hashUnsignedTransaction, verifySignature } from '@/lib/action/lit-lib'
 
 const chainIdToLitChainName = (chainId: number) => {
   switch (chainId) {
@@ -56,9 +57,9 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     signerAddress,
     // litNodeClient,
     pkpPublicKey,
-    litContracts,
     pkpWallet
   } = useWalletContext()
+  const provider = useProvider()
   const { data: walletClient } = useWalletClient()
   const { data: litNodeClient } = useLitClient()
 
@@ -72,7 +73,7 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
 
   const tx = {
     ...transaction.transaction,
-    nonce
+    nonce: baseNonce
   }
 
   let chainMismatch = false
@@ -96,12 +97,20 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     //switch the network to the correct one
 
     // pkpWallet.
+    const hash = hashUnsignedTransaction(transaction.transaction as UnsignedMpcTransaction)
     try {
       //todo use walletClient for this
       const signature = await signer.signMessage(hash)
+      console.log('pizza the signature is', signature)
+      console.log('pizza the signature is', signature)
+      const verifiedAddress = verifySignature(transaction.transaction, signature)
+      console.log('pizza the verify address is', verifiedAddress, 'expected', signerAddress)
       await safeApi.createSignature(pkpAddress, transaction.id, signature, signerAddress, nonce)
       await onUpdate()
-    } catch {}
+    } catch (e) {
+      //
+      console.error('failed to sign', e)
+    }
   }
 
   const { mutate: broadcastMutation, isLoading: loading } = useMutation(async () => {
@@ -123,12 +132,12 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     // setLoading(true)
     console.log('chain is', chain)
     try {
-      var authSig = await LitJsSdk.checkAndSignAuthMessage({
-        chain: chainIdToLitChainName(chain?.id as number)
-      })
+      // var authSig = await LitJsSdk.checkAndSignAuthMessage({
+      //   chain: chainIdToLitChainName(chain?.id as number)
+      // })
 
-      console.log('got the auth sig!!!!!', authSig)
-      await litNodeClient.connect()
+      // console.log('got the auth sig!!!!!', authSig)
+      // await litNodeClient.connect()
       console.log('connected!')
       // this does both deployment action calling in the same code
       // need to break it down to upload to ipfs separately
@@ -164,15 +173,16 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
       //   }
       // })
 
-      console.log(resp)
-      if (!resp.data?.signatures?.sig1) {
+      console.log({ resp })
+      if (!resp?.signatures?.sig1) {
         alert('Invalid signature')
         // setLoading(false)
         return
       }
-      const serialized2 = ethers.utils.serializeTransaction(tx, resp.data.signatures.sig1.signature)
+
+      const serialized2 = ethers.utils.serializeTransaction(tx, resp?.signatures?.sig1.signature)
       // console.log(serialized2)
-      const sent = await litContracts.provider.sendTransaction(serialized2)
+      const sent = await provider.sendTransaction(serialized2)
       await sent.wait()
       await safeApi.patchTransaction(pkpAddress, transaction.id, sent.hash)
       await onUpdate()
@@ -209,6 +219,15 @@ function Transaction({ transaction, onUpdate, baseNonce, nonce }: Props) {
     await safeApi.deleteTransaction(safe, transaction.id)
     await onUpdate()
   }
+
+  console.log(
+    transaction.signatures.length < msConfig.data.threshold,
+    loading,
+    baseNonce !== nonce,
+    transaction.signatures.some(signature => {
+      return signature.nonce !== nonce
+    })
+  )
 
   return (
     <div className="py-6 text-xs">
@@ -256,7 +275,7 @@ ${JSON.stringify(tx, null, 2)}
           disabled={
             transaction.signatures.length < msConfig.data.threshold ||
             loading ||
-            baseNonce !== nonce ||
+            // baseNonce !== nonce ||
             transaction.signatures.some(signature => {
               return signature.nonce !== nonce
             })

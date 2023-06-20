@@ -56,7 +56,7 @@ const governanceForMethod = {
     const authorizedAddressesCopy = [...authorizedAddresses];
     for (let signature of signatures) {
       if (!validAddress(signature.signerAddress)) {
-        return errorResponse("adddress not checksummed");
+        return errorResponse("address not checksummed");
       }
       if (authorizedAddressesCopy.includes(signature.signerAddress)) {
         authorizedAddressesCopy.splice(
@@ -110,7 +110,7 @@ const governanceForMethod = {
     const authorizedAddressesCopy = [...authorizedAddresses];
     for (let signature of signedTransaction.signatures) {
       if (!validAddress(signature.signerAddress)) {
-        return errorResponse("adddress not checksummed");
+        return errorResponse("address not checksummed");
       }
       if (authorizedAddressesCopy.includes(signature.signerAddress)) {
         authorizedAddressesCopy.splice(

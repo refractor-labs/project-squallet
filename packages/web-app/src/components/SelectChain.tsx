@@ -1,7 +1,7 @@
 // @flow
 import * as React from 'react'
 import { useCallback } from 'react'
-import { Chain, mainnet, useAccount, useConnect, useNetwork, useSwitchNetwork } from 'wagmi'
+import { Chain, goerli, mainnet, useAccount, useConnect, useNetwork, useSwitchNetwork } from 'wagmi'
 import { polygonMumbai } from '@wagmi/chains'
 import { chronicleChain } from '@/utils/chains'
 
@@ -49,6 +49,7 @@ export const SelectChain = () => {
         <option value={mainnet.id}>{mainnet.name}</option>
         <option value={chronicleChain.id}>{chronicleChain.name}</option>
         <option value={polygonMumbai.id}>{polygonMumbai.name}</option>
+        <option value={goerli.id}>{goerli.name}</option>
       </select>
     </div>
   )

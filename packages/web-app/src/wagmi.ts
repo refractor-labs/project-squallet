@@ -17,6 +17,7 @@ export const { chains, provider, webSocketProvider } = configureChains(
     chronicleChain,
     polygonMumbai,
     polygon,
+    goerli,
     ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [goerli] : [])
   ],
   [alchemyProvider({ apiKey: alchemyKey }), infuraProvider({ apiKey: INFURA_KEY })]
