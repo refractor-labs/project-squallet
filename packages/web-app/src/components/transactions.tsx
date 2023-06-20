@@ -1,45 +1,48 @@
 import useApi from '@/hooks/useApi'
 import { TransactionDetailed } from '@refactor-labs-lit-protocol/api-client'
 import { useRouter } from 'next/router'
-import {useCallback, useContext, useEffect, useState} from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import Transaction from './transaction'
-import {WalletContext} from "@/contexts/wallet";
+import { WalletContext } from '@/contexts/wallet-standalone'
+import { useProvider } from 'wagmi'
+import { useQuery } from '@tanstack/react-query'
 
 function Transactions() {
-  const [transactions, setTransactions] = useState<TransactionDetailed[] | null>(null)
   const [nonce, setNonce] = useState<number | null>(null)
-  const {
-    address,
-    litContracts
-  } = useContext(WalletContext)
+  const { pkpAddress, litContracts } = useContext(WalletContext)
 
   const router = useRouter()
   const { safeApi } = useApi()
-  const safe = router.query.safe as string
+  // const safe = router.query.safe as string
+  const provider = useProvider()
 
   const updateNonce = useCallback(async () => {
-    if (!address) {
+    if (!pkpAddress) {
       return
     }
-    await litContracts.connect()
+    // await litContracts.connect()
     try {
-      const nonce = await litContracts.provider.getTransactionCount(address)
+      const nonce = await provider.getTransactionCount(pkpAddress)
       setNonce(nonce)
+      console.log('pizza NONCE set to ', nonce)
     } catch (err) {
-      console.error(err)
+      console.error('pizza NONCE error', err)
     }
-  }, [litContracts, address])
+  }, [provider, pkpAddress, setNonce])
 
-  const loadData = useCallback(async() => {
-    await updateNonce();
-    if (!safe || !safeApi) {
-      return
+  const { data: transactions, refetch } = useQuery(
+    ['use-transactions', safeApi, pkpAddress, updateNonce],
+    async ({ signal }) => {
+      await updateNonce()
+      if (!pkpAddress || !safeApi) {
+        return
+      }
+      const data = await safeApi.getTransactions(pkpAddress, { signal })
+      return data.data
     }
-    safeApi.getTransactions(safe).then(r => setTransactions(r.data))
-  }, [safeApi, safe, updateNonce])
+  )
 
-  useEffect(() => {loadData()}, [loadData])
-
+  console.log({ transactions, nonce })
   if (!transactions || nonce === null) {
     return null
   }
@@ -47,7 +50,13 @@ function Transactions() {
   return (
     <div className="divide-y">
       {transactions.map((t, index) => (
-        <Transaction key={t.id} transaction={t} onUpdate={loadData} baseNonce={nonce} nonce={nonce + index} />
+        <Transaction
+          key={t.id}
+          transaction={t}
+          onUpdate={refetch}
+          baseNonce={nonce}
+          nonce={nonce + index}
+        />
       ))}
     </div>
   )

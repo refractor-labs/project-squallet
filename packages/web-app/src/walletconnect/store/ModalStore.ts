@@ -53,6 +53,7 @@ const ModalStore = {
   state,
 
   open(view: State['view'], data: State['data']) {
+    console.log('showing ', view)
     state.view = view
     state.data = data
     state.open = true

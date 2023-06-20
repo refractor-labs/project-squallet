@@ -1,5 +1,8 @@
 import { ethers } from 'ethers'
-import { TransactionModel, UnsignedMpcTransaction } from '@/lib/Transaction'
+import {
+  TransactionModel,
+  UnsignedMpcTransaction
+} from '../../../litlib/src/action/transaction.types'
 import { TransactionServiceStore, TransactionServiceStoreI } from '@/lib/TxServiceStore'
 import { hashUnsignedTransaction } from '@/lib/action/lit-lib'
 

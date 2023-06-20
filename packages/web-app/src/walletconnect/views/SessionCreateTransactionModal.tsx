@@ -1,13 +1,14 @@
-import { WalletContext } from '@/contexts/wallet'
+import { WalletContext } from '@/contexts/wallet-standalone'
 import RequestModalContainer from '@/walletconnect/components/RequestModalContainer'
 import ModalStore from '@/walletconnect/store/ModalStore'
 import { Button, Col, Divider, Loading, Modal, Row, Text } from '@nextui-org/react'
 import { Fragment, useCallback, useContext, useState } from 'react'
 import useApi from '@/hooks/useApi'
+import { useNetwork, useSwitchNetwork } from 'wagmi'
 
 export default function SessionCreateTransactionModal() {
   const [loading, setLoading] = useState(false)
-  const { litContracts, address, safe } = useContext(WalletContext)
+  const { litContracts, pkpAddress } = useContext(WalletContext)
   const { safeApi } = useApi()
   const [to, setTo] = useState<string>('')
   const [data, setData] = useState<string>('')
@@ -19,21 +20,21 @@ export default function SessionCreateTransactionModal() {
   const createTransaction = useCallback(async () => {
     setLoading(true)
     const feeData = await litContracts.provider.getFeeData()
-    //allow try again??
+    const safe = pkpAddress
     await safeApi.createTransaction(safe, '', '', {
       to,
       data,
-      from: address,
+      from: pkpAddress,
       type: 2,
-      nonce: await litContracts.provider.getTransactionCount(address),
+      nonce: await litContracts.provider.getTransactionCount(pkpAddress),
       value,
       chainId: 80001,
       gasLimit:
         '0x' +
         (
           await web3.eth.estimateGas({
-            from: address,
-            nonce: await litContracts.provider.getTransactionCount(address),
+            from: pkpAddress,
+            nonce: await litContracts.provider.getTransactionCount(pkpAddress),
             to: to,
             data: data
           })
@@ -43,7 +44,7 @@ export default function SessionCreateTransactionModal() {
     })
     ModalStore.close()
     setLoading(false)
-  }, [safeApi, address, litContracts.provider, web3.eth, safe, to, data, value])
+  }, [safeApi, pkpAddress, litContracts.provider, web3.eth, to, data, value])
 
   return (
     <Fragment>

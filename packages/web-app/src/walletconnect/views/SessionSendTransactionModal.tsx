@@ -1,4 +1,4 @@
-import { WalletContext } from '@/contexts/wallet'
+import { WalletContext } from '@/contexts/wallet-standalone'
 import ProjectInfoCard from '@/walletconnect/components/ProjectInfoCard'
 import RequestDataCard from '@/walletconnect/components/RequestDataCard'
 import RequesDetailsCard from '@/walletconnect/components/RequestDetalilsCard'
@@ -9,40 +9,47 @@ import { rejectEIP155Request } from '@/walletconnect/utils/EIP155RequestHandlerU
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Divider, Loading, Modal, Text } from '@nextui-org/react'
 import { Fragment, useContext, useEffect, useState } from 'react'
-import { ethers } from 'ethers'
-import { formatJsonRpcResult } from '@json-rpc-tools/utils'
 import useApi from '@/hooks/useApi'
+import { useProvider } from 'wagmi'
 
 export default function SessionSendTransactionModal() {
   const [loading, setLoading] = useState(false)
-  const { litContracts, address, safe } = useContext(WalletContext)
+  const { litContracts, pkpAddress, signer } = useContext(WalletContext)
+  const provider = useProvider()
   const [tx, setTx] = useState<any>(null)
   const { safeApi } = useApi()
-
   // Get request and wallet data from store
   const requestEvent = ModalStore.state.data?.requestEvent
   const requestSession = ModalStore.state.data?.requestSession
 
   useEffect(() => {
-    if (!requestEvent?.params?.request?.params?.length) {
+    if (!transaction || !provider) {
       return
     }
-    // Get required proposal data
-    const { topic, params, id } = requestEvent
-    const { request, chainId } = params
-    const transaction = request.params[0]
-    const fn = async () => {
-      transaction.nonce = await litContracts.provider.getTransactionCount(address)
+    // Ensure request and wallet are defined
+    if (!requestEvent || !requestSession) {
+      return
+    }
+    ;(async () => {
+      let nonce = 0
+      try {
+        nonce = await provider.getTransactionCount(pkpAddress)
+        console.log('pizza got nonce here', nonce)
+      } catch (e) {
+        console.error('pizza failed to fetch getTransactionCount' + e)
+      }
       const tx = JSON.parse(JSON.stringify(transaction))
-      const feeData = await litContracts.provider.getFeeData()
+      const feeData = await provider.getFeeData()
+      if (!feeData.maxPriorityFeePerGas || !feeData.maxFeePerGas) {
+        throw new Error('Missing fee data: ' + JSON.stringify(feeData))
+      }
       tx.type = 2
       tx.chainId = chainId.indexOf(':') !== -1 ? chainId.split(':')[1] : chainId
       tx.maxFeePerGas = feeData.maxFeePerGas?.toHexString()
       delete tx.gasPrice
       tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas?.toHexString()
       setTx(tx)
-    }
-    fn()
+    })()
   }, [requestEvent])
 
   // Ensure request and wallet are defined
@@ -57,13 +64,19 @@ export default function SessionSendTransactionModal() {
 
   async function onSave() {
     setLoading(true)
-    await safeApi.createTransaction(safe, topic, id.toString(10), tx)
-    // await signClient.respond({
-    //   topic,
-    //   response: formatJsonRpcResult(id, hash),
-    // })
-    ModalStore.close()
-    setLoading(false)
+    try {
+      console.log('saving transaction', tx, pkpAddress, topic, id)
+      await safeApi.createTransaction(pkpAddress, topic, id.toString(10), tx)
+      // await signClient.respond({
+      //   topic,
+      //   response: formatJsonRpcResult(id, hash),
+      // })
+      ModalStore.close()
+    } catch (e) {
+      console.error('failed to save Transaction, trying again?', e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Handle reject action

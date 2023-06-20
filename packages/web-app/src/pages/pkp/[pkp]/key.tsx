@@ -6,10 +6,11 @@ import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Text } from '@nextui-org/react'
 import { getSdkError } from '@walletconnect/utils'
 import { Fragment, ReactElement, useState } from 'react'
+import { useLitActionSource } from '@/hooks/lit-action/useLitActionSource'
 
 export default function PairingsPage() {
   const [pairings, setPairings] = useState(signClient.pairing.values)
-  console.log(pairings)
+  console.log('pairings', pairings)
 
   async function onDelete(topic: string) {
     await signClient.disconnect({ topic, reason: getSdkError('USER_DISCONNECTED') })

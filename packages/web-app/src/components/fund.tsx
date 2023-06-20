@@ -1,38 +1,42 @@
-import { WalletContext } from '@/contexts/wallet'
 import { ethers } from 'ethers'
 import { useCallback, useContext, useEffect, useState } from 'react'
+import { WalletContext } from '@/contexts/wallet-standalone'
+import { useProvider } from 'wagmi'
 
 export default function Fund() {
-  const { publicKey, address, pkp, litContracts } = useContext(WalletContext)
+  const provider = useProvider()
+  const { pkpPublicKey, pkpAddress, pkpId, litContracts, signer } = useContext(WalletContext)
   const [loading, setLoading] = useState(false)
   const [balance, setBalance] = useState('0')
   const [nonce, setNonce] = useState(0)
 
   const updateBalance = useCallback(async () => {
-    if (!address) {
+    console.log('updating balance')
+    if (!pkpAddress || !signer) {
       return
     }
-    await litContracts.connect()
+    // await litContracts.connect()
     try {
-      const balance = await litContracts.provider.getBalance(address)
+      const balance = await provider.getBalance(pkpAddress)
+      console.log('Got balance', balance.toString())
       setBalance(ethers.utils.formatUnits(balance.toString(), 18))
     } catch (err) {
       console.error(err)
     }
-  }, [address])
+  }, [pkpAddress])
 
   const updateNonce = useCallback(async () => {
-    if (!address) {
+    if (!pkpAddress || !signer) {
       return
     }
-    await litContracts.connect()
+    // await litContracts.connect()
     try {
-      const nonce = await litContracts.provider.getTransactionCount(address)
+      const nonce = await provider.getTransactionCount(pkpAddress)
       setNonce(nonce)
     } catch (err) {
       console.error(err)
     }
-  }, [address])
+  }, [pkpAddress])
 
   useEffect(() => {
     updateBalance()
@@ -46,16 +50,18 @@ export default function Fund() {
     try {
       setLoading(true)
       // initialization
-      await litContracts.connect()
+      // await litContracts.connect()
+      if (!signer) {
+        console.log('No signer')
+        return
+      }
 
-      console.log('Sending gas to PKP')
-      await litContracts.connect()
-      const gasTx = await litContracts.signer.sendTransaction({
-        to: address,
-        value: '1000000000'
+      const gasTx = await signer.sendTransaction({
+        to: pkpAddress,
+        value: '10000000000000000'
       })
       console.log(await gasTx.wait())
-      console.log(`Gas sent to ${address}`)
+      console.log(`Gas sent to ${pkpAddress}`)
 
       await updateBalance()
     } catch (err) {
@@ -64,18 +70,18 @@ export default function Fund() {
     setLoading(false)
   }
 
-  if (!address) {
+  if (!pkpAddress) {
     return null
   }
 
   return (
     <div className="break-all text-xs space-y-6">
       <h2 className="font-bold">Public key</h2>
-      <code>{publicKey}</code>
+      <code>{pkpPublicKey}</code>
       <h2 className="font-bold">PKP Address</h2>
-      <code>{address}</code>
+      <code>{pkpAddress}</code>
       <h2 className="font-bold">PKP ID</h2>
-      <code>{pkp}</code>
+      <code>{pkpId}</code>
       <h2 className="font-bold">Balance</h2>
       <code>{balance} MATIC</code>
       <h2 className="font-bold">Nonce</h2>

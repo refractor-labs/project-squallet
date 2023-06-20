@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { TransactionServiceStoreDb } from '@/lib/TxServiceStore'
 import { TxService } from '@/lib/TransactionServiceI'
 import { useContext } from 'react'
-import { WalletContext } from '@/contexts/wallet'
+import { WalletContext } from '@/contexts/wallet-standalone'
 
 export default function WalletTransaction() {
   const { signer } = useContext(WalletContext)
@@ -21,11 +21,11 @@ export default function WalletTransaction() {
   const signTransactionMutation = useMutation(async (id: number) => {
     //
     // lalalal/
-    const tx = transactionsQuery?.data?[id];
+    const tx = transactionsQuery?.data?.[id]
     if (typeof walletAddress !== 'string' || !signer || !tx) {
       throw new Error('Invalid wallet address or signer')
     }
-    new TxService(walletAddress, signer, new TransactionServiceStoreDb()).signTransaction()
+    // new TxService(walletAddress, signer, new TransactionServiceStoreDb()).signTransaction()
   })
 
   return (

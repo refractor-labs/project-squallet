@@ -1,16 +1,22 @@
 // @flow
 import { parseUri } from '@walletconnect/utils'
 import * as React from 'react'
-import { Fragment, useState } from 'react'
+import { Fragment, useContext, useState } from 'react'
 import { createLegacySignClient } from '@/walletconnect/utils/LegacyWalletConnectUtil'
 import { signClient } from '@/walletconnect/utils/WalletConnectUtil'
 import { Button, Input, Loading, Text } from '@nextui-org/react'
-import Fund from '@/components/fund'
-import LitAction from '@/components/lit-action'
+import { WalletContext } from '@/contexts/wallet-standalone'
+import { ethers } from 'ethers'
+import { useLitActionSource } from '@/hooks/lit-action/useLitActionSource'
+import { useMultisigConfig } from '@/hooks/lit-action/useMultisigConfig'
 
-export default function WalletConnectPage() {
+function WalletConnectPKPStandalonePage() {
   const [uri, setUri] = useState('')
-  const [loading, setLoading] = useState(false)  
+  const [loading, setLoading] = useState(false)
+  const walletContext = useContext(WalletContext)
+  // console.log('walletContext', walletContext)
+  const sources = useLitActionSource()
+  const parsed = useMultisigConfig()
   async function onConnect(uri: string) {
     try {
       setLoading(true)
@@ -21,7 +27,7 @@ export default function WalletConnectPage() {
         createLegacySignClient({ uri })
       } else {
         await signClient.pair({ uri })
-        await signClient.session.init();
+        await signClient.session.init()
         console.log(signClient)
       }
     } catch (err: unknown) {
@@ -33,7 +39,7 @@ export default function WalletConnectPage() {
   }
 
   return (
-    <div className='divide-y space-y-10'>
+    <div className="divide-y space-y-10">
       <Text size={13} css={{ textAlign: 'center', marginTop: '$10', marginBottom: '$10' }}>
         use walletconnect uri
       </Text>
@@ -60,3 +66,4 @@ export default function WalletConnectPage() {
     </div>
   )
 }
+export default WalletConnectPKPStandalonePage
