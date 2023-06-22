@@ -1,8 +1,12 @@
+import { ethers as ethersLib } from 'ethers'
+
 declare global {
-  var pkpPublicKey: any;
-  var publicKey: any;
-  var sigName: any;
-  var toSign: any;
+  var ethers: typeof ethersLib
+
+  var pkpPublicKey: any
+  var publicKey: any
+  var sigName: any
+  var toSign: any
 
   var LitActions: {
     /**
@@ -11,10 +15,7 @@ declare global {
      * @param params.ipfsId - The IPFS ID of some JS code (a lit action)
      * @returns A boolean indicating whether the IPFS ID is permitted to sign using the PKP tokenId
      */
-    isPermittedAction(params: {
-      tokenId: string;
-      ipfsId: string;
-    }): Promise<boolean>;
+    isPermittedAction(params: { tokenId: string; ipfsId: string }): Promise<boolean>
 
     /**
      * Check if a given wallet address is permitted to sign using a given PKP tokenId
@@ -22,10 +23,7 @@ declare global {
      * @param params.address - The wallet address to check
      * @returns A boolean indicating whether the wallet address is permitted to sign using the PKP tokenId
      */
-    isPermittedAddress(params: {
-      tokenId: string;
-      address: string;
-    }): Promise<boolean>;
+    isPermittedAddress(params: { tokenId: string; address: string }): Promise<boolean>
 
     /**
      * Check if a given auth method is permitted to sign using a given PKP tokenId
@@ -35,31 +33,31 @@ declare global {
      * @returns A boolean indicating whether the auth method is permitted to sign using the PKP tokenId
      */
     isPermittedAuthMethod(params: {
-      tokenId: string;
-      authMethodType: number;
-      userId: Uint8Array;
-    }): Promise<boolean>;
+      tokenId: string
+      authMethodType: number
+      userId: Uint8Array
+    }): Promise<boolean>
 
     /**
      * Get the full list of actions that are permitted to sign using a given PKP tokenId
      * @param params.tokenId - The tokenId to check
      * @returns An array of IPFS IDs of lit actions that are permitted to sign using the PKP tokenId
      */
-    getPermittedActions(params: { tokenId: string }): Promise<string[]>;
+    getPermittedActions(params: { tokenId: string }): Promise<string[]>
 
     /**
      * Get the full list of addresses that are permitted to sign using a given PKP tokenId
      * @param params.tokenId - The tokenId to check
      * @returns An array of addresses that are permitted to sign using the PKP tokenId
      */
-    getPermittedAddresses(params: { tokenId: string }): string[];
+    getPermittedAddresses(params: { tokenId: string }): string[]
 
     /**
      * Get the full list of auth methods that are permitted to sign using a given PKP tokenId
      * @param params.tokenId - The tokenId to check
      * @returns An array of auth methods that are permitted to sign using the PKP tokenId.  Each auth method is an object with the following properties: auth_method_type, id, and user_pubkey (used for web authn, this is the pubkey of the user's authentication keypair)
      */
-    getPermittedAuthMethods(params: { tokenId: string }): Promise<object[]>;
+    getPermittedAuthMethods(params: { tokenId: string }): Promise<object[]>
 
     /**
      * Get the permitted auth method scopes for a given PKP tokenId and auth method type + id
@@ -70,18 +68,18 @@ declare global {
      * @returns An array of booleans that define if a given scope id is turned on.  The index of the array is the scope id.  For example, if the array is [true, false, true], then scope ids 0 and 2 are turned on, but scope id 1 is turned off.
      */
     getPermittedAuthMethodScopes(params: {
-      tokenId: string;
-      authMethodType: string;
-      userId: Uint8Array;
-      maxScopeId: number;
-    }): Promise<boolean>[];
+      tokenId: string
+      authMethodType: string
+      userId: Uint8Array
+      maxScopeId: number
+    }): Promise<boolean>[]
 
     /**
      * Converts a PKP public key to a PKP token ID by hashing it with keccak256
      * @param params.publicKey - The public key to convert
      * @returns The token ID as a string
      */
-    pubkeyToTokenId(params: { publicKey: string }): Promise<string>;
+    pubkeyToTokenId(params: { publicKey: string }): Promise<string>
 
     /**
      * Gets latest nonce for the given address on a supported chain
@@ -89,7 +87,7 @@ declare global {
      * @param params.chain - The chain of which the nonce is fetched
      * @returns The token ID as a string
      */
-    getLatestNonce(params: { address: string; chain: string }): Promise<string>;
+    getLatestNonce(params: { address: string; chain: string }): Promise<string>
 
     /**
      * Ask the Lit Node to sign any data using the ECDSA Algorithm with it's private key share.  The resulting signature share will be returned to the Lit JS SDK which will automatically combine the shares and give you the full signature to use.
@@ -98,11 +96,7 @@ declare global {
      * @param params.sigName - You can put any string here.  This is used to identify the signature in the response by the Lit JS SDK.  This is useful if you are signing multiple messages at once.  When you get the final signature out, it will be in an object with this signature name as the key.
      * @returns This function will return the string "success" if it works.  The signature share is returned behind the scenes to the Lit JS SDK which will automatically combine the shares and give you the full signature to use.
      */
-    signEcdsa(params: {
-      toSign: Uint8Array;
-      publicKey: string;
-      sigName: string;
-    }): Promise<string>;
+    signEcdsa(params: { toSign: Uint8Array; publicKey: string; sigName: string }): Promise<string>
 
     /**
      * Ask the Lit Node to sign a message using the eth_personalSign algorithm.  The resulting signature share will be returned to the Lit JS SDK which will automatically combine the shares and give you the full signature to use.
@@ -112,10 +106,10 @@ declare global {
      * @returns This function will return the string "success" if it works.  The signature share is returned behind the scenes to the Lit JS SDK which will automatically combine the shares and give you the full signature to use.
      */
     ethPersonalSignMessageEcdsa(params: {
-      message: string;
-      publicKey: string;
-      sigName: string;
-    }): Promise<string>;
+      message: string
+      publicKey: string
+      sigName: string
+    }): Promise<string>
 
     /**
      * Checks a condition using the Lit condition checking engine.  This is the same engine that powers our Access Control product.  You can use this to check any condition that you can express in our condition language.  This is a powerful tool that allows you to build complex conditions that can be checked in a decentralized way.  Visit https://developer.litprotocol.com and click on the "Access Control" section to learn more.
@@ -124,17 +118,13 @@ declare global {
      * @param params.chain - The chain this AuthSig comes from
      * @returns A boolean indicating whether the condition check passed or failed
      */
-    checkConditions(params: {
-      conditions: object[];
-      authSig: any;
-      chain: string;
-    }): Promise<boolean>;
+    checkConditions(params: { conditions: object[]; authSig: any; chain: string }): Promise<boolean>
 
     /**
      * Set the response returned to the client
      * @param params.response - The response to send to the client.  You can put any string here, like you could use JSON.stringify on a JS object and send it here.
      */
-    setResponse(params: { response: string }): void;
+    setResponse(params: { response: string }): void
 
     /**
      * Call a child Lit Action
@@ -142,7 +132,7 @@ declare global {
      * @param params.params - The parameters to pass to the child Lit Action
      * @returns The response from the child Lit Action.  Note that any signatures performed by the child Lit Action will be automatically combined and returned with the parent Lit Action to the Lit JS SDK client.
      */
-    call(params: { ipfsId: string; params: any }): Promise<string>;
+    call(params: { ipfsId: string; params: any }): Promise<string>
 
     /**
      * Convert a Uint8Array to a string.  This is a re-export of this function: https://www.npmjs.com/package/uint8arrays#tostringarray-encoding--utf8
@@ -150,7 +140,7 @@ declare global {
      * @param encoding - The encoding to use.  Defaults to "utf8"
      * @returns The string representation of the Uint8Array
      */
-    uint8arrayToString(array: Uint8Array, encoding: string): string;
+    uint8arrayToString(array: Uint8Array, encoding: string): string
 
     /**
      * Convert a string to a Uint8Array.  This is a re-export of this function: https://www.npmjs.com/package/uint8arrays#fromstringstring-encoding--utf8
@@ -158,14 +148,14 @@ declare global {
      * @param encoding - The encoding to use.  Defaults to "utf8"
      * @returns The Uint8Array representation of the string
      */
-    uint8arrayFromString(string: string, encoding: string): Uint8Array;
-  };
+    uint8arrayFromString(string: string, encoding: string): Uint8Array
+  }
 }
 
-export {};
+export {}
 
 // lore parameters
 declare global {
-  var request: any;
-  var method: any;
+  var request: any
+  var method: any
 }

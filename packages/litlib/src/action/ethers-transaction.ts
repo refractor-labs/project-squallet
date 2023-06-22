@@ -1,27 +1,28 @@
-import { SignatureLike, arrayify } from "@ethersproject/bytes";
+import { SignatureLike, arrayify } from '@ethersproject/bytes'
 import {
   TransactionModel,
   TransactionRequest,
   TransactionRequestI,
-  UnsignedMpcTransaction,
-} from "./transaction.types";
-import {
-  TypedDataDomain,
-  TypedDataField,
-} from "@ethersproject/abstract-signer";
-import { serialize } from "@ethersproject/transactions";
-import { hashMessage } from "@ethersproject/hash";
-import { getAddress } from "@ethersproject/address";
-import { verifyTypedData, verifyMessage } from "@ethersproject/wallet";
-import { toUtf8Bytes } from "@ethersproject/strings";
+  UnsignedMpcTransaction
+} from './transaction.types'
+import { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer'
+import { serialize } from '@ethersproject/transactions'
+import { hashMessage } from '@ethersproject/hash'
+import { getAddress } from '@ethersproject/address'
+import { verifyTypedData, verifyMessage } from '@ethersproject/wallet'
+import { toUtf8Bytes } from '@ethersproject/strings'
+import { Fee } from '../client'
+import { BigNumber } from '@ethersproject/bignumber'
+import { hashTransactionRequest } from './transaction-request'
 
 /**
  * Sign a standard transaction. Ignoring gas price and priority. Forces 1559 txns.
  * @param tx {UnsignedMpcTransaction}
  */
 export const hashUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
-  return hashMessage(serializeUnsignedTransaction(tx));
-};
+  return hashMessage(serializeUnsignedTransaction(tx))
+}
+
 /**
  * verify the model and equal to the transaction
  * @param signedTransaction
@@ -33,19 +34,22 @@ export const equivalent = (
 ) => {
   //transaction is the one that was signed by the owner and will be broadcast
   return (
-    serialize(signedTransaction.transaction) ===
-    serialize(TransactionRequest.from(transaction))
-  );
-};
+    serialize(signedTransaction.transaction) === serialize(TransactionRequest.from(transaction))
+  )
+}
 
 /**
  * Serialize a standard transaction for signing. Ignoring gas price and priority. Forces 1559 txns.
  * @param tx {UnsignedMpcTransaction}
  */
 export const serializeUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
+  return serialize(copyUnsignedTransaction(tx))
+}
+
+export const copyUnsignedTransaction = (tx: UnsignedMpcTransaction): UnsignedMpcTransaction => {
   //copy it over so we know the properties
   // skip gas price and priority
-  const txCopy = {
+  return {
     chainId: tx.chainId,
     nonce: tx.nonce,
     type: 2,
@@ -56,24 +60,19 @@ export const serializeUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
     to: tx.to,
     value: tx.value,
     data: tx.data,
-    accessList: tx.accessList,
-  };
-  return serialize(txCopy);
-  // return ethers.utils.serializeTransaction(txCopy);
-};
+    accessList: tx.accessList
+  }
+}
 
 export const arrayifyUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
-  return arrayify(serializeUnsignedTransaction(tx));
-};
+  return arrayify(serializeUnsignedTransaction(tx))
+}
 
-export const verifySignature = (
-  transaction: UnsignedMpcTransaction,
-  signature: SignatureLike
-) => {
-  const rawMessage = hashUnsignedTransaction(transaction);
-  const message = toUtf8Bytes(rawMessage);
-  return verifyMessage(message, signature);
-};
+export const verifySignature = (transaction: TransactionRequestI, signature: SignatureLike) => {
+  const rawMessage = hashTransactionRequest(transaction)
+  const message = toUtf8Bytes(rawMessage)
+  return verifyMessage(message, signature)
+}
 
 export const verifyTypedDataSignature = (
   domain: TypedDataDomain,
@@ -81,13 +80,26 @@ export const verifyTypedDataSignature = (
   value: Record<string, any>,
   signature: SignatureLike
 ) => {
-  return verifyTypedData(domain, types, value, signature);
-};
+  return verifyTypedData(domain, types, value, signature)
+}
 
 export const validAddress = (address: string) => {
   try {
-    return getAddress(address) === address;
+    return getAddress(address) === address
   } catch (e) {
-    return false;
+    return false
   }
-};
+}
+
+export const getFeeOk = (fee: Fee, tx: TransactionRequestI) => {
+  const gasGwei = BigNumber.from(fee.maxFeePerGas).mul(tx.gasLimit)
+  //return as eth
+  console.log('fee.maxFeePerGas', fee.maxFeePerGas.toString())
+  console.log('tx.gasLimit', tx.gasLimit.toString())
+  console.log('gasGwei', gasGwei.toString())
+  console.log('tx.maxFee', tx.maxFee.toString())
+  return gasGwei.lte(BigNumber.from(tx.maxFee))
+}
+// 31500000378000
+// 157500001890000
+// 157500001890000 / 31500000378000=5 yay

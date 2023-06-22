@@ -6,10 +6,16 @@
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "typeRoots": ["./src/types", "../../../node_modules/ethers/lib"],
-    "baseUrl": "./src"
+    "typeRoots": [
+      "src/types",
+      "node_modules/ethers/lib"
+    ],
+    "baseUrl": "./"
   },
-  "include": ["globa.d.ts", "src/*"],
+  "include": [
+    "src/globa.d.ts",
+    "src/*"
+  ],
   "references": [
-    { "path": "../../litlib" }]
+    { "path": "../litlib"}]
 }
