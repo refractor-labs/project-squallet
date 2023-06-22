@@ -1,4 +1,4 @@
-import { ethers as ethersLib } from 'ethers'
+import * as ethersLib from 'ethers'
 
 declare global {
   var ethers: typeof ethersLib

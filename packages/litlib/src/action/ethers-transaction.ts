@@ -1,4 +1,4 @@
-import { SignatureLike, arrayify } from '@ethersproject/bytes'
+// import { SignatureLike, arrayify } from '@ethersproject/bytes'
 import {
   TransactionModel,
   TransactionRequest,
@@ -6,21 +6,23 @@ import {
   UnsignedMpcTransaction
 } from './transaction.types'
 import { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer'
-import { serialize } from '@ethersproject/transactions'
-import { hashMessage } from '@ethersproject/hash'
-import { getAddress } from '@ethersproject/address'
-import { verifyTypedData, verifyMessage } from '@ethersproject/wallet'
-import { toUtf8Bytes } from '@ethersproject/strings'
+// import { serialize } from '@ethersproject/transactions'
+// import { hashMessage } from '@ethersproject/hash'
+// import { getAddress } from '@ethersproject/address'
+// import { verifyTypedData, verifyMessage } from '@ethersproject/wallet'
+// import { toUtf8Bytes } from '@ethersproject/strings'
 import { Fee } from '../client'
-import { BigNumber } from '@ethersproject/bignumber'
+// import { BigNumber } from '@ethersproject/bignumber'
 import { hashTransactionRequest } from './transaction-request'
+import ethers from 'ethers'
+import { SignatureLike } from '@ethersproject/bytes'
 
 /**
  * Sign a standard transaction. Ignoring gas price and priority. Forces 1559 txns.
  * @param tx {UnsignedMpcTransaction}
  */
 export const hashUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
-  return hashMessage(serializeUnsignedTransaction(tx))
+  return ethers.utils.hashMessage(serializeUnsignedTransaction(tx))
 }
 
 /**
@@ -34,7 +36,8 @@ export const equivalent = (
 ) => {
   //transaction is the one that was signed by the owner and will be broadcast
   return (
-    serialize(signedTransaction.transaction) === serialize(TransactionRequest.from(transaction))
+    ethers.utils.serializeTransaction(signedTransaction.transaction) ===
+    ethers.utils.serializeTransaction(TransactionRequest.from(transaction))
   )
 }
 
@@ -43,7 +46,7 @@ export const equivalent = (
  * @param tx {UnsignedMpcTransaction}
  */
 export const serializeUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
-  return serialize(copyUnsignedTransaction(tx))
+  return ethers.utils.serializeTransaction(copyUnsignedTransaction(tx))
 }
 
 export const copyUnsignedTransaction = (tx: UnsignedMpcTransaction): UnsignedMpcTransaction => {
@@ -65,13 +68,13 @@ export const copyUnsignedTransaction = (tx: UnsignedMpcTransaction): UnsignedMpc
 }
 
 export const arrayifyUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
-  return arrayify(serializeUnsignedTransaction(tx))
+  return ethers.utils.arrayify(serializeUnsignedTransaction(tx))
 }
 
 export const verifySignature = (transaction: TransactionRequestI, signature: SignatureLike) => {
   const rawMessage = hashTransactionRequest(transaction)
-  const message = toUtf8Bytes(rawMessage)
-  return verifyMessage(message, signature)
+  const message = ethers.utils.toUtf8Bytes(rawMessage)
+  return ethers.utils.verifyMessage(message, signature)
 }
 
 export const verifyTypedDataSignature = (
@@ -80,25 +83,25 @@ export const verifyTypedDataSignature = (
   value: Record<string, any>,
   signature: SignatureLike
 ) => {
-  return verifyTypedData(domain, types, value, signature)
+  return ethers.utils.verifyTypedData(domain, types, value, signature)
 }
 
 export const validAddress = (address: string) => {
   try {
-    return getAddress(address) === address
+    return ethers.utils.getAddress(address) === address
   } catch (e) {
     return false
   }
 }
 
 export const getFeeOk = (fee: Fee, tx: TransactionRequestI) => {
-  const gasGwei = BigNumber.from(fee.maxFeePerGas).mul(tx.gasLimit)
+  const gasGwei = ethers.BigNumber.from(fee.maxFeePerGas).mul(tx.gasLimit)
   //return as eth
   console.log('fee.maxFeePerGas', fee.maxFeePerGas.toString())
   console.log('tx.gasLimit', tx.gasLimit.toString())
   console.log('gasGwei', gasGwei.toString())
   console.log('tx.maxFee', tx.maxFee.toString())
-  return gasGwei.lte(BigNumber.from(tx.maxFee))
+  return gasGwei.lte(ethers.BigNumber.from(tx.maxFee))
 }
 // 31500000378000
 // 157500001890000

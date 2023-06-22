@@ -1,4 +1,4 @@
-import ethers, { BigNumberish } from 'ethers'
+import ethers from 'ethers'
 import { BytesLike } from '@ethersproject/bytes'
 import { AccessListish } from '@ethersproject/transactions'
 
