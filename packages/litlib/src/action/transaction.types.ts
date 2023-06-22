@@ -2,29 +2,23 @@ import ethers from 'ethers'
 import { BytesLike } from '@ethersproject/bytes'
 import { AccessListish } from '@ethersproject/transactions'
 
-export interface UnsignedMpcTransaction {
-  chainId: number
+export interface UnsignedMpcTransaction extends ethers.providers.TransactionRequest {
+  to: string
+  from: string
   nonce: number
 
+  gasLimit: ethers.BigNumberish
+  gasPrice?: undefined // gasPrice not supported
+
+  data?: BytesLike
+  value?: ethers.BigNumberish
+  chainId: number
+
   type: 2
-  // EIP-1559; Type 2
+  accessList?: AccessListish
+
   maxPriorityFeePerGas: ethers.BigNumberish
   maxFeePerGas: ethers.BigNumberish
-  // maxPriorityFeePerGas: 0;
-  // maxFeePerGas: 0;
-  gasLimit: ethers.BigNumberish
-
-  from: string
-  to: string
-  value?: ethers.BigNumberish
-  data?: BytesLike
-
-  //
-  // // Typed-Transaction features
-  // type:2;//1559 support only
-
-  // EIP-2930; Type 1 & EIP-1559; Type 2
-  accessList?: ethers.utils.AccessListish
 }
 
 export type OwnerSignature = { signerAddress: string; signature: string }
