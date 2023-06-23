@@ -24,7 +24,6 @@
 
   // global-externals:ethers
   var ethers_default = ethers;
-  var { ethers } = ethers;
 
   // ../litlib/src/action/transaction-request.ts
   function formatNumber(value, name) {

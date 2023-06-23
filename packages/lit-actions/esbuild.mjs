@@ -5,7 +5,7 @@ import * as esbuild from 'esbuild'
 const globals = {
   ethers: {
     varName: 'ethers',
-    namedExports: ["ethers"],
+    // namedExports: ["ethers"],
     defaultExport: true
   },
   crypto: {

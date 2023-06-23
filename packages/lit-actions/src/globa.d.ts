@@ -1,7 +1,7 @@
-import * as ethersLib from 'ethers'
+// import * as ethersLib from 'ethers'
 
 declare global {
-  var ethers: typeof ethersLib
+  // var ethers: typeof ethersLib
 
   var pkpPublicKey: any
   var publicKey: any
