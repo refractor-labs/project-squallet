@@ -89,7 +89,6 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
       }
     }
 
-    //todo send request to lit node
     return {
       success: true,
       signatures: resp.signatures,
@@ -99,19 +98,5 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
 }
 
 export const isNode = () => {
-  var isNode = false
-  // @ts-ignore
-  if (typeof process === 'object') {
-    // @ts-ignore
-    if (typeof process.versions === 'object') {
-      // @ts-ignore
-      if (typeof process.versions.node !== 'undefined') {
-        isNode = true
-      }
-    }
-  }
-  return isNode
-}
-export const isBrowser = () => {
-  return isNode() === false
+  return typeof window === 'undefined'
 }
