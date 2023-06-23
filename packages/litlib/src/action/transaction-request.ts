@@ -9,9 +9,11 @@ function formatNumber(value: ethers.BigNumberish, name: string): Uint8Array {
   }
   return result
 }
+
 function formatAccessList(value: AccessListish): Array<[string, Array<string>]> {
   return ethers.utils.accessListify(value).map(set => [set.address, set.storageKeys])
 }
+
 export const serializeTransactionRequest = (tx: TransactionRequestI) => {
   const transaction = TransactionRequest.from(tx)
   const fields = [

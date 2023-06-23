@@ -24,6 +24,7 @@
 
   // global-externals:ethers
   var ethers_default = ethers;
+  var { ethers } = ethers;
 
   // ../litlib/src/action/transaction-request.ts
   function formatNumber(value, name) {
@@ -95,12 +96,12 @@
     }
   };
   var getFeeOk = (fee, tx) => {
-    const gasGwei = ethers_default.BigNumber.from(fee.maxFeePerGas).mul(tx.gasLimit);
+    const txFeeGwei = ethers_default.BigNumber.from(fee.maxFeePerGas).mul(tx.gasLimit);
     console.log("fee.maxFeePerGas", fee.maxFeePerGas.toString());
     console.log("tx.gasLimit", tx.gasLimit.toString());
-    console.log("gasGwei", gasGwei.toString());
+    console.log("gasGwei", txFeeGwei.toString());
     console.log("tx.maxFee", tx.maxFee.toString());
-    return gasGwei.lte(ethers_default.BigNumber.from(tx.maxFee));
+    return txFeeGwei.lte(ethers_default.BigNumber.from(tx.maxFee));
   };
 
   // src/multisig.action.ts

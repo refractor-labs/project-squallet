@@ -39,6 +39,7 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
 
     console.log('connected lit contract client')
     const litNodeClient = new LitJsSdk.LitNodeClient({
+      debug: true,
       litNetwork: litNetwork
     })
     console.log('initialized lit client')
@@ -71,7 +72,8 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
       ipfsId: cid,
       authSig,
       // all jsParams can be used anywhere in your litActionCode
-      jsParams
+      jsParams,
+      debug: true
     })
     console.log('Lit action took', Date.now() - start, 'ms')
     console.log('Lit action resp', resp)
@@ -82,7 +84,7 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
     if (!responseCast.success) {
       return {
         success: false,
-        error: 'lit action failed',
+        data: 'lit action failed: ' + responseCast.data,
         signatures: {}
       }
     }
@@ -90,7 +92,8 @@ export class SqualletWalletBrowserClient implements SqualletWalletTypes {
     //todo send request to lit node
     return {
       success: true,
-      signatures: resp.signatures
+      signatures: resp.signatures,
+      data: responseCast.data
     }
   }
 }

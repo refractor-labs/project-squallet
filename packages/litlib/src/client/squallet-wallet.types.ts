@@ -14,6 +14,7 @@ export interface SqualletWalletTypes {
 export interface WalletResponse {
   success: boolean
   error?: string
+  data: any
   signatures: Record<
     string,
     {

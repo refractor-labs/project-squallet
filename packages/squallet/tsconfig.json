@@ -11,6 +11,5 @@
     "rootDir": "src",
     "types": ["@types/jest"]
   },
-  "include": [
-    "src/action/globa.d.ts", "./*.ts"],
+  "include": ["./*.ts"],
 }

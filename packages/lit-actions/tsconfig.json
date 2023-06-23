@@ -8,7 +8,6 @@
     "moduleResolution": "node",
     "typeRoots": [
       "src/types",
-      "node_modules/ethers/lib"
     ],
     "baseUrl": "./"
   },

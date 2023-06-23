@@ -7,7 +7,8 @@ import {
   SignTransactionRequest,
   SqualletWalletBrowserClient
 } from '../../../src'
-import { ethers } from 'ethers'
+const ethers = require('ethers')
+
 import {
   hashTransactionRequest,
   hashUnsignedTransaction,
@@ -36,21 +37,21 @@ describe('MultiSig', () => {
       code = code.replace('var threshold = 11337012321;', 'var threshold = 1;')
       code = code.replace('"%%OWNER_ADDRESS%%"', `"${signer.address}"`)
 
-      const createNew = true
-      const fund = true
+      const createNew = false
+      const fund = false
 
       let pkpPromise: ReturnType<typeof factoryCreatePkp>
       if (createNew) {
         pkpPromise = factoryCreatePkp({ signer, ipfs: ipfsWrapper, code })
       } else {
         pkpPromise = Promise.resolve({
-          pkpId: '0x840510e5e281d054fb3387b63a0b41cd2982f27651549c7215c76a652806b966',
+          pkpId: '0x49cf96b3f6ec2aade8e5be784fe6ac875c0bbf96952926e15dd9d2e9c6a3cf49',
           pkpPublicKey:
-            '0x043447be4c2dd7818703e4b2647f56f765c767c3531a901741813488d39df98b1bb0bf73cf6e23267e34d911b096aee36017a12e1059aeb65f1c83bdd0e1d3559a',
-          pkpAddress: '0xcb3a3B66985A1aA04cd657950Eb427809FeA5B6A',
+            '0x0448f283c87dcd7300ce0ec89019b03abc73ce5770df7671ee0640691ca2a42e1d64eb4c52d12823cf499d618b517afbdaef31041a52fb8b40c50cde6208398e48',
+          pkpAddress: '0xaa579817166d04377Cba39692BDC676209C6f8Df',
           owner: '0x182351E16c1F511e50eA4438aFE3d0f16ae4769B',
           permittedActions: [],
-          cid: 'QmZKewjzs2tB8WDfoQLBQRVCiv9bd9LXALfLf5vCQupArN'
+          cid: 'QmQ8uvkhpSvki8NHP9A5bgvs3BwqsoQGsNpMRgrFpRppyr'
         })
       }
       const pkp = await pkpPromise
@@ -80,7 +81,7 @@ describe('MultiSig', () => {
         throw new Error('no fee')
       }
 
-      const maxFee = estimate.mul(maxFeePerGas).mul(5)
+      const maxFee = estimate.mul(maxFeePerGas).mul(7)
 
       const tx: TransactionRequestI = {
         to: pkp.pkpAddress,

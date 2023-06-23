@@ -95,14 +95,19 @@ export const validAddress = (address: string) => {
 }
 
 export const getFeeOk = (fee: Fee, tx: TransactionRequestI) => {
-  const gasGwei = ethers.BigNumber.from(fee.maxFeePerGas).mul(tx.gasLimit)
+  const txFeeGwei = ethers.BigNumber.from(fee.maxFeePerGas).mul(tx.gasLimit)
   //return as eth
   console.log('fee.maxFeePerGas', fee.maxFeePerGas.toString())
   console.log('tx.gasLimit', tx.gasLimit.toString())
-  console.log('gasGwei', gasGwei.toString())
+  console.log('gasGwei', txFeeGwei.toString())
   console.log('tx.maxFee', tx.maxFee.toString())
-  return gasGwei.lte(ethers.BigNumber.from(tx.maxFee))
+  return txFeeGwei.lte(ethers.BigNumber.from(tx.maxFee))
 }
 // 31500000378000
 // 157500001890000
 // 157500001890000 / 31500000378000=5 yay
+
+//maxfee
+// 315000004620000
+// 1500000000* 21000=
+// 31500000000000
