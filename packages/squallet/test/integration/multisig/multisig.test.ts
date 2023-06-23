@@ -249,7 +249,7 @@ describe('MultiSig', () => {
       const res = await client.sendRequest(request)
       console.log('res', res)
       expect(res.success).toBe(false)
-      expect(res.data).toBe('fee too high')
+      expect(res.data).toBe('lit action failed: fee too high')
     })
   })
 })
