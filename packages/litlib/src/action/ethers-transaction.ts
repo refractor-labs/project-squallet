@@ -14,7 +14,6 @@ import { toUtf8Bytes } from '@ethersproject/strings'
 import { Fee } from '../client'
 import { BigNumber } from '@ethersproject/bignumber'
 import { hashTransactionRequest } from './transaction-request'
-// import { ethers } from 'ethers'
 
 /**
  * Sign a standard transaction. Ignoring gas price and priority. Forces 1559 txns.

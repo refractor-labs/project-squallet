@@ -1,0 +1,1 @@
+declare module '@refactor-labs-lit-protocol/lit-actions';
