@@ -1,24 +1,25 @@
-import ethers from 'ethers'
 import { BytesLike } from '@ethersproject/bytes'
 import { AccessListish } from '@ethersproject/transactions'
+import { BigNumberish } from '@ethersproject/bignumber'
+import { TransactionRequest as TransactionRequestEthers } from '@ethersproject/providers'
 
-export interface UnsignedMpcTransaction extends ethers.providers.TransactionRequest {
+export interface UnsignedMpcTransaction extends TransactionRequestEthers {
   to: string
   from: string
   nonce: number
 
-  gasLimit: ethers.BigNumberish
+  gasLimit: BigNumberish
   gasPrice?: undefined // gasPrice not supported
 
   data?: BytesLike
-  value?: ethers.BigNumberish
+  value?: BigNumberish
   chainId: number
 
   type: 2
   accessList?: AccessListish
 
-  maxPriorityFeePerGas: ethers.BigNumberish
-  maxFeePerGas: ethers.BigNumberish
+  maxPriorityFeePerGas: BigNumberish
+  maxFeePerGas: BigNumberish
 }
 
 export type OwnerSignature = { signerAddress: string; signature: string }
@@ -32,16 +33,16 @@ export interface TransactionModel {
 }
 
 //copy of ethers.providers.TransactionRequest but with non-null fields
-export interface TransactionRequestI extends ethers.providers.TransactionRequest {
+export interface TransactionRequestI extends TransactionRequest {
   to: string
   from: string
   nonce: number
 
-  gasLimit: ethers.BigNumberish
+  gasLimit: BigNumberish
   gasPrice?: undefined // gasPrice not supported
 
   data?: BytesLike
-  value?: ethers.BigNumberish
+  value?: BigNumberish
   chainId: number
 
   type: 2
@@ -51,7 +52,7 @@ export interface TransactionRequestI extends ethers.providers.TransactionRequest
   maxFeePerGas?: undefined
 
   // max fee user is willing to pay, in gwei
-  maxFee: ethers.BigNumberish
+  maxFee: BigNumberish
 
   // customData?: Record<string, any>;
   // ccipReadEnabled?: boolean;
@@ -63,11 +64,11 @@ export class TransactionRequest implements TransactionRequestI {
   from: string
   nonce: number
 
-  gasLimit: ethers.BigNumberish
+  gasLimit: BigNumberish
   gasPrice?: undefined
 
   data?: BytesLike
-  value?: ethers.BigNumberish
+  value?: BigNumberish
   chainId: number
 
   type: 2
@@ -76,7 +77,7 @@ export class TransactionRequest implements TransactionRequestI {
   maxPriorityFeePerGas?: undefined
   maxFeePerGas?: undefined
 
-  maxFee: ethers.BigNumberish
+  maxFee: BigNumberish
 
   private constructor(input: TransactionRequestI) {
     this.to = input.to

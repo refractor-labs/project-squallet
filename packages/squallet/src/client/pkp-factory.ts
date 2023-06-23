@@ -20,7 +20,6 @@ export const factoryCreatePkp = async ({
   // if (owners.length < threshold) {
   //   throw new Error("threshold must be less than or equal to owners.length");
   // }
-
   const ipfsCid = await ipfs(code)
   const newCid = ipfsCid.cid
 

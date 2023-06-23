@@ -94,7 +94,7 @@ const governanceForMethod = {
     const authorizedAddressesCopy = [...authorizedAddresses]
     for (let signature of signedTransaction.signatures) {
       if (!validAddress(signature.signerAddress)) {
-        return errorResponse('address not checksummed')
+        return errorResponse('signer address not checksummed: ' + signature.signerAddress)
       }
       if (authorizedAddressesCopy.includes(signature.signerAddress)) {
         authorizedAddressesCopy.splice(authorizedAddressesCopy.indexOf(signature.signerAddress), 1)

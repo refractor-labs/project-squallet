@@ -37,8 +37,8 @@ describe('MultiSig', () => {
       code = code.replace('var threshold = 11337012321;', 'var threshold = 1;')
       code = code.replace('"%%OWNER_ADDRESS%%"', `"${signer.address}"`)
 
-      const createNew = false
-      const fund = false
+      const createNew = true
+      const fund = true
 
       let pkpPromise: ReturnType<typeof factoryCreatePkp>
       if (createNew) {
@@ -110,7 +110,7 @@ describe('MultiSig', () => {
             hash,
             signatures: [
               {
-                signerAddress: signerMumbai.address,
+                signerAddress: ethers.utils.getAddress(signerMumbai.address),
                 signature: await signerMumbai.signMessage(hash)
               }
             ],

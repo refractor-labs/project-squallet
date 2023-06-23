@@ -1,4 +1,4 @@
-// import { SignatureLike, arrayify } from '@ethersproject/bytes'
+import { SignatureLike, arrayify } from '@ethersproject/bytes'
 import {
   TransactionModel,
   TransactionRequest,
@@ -6,23 +6,22 @@ import {
   UnsignedMpcTransaction
 } from './transaction.types'
 import { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer'
-// import { serialize } from '@ethersproject/transactions'
-// import { hashMessage } from '@ethersproject/hash'
-// import { getAddress } from '@ethersproject/address'
-// import { verifyTypedData, verifyMessage } from '@ethersproject/wallet'
-// import { toUtf8Bytes } from '@ethersproject/strings'
+import { serialize } from '@ethersproject/transactions'
+import { hashMessage } from '@ethersproject/hash'
+import { getAddress } from '@ethersproject/address'
+import { verifyTypedData, verifyMessage } from '@ethersproject/wallet'
+import { toUtf8Bytes } from '@ethersproject/strings'
 import { Fee } from '../client'
-// import { BigNumber } from '@ethersproject/bignumber'
+import { BigNumber } from '@ethersproject/bignumber'
 import { hashTransactionRequest } from './transaction-request'
-import ethers from 'ethers'
-import { SignatureLike } from '@ethersproject/bytes'
+// import { ethers } from 'ethers'
 
 /**
  * Sign a standard transaction. Ignoring gas price and priority. Forces 1559 txns.
  * @param tx {UnsignedMpcTransaction}
  */
 export const hashUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
-  return ethers.utils.hashMessage(serializeUnsignedTransaction(tx))
+  return hashMessage(serializeUnsignedTransaction(tx))
 }
 
 /**
@@ -36,8 +35,7 @@ export const equivalent = (
 ) => {
   //transaction is the one that was signed by the owner and will be broadcast
   return (
-    ethers.utils.serializeTransaction(signedTransaction.transaction) ===
-    ethers.utils.serializeTransaction(TransactionRequest.from(transaction))
+    serialize(signedTransaction.transaction) === serialize(TransactionRequest.from(transaction))
   )
 }
 
@@ -46,7 +44,7 @@ export const equivalent = (
  * @param tx {UnsignedMpcTransaction}
  */
 export const serializeUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
-  return ethers.utils.serializeTransaction(copyUnsignedTransaction(tx))
+  return serialize(copyUnsignedTransaction(tx))
 }
 
 export const copyUnsignedTransaction = (tx: UnsignedMpcTransaction): UnsignedMpcTransaction => {
@@ -68,13 +66,13 @@ export const copyUnsignedTransaction = (tx: UnsignedMpcTransaction): UnsignedMpc
 }
 
 export const arrayifyUnsignedTransaction = (tx: UnsignedMpcTransaction) => {
-  return ethers.utils.arrayify(serializeUnsignedTransaction(tx))
+  return arrayify(serializeUnsignedTransaction(tx))
 }
 
 export const verifySignature = (transaction: TransactionRequestI, signature: SignatureLike) => {
   const rawMessage = hashTransactionRequest(transaction)
-  const message = ethers.utils.toUtf8Bytes(rawMessage)
-  return ethers.utils.verifyMessage(message, signature)
+  const message = toUtf8Bytes(rawMessage)
+  return verifyMessage(message, signature)
 }
 
 export const verifyTypedDataSignature = (
@@ -83,25 +81,27 @@ export const verifyTypedDataSignature = (
   value: Record<string, any>,
   signature: SignatureLike
 ) => {
-  return ethers.utils.verifyTypedData(domain, types, value, signature)
+  return verifyTypedData(domain, types, value, signature)
 }
 
 export const validAddress = (address: string) => {
   try {
-    return ethers.utils.getAddress(address) === address
+    console.log('checksum address in ', address, 'address out', getAddress(address))
+    return getAddress(address) === address
   } catch (e) {
+    console.log('invalid address', address, e)
     return false
   }
 }
 
 export const getFeeOk = (fee: Fee, tx: TransactionRequestI) => {
-  const txFeeGwei = ethers.BigNumber.from(fee.maxFeePerGas).mul(tx.gasLimit)
+  const txFeeGwei = BigNumber.from(fee.maxFeePerGas).mul(tx.gasLimit)
   //return as eth
   console.log('fee.maxFeePerGas', fee.maxFeePerGas.toString())
   console.log('tx.gasLimit', tx.gasLimit.toString())
   console.log('gasGwei', txFeeGwei.toString())
   console.log('tx.maxFee', tx.maxFee.toString())
-  return txFeeGwei.lte(ethers.BigNumber.from(tx.maxFee))
+  return txFeeGwei.lte(BigNumber.from(tx.maxFee))
 }
 // 31500000378000
 // 157500001890000

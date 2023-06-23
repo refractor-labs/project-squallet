@@ -1,9 +1,13 @@
 import { TransactionRequest, TransactionRequestI } from './transaction.types'
-import { AccessListish } from '@ethersproject/transactions'
-import ethers from 'ethers'
+import { accessListify, AccessListish } from '@ethersproject/transactions'
+import { BigNumber, BigNumberish } from '@ethersproject/bignumber'
+import { hexConcat, stripZeros } from '@ethersproject/bytes'
+import { getAddress } from '@ethersproject/address'
+import * as RLP from '@ethersproject/rlp'
+import { hashMessage } from '@ethersproject/hash'
 
-function formatNumber(value: ethers.BigNumberish, name: string): Uint8Array {
-  const result = ethers.utils.stripZeros(ethers.BigNumber.from(value).toHexString())
+function formatNumber(value: BigNumberish, name: string): Uint8Array {
+  const result = stripZeros(BigNumber.from(value).toHexString())
   if (result.length > 32) {
     throw new Error('invalid ' + name)
   }
@@ -11,7 +15,7 @@ function formatNumber(value: ethers.BigNumberish, name: string): Uint8Array {
 }
 
 function formatAccessList(value: AccessListish): Array<[string, Array<string>]> {
-  return ethers.utils.accessListify(value).map(set => [set.address, set.storageKeys])
+  return accessListify(value).map(set => [set.address, set.storageKeys])
 }
 
 export const serializeTransactionRequest = (tx: TransactionRequestI) => {
@@ -23,15 +27,15 @@ export const serializeTransactionRequest = (tx: TransactionRequestI) => {
     formatNumber(transaction.maxPriorityFeePerGas || 0, 'maxPriorityFeePerGas'),
     formatNumber(transaction.maxFeePerGas || 0, 'maxFeePerGas'),
     formatNumber(transaction.gasLimit || 0, 'gasLimit'),
-    transaction.to != null ? ethers.utils.getAddress(transaction.to) : '0x',
+    transaction.to != null ? getAddress(transaction.to) : '0x',
     formatNumber(transaction.value || 0, 'value'),
     transaction.data || '0x',
     formatAccessList(transaction.accessList || [])
   ]
 
-  return ethers.utils.hexConcat(['0x02', ethers.utils.RLP.encode(fields)])
+  return hexConcat(['0x02', RLP.encode(fields)])
 }
 
 export const hashTransactionRequest = (tx: TransactionRequestI): string => {
-  return ethers.utils.hashMessage(serializeTransactionRequest(tx))
+  return hashMessage(serializeTransactionRequest(tx))
 }
