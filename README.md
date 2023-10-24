@@ -1,4 +1,4 @@
-# Project Squallet: A Collective Wallet for Optimism L2s
+# Project Squallet: A Collective Wallet with Optimism Control Plane
 
 ## Introduction
 
