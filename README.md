@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Welcome to the Project Squallet GitHub repository! This project is at the forefront of Web3, enabling a trustless, group-controlled, multichain wallet optimized build on Optimism with an architecture founded on Multi-Party Computation (MPC). 
+Welcome to the Project Squallet GitHub repository from [Lore](https://lore.xyz)! This project is at the forefront of Web3, enabling a trustless, group-controlled, multichain wallet optimized build on Optimism with an architecture founded on Multi-Party Computation (MPC). 
 This wallet leverages federated Public-Private Key Pairs (PKPs) on the Optimism control plane to offer seamless and secure interoperability across multiple blockchain networks using Lit Protocols Chronicle chain.
 
 ## Key Features
