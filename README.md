@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Welcome to the Project Squallet GitHub repository from [Lore](https://lore.xyz)! This project is at the forefront of Web3, enabling a trustless, group-controlled, multichain wallet optimized build on Optimism with an architecture founded on Multi-Party Computation (MPC). 
+Welcome to the Project Squallet GitHub repository from [Lore](https://lore.xyz)! This project is at the forefront of Web3, enabling a trustless, group-controlled, multichain wallet optimized build on Optimism with an architecture founded on Multi-Party Computation (MPC).
 This wallet leverages federated Public-Private Key Pairs (PKPs) on the Optimism control plane to offer seamless and secure interoperability across multiple blockchain networks using Lit Protocols Chronicle chain.
 
 ## Key Features
@@ -40,7 +40,27 @@ The journey began in Q1 2023 with research and development, culminating in a tes
 
 ## Getting Started
 
-Coming Soon.
+### What's in this repo?
+
+#### Lit action source code written in Typescript
+
+- `packages/squallet-lit-actions/src/multisig.action.ts`
+
+#### Compile Lit Actions into a client library for deploying to a PKP. Node and Browser compatible!
+
+- `packages/squallet-client/src/utils/index.ts`
+
+#### A well defined protocol for communicating with a pkp wallet.
+
+- `packages/squallet-client/test/integration/multisig/multisig.test.ts`
+
+#### Integration Tests
+
+- `packages/squallet-client/test/integration/multisig/multisig.test.ts`
+
+#### Demo UI
+
+- `packages/squallet-ui`
 
 ## Architecture
 
