@@ -1,0 +1,154 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/prisma"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Pkp {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pkpId        String
+  pkpPublicKey String
+  pkpAddress   String
+
+  squalletId String
+  squallet   Squallet @relation(fields: [squalletId], references: [id], onDelete: Cascade)
+
+  actions Action[]
+
+  @@index([squalletId])
+}
+
+model Action {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  actionId String
+  cid      String
+
+  pkpId String
+  Pkp   Pkp    @relation(fields: [pkpId], references: [id], onDelete: Cascade)
+
+  @@index([pkpId])
+}
+
+model Squallet {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     SqualletUser[]
+  name      String         @default("")
+  proposals Proposal[]
+  threshold Int            @default(1)
+
+  pkp Pkp[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  address String
+
+  squallets SqualletUser[]
+  proposals Proposal[]
+}
+
+enum Role {
+  SIGNER
+  MEMBER
+}
+
+model SqualletUser {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role   Role
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  squalletId String
+  squallet   Squallet @relation(fields: [squalletId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([squalletId])
+}
+
+enum ProposalStage {
+  NOT_PROPOSED
+  PROPOSED
+  CANCELLED
+  EXECUTED
+}
+
+enum ProposalType {
+  MODIFY_MEMBERS
+  SIGN_TRANSACTION
+  SIGN_MESSAGE
+}
+
+model Proposal {
+  id            String        @id @default(cuid())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  name          String?
+  description   String?
+  squallet      Squallet      @relation(fields: [squalletId], references: [id])
+  squalletId    String
+  proposalStage ProposalStage
+  proposalType  ProposalType
+  creatorId     String
+  creator       User          @relation(references: [id], fields: [creatorId], onDelete: Cascade) 
+  data          Json?
+
+  signatures    Signature[]
+  executions    Execution[]
+
+  @@index([squalletId])
+  @@index([creatorId])
+}
+
+model Signature {
+  id            String        @id @default(cuid())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  proposalId    String
+  proposal      Proposal      @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+  nonce        Int            @default(0)
+  address      String
+  signature    String
+
+  @@unique([address, proposalId])
+
+  @@index([proposalId])
+}
+
+model Execution {
+  id            String        @id @default(cuid())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  signature     String
+
+  proposalId    String
+  proposal      Proposal      @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+
+  @@index([proposalId])
+}

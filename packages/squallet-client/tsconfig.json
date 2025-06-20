@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "esnext",
+    "lib": [ "esnext", "dom" ],
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "typeRoots": ["."],
+    "baseUrl": ".",
+    "rootDir": "src",
+  },
+  "include": ["./*.ts"],
+}

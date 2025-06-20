@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "lib": [ "esnext", "dom" ],
+    "strict": true,
+    "moduleResolution": "node",
+    "typeRoots": ["."],
+    "baseUrl": ".",
+    "rootDir": "src",
+//    "target": "esnext",
+    "types": ["@types/jest"],
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true, // Typing support for this case
+    "esModuleInterop": true
+  },
+  "include": ["./*.ts"],
+}

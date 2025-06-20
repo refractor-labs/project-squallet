@@ -1,0 +1,378 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'Aeonik';
+    font-style: 'normal';
+    font-display: 'swap';
+    font-weight: 400;
+    src: url(/fonts/NewBrandFonts/Aeonik-Regular.woff2) format('woff2');
+}
+
+@font-face {
+    font-family: 'Aeonik';
+    font-style: 'normal';
+    font-display: 'swap';
+    font-weight: 500;
+    src: url(/fonts/NewBrandFonts/Aeonik-Medium.woff2) format('woff2');
+}
+
+@font-face {
+    font-family: 'Aeonik';
+    font-style: 'normal';
+    font-display: 'swap';
+    font-weight: 700;
+    src: url(/fonts/NewBrandFonts/Aeonik-Bold.woff2) format('woff2');
+}
+
+@font-face {
+    font-family: 'Aeonik Mono';
+    font-style: 'normal';
+    font-display: 'swap';
+    font-weight: 400;
+    src: url(/fonts/NewBrandFonts/AeonikMono-Regular.woff2) format('woff2');
+}
+
+@font-face {
+    font-family: 'Aeonik Mono';
+    font-style: 'normal';
+    font-display: 'swap';
+    font-weight: 700;
+    src: url(/fonts/NewBrandFonts/AeonikMono-Medium.woff2) format('woff2');
+}
+
+@font-face {
+    font-family: 'GT Ultra';
+    font-style: 'normal';
+    font-display: 'swap';
+    font-weight: 700;
+    src: url(/fonts/NewBrandFonts/GT-Ultra-Median-Regular.woff2) format('woff2');
+}
+
+@font-face {
+    font-family: 'GT Ultra';
+    font-style: 'normal';
+    font-display: 'swap';
+    font-weight: 900;
+    src: url(/fonts/NewBrandFonts/GT-Ultra-Median-Black.woff2) format('woff2');
+}
+
+:root {
+    --tw-prose-headings: red !important;
+}
+
+html,
+body {
+    padding: 0;
+    margin: 0;
+    font-size: 16px;
+    font-variant-ligatures: no-contextual;
+    font-feature-settings: 'ss01', 'ss07';
+    text-rendering: optimizeLegibility !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    font-smooth: antialiased !important;
+    font-family: 'Aeonik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+        sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    overflow-x: 'hidden';
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'GT Ultra', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+        sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+}
+
+.gt-ultra {
+    font-family: 'GT Ultra', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+        sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.night-mode {
+    background: #040305;
+}
+
+.card-grid {
+    display: grid;
+    margin-top: 1.5rem;
+    gap: 1.5rem;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 37.5rem) {
+    .card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 60rem) {
+    .card-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.dashboard-grid {
+    display: grid;
+    margin-top: 1.5rem;
+    /* gap: 5rem; */
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+/* @media (min-width: 37.5rem) {
+.dashboard-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+} */
+
+@media (min-width: 60rem) {
+    .dashboard-grid {
+        gap: 3rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* '@initial': 1,
+'@MinWidth600': 2,
+'@MinWidth960': 3, */
+
+.rotate-main {
+    overflow: auto;
+    border-radius: 10px;
+    border-width: 2px;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    position: relative;
+    min-height: 400px;
+}
+
+.rotate-main > * {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.theCenter {
+    align-self: center;
+    justify-self: center;
+    width: 50px;
+    height: 50px;
+}
+
+.item {
+    animation: spinAround 20s linear infinite;
+}
+
+@keyframes spinAround {
+    from {
+        transform: rotate(0deg) translate(120px);
+    }
+
+    to {
+        transform: rotate(360deg) translate(120px);
+    }
+}
+
+.select-wrapper select {
+    appearance: none;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper::after {
+    content: '⌄';
+    font-size: 1rem;
+    bottom: 0px;
+    right: 16px;
+    position: absolute;
+    top: 5px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+    -moz-appearance: textfield;
+}
+
+.screen-reader-only {
+    position: absolute;
+    height: 1px;
+    width: 1px;
+    clip: rect(1px 1px 1px 1px);
+    clip: rect(1px, 1px, 1px, 1px);
+    clip-path: polygon(0px 0px, 0px 0px, 0px 0px);
+    -webkit-clip-path: polygon(0px 0px, 0px 0px, 0px 0px);
+    overflow: hidden !important;
+}
+
+/* ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background-color: transparent;
+} */
+
+::-webkit-scrollbar-thumb {
+    border-radius: 12px;
+    background-color: #616076;
+}
+
+::-webkit-scrollbar-track {
+    padding: 2px;
+    background-color: transparent;
+}
+
+.lore-header {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+    .lore-header {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/**
+  Date Picker Styling
+*/
+.rdp {
+    --rdp-cell-size: 40px;
+    --rdp-background-color: var(--background-default-secondary);
+}
+
+.rdp-button:focus:not(.rdp-day_selected) {
+    border: 2px solid var(--background-gray-focus);
+}
+
+.rdp-button:disabled {
+    --rdp-background-color: var(--icon-default-muted);
+}
+
+.my-selected {
+    background: var(--background-deep-purple-focus);
+    color: var(--icon-deep-purple-focus);
+}
+
+.border-orange-bevel {
+    border: 30px solid transparent;
+    border-image: url('/lore/borders/css-borders/border-orange.png') 35 round;
+}
+
+.border-violet-bevel {
+    border: 30px solid transparent;
+    border-image: url('/lore/borders/css-borders/border-violet.png') 35 round;
+}
+
+.border-pink-bevel {
+    border: 30px solid transparent;
+    border-image: url('/lore/borders/css-borders/border-pink.png') 35 round;
+}
+
+.border-red-bevel {
+    border: 30px solid transparent;
+    border-image: url('/lore/borders/css-borders/border-red.png') 35 round;
+}
+
+.border-testimonial {
+    border: 10px solid transparent;
+    border-left: 0;
+    border-right: 0;
+    border-image: url('/lore/borders/css-borders/testimonial.png') 42 round;
+}
+
+.border-default {
+    border: 16px solid transparent;
+    border-image: url('/lore/borders/css-borders/border-default.png') 20 round;
+}
+
+.full-width {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+}
+
+.feature-image-1-box-shadow {
+    box-shadow: 0px -1px 10px rgba(255, 181, 126, 0.04), 0px 16px 40px rgba(255, 181, 126, 0.38);
+}
+
+.feature-image-2-box-shadow {
+    box-shadow: 0px -1px 10px rgba(255, 177, 239, 0.04), 0px 16px 40px rgba(255, 177, 239, 0.38);
+}
+
+.feature-image-3-box-shadow {
+    box-shadow: 0px -1px 10px rgba(255, 184, 184, 0.04), 0px 16px 40px rgba(255, 184, 184, 0.38);
+}
+
+.bg-hero-ellipse {
+    background: radial-gradient(50% 50% at 50% 50%, #000000 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+.react-calendar-heatmap text {
+    font-family: 'Aeonik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+        sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-size: 6px;
+    fill: #aaa;
+}
+
+.react-calendar-heatmap-month-labels {
+    font-size: 10px;
+}
+.react-calendar-heatmap .react-calendar-heatmap-small-text {
+    font-size: 5px;
+}
+
+.react-calendar-heatmap rect:hover {
+    stroke: var(--line-default-focus);
+    stroke-width: 1px;
+}
+
+/*
+* Default color scale
+*/
+
+.react-calendar-heatmap .color-empty {
+    fill: var(--background-default-focus);
+}
+
+.react-calendar-heatmap .color-filled {
+    fill: var(--background-green-focus);
+}
+
+/*
+* Github color scale
+*/
+
+.react-calendar-heatmap .color-github-0 {
+    fill: #eeeeee;
+}
+.react-calendar-heatmap .color-github-1 {
+    fill: #c7e6d0;
+}
+.react-calendar-heatmap .color-github-2 {
+    fill: #3b985f;
+}
+.react-calendar-heatmap .color-github-3 {
+    fill: #0a3e21;
+}
+.react-calendar-heatmap .color-github-4 {
+    fill: #0a3e21;
+}

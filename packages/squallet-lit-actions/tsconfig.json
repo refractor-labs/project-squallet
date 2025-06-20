@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "commonjs",
+    "lib": [ "es2015", "dom" ],
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "typeRoots": [
+      "src/types",
+    ],
+    "baseUrl": "./"
+  },
+  "include": [
+    "src/globa.d.ts",
+    "src/*"
+  ],
+  "references": [
+    { "path": "../squallet-protocol"}]
+}

@@ -1,0 +1,54 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "target": "es2022",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "strict": false,
+        "strictNullChecks": true,
+        "forceConsistentCasingInFileNames": true,
+        "noEmit": true,
+        "esModuleInterop": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "jsx": "preserve",
+        "incremental": true,
+        "baseUrl": ".",
+        "experimentalDecorators": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "typeRoots": ["types", "node_modules/@types"],
+        "emitDecoratorMetadata": true,
+        "paths": {
+            "@refractor-labs/core-lib/*": ["../../packages/core-lib/src/*"],
+            "@refractor-labs/shared-utils": ["../../packages/shared-utils/src/index"],
+            "@refractor-labs/db-client-prisma": ["../../packages/db-client-prisma/src/index"],
+            "@refractor-labs/design-system-vite": ["../../packages/design-system-vite"]
+        }
+    },
+    "include": [
+        "next-env.d.ts",
+        "**/*.ts",
+        "**/*.tsx",
+        "./contracts/typechain-types",
+        "types/**/**.d.ts",
+        "contexts/**/*.ts",
+        "contexts/**/*.js",
+        "lib/**/*.ts",
+        "lib/**/*.js",
+        "helpers/**/*.ts",
+        "helpers/**/*.js",
+        "hooks/**/*.ts",
+        "store/**/*.ts"
+    ],
+    "exclude": ["node_modules", "./**/*.test.ts", "./**/tests/**/*.ts"],
+    "references": [
+        {
+            "path": "../design-system-vite"
+        }
+    ]
+}

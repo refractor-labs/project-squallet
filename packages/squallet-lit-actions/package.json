@@ -1,0 +1,22 @@
+{
+  "name": "@refactor-labs/squallet-lit-actions",
+  "version": "1.0.0",
+  "dependencies": {
+    "@refactor-labs/squallet-protocol": "*"
+  },
+  "devDependencies": {
+    "@fal-works/esbuild-plugin-global-externals": "^2.1.2",
+    "esbuild": "0.18.6",
+    "ethers": "6.7.1"
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "codegen": "npm run build"
+  },
+  "module": "dist/index.mjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ]
+}
